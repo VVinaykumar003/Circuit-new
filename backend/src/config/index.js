@@ -32,8 +32,9 @@ const config = {
   // DB
   mongo: {
     uri:
-      env("MONGO_URI") ||
-      "mongodb://127.0.0.1:27017/circuit",
+      IS_PROD
+        ? env("MONGO_ATLAS_URI") || env("MONGO_URI")
+        : env("MONGO_URI") || "mongodb://127.0.0.1:27017/circuit",
     options: {
     },
   },
@@ -88,7 +89,7 @@ if (!config.REDIS_URL) {
 function validate(throwOnError = true) {
   const errors = [];
 
-  if (!config.mongo.uri) errors.push("MONGO_URI is required");
+  if (!config.mongo.uri) errors.push("MongoDB URI (MONGO_URI or MONGO_ATLAS_URI) is required");
   if (!config.JWT_SECRET.trim()) errors.push("JWT_SECRET is required");
 
   if (IS_PROD) {
