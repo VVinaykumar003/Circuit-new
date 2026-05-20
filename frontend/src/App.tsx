@@ -1,5 +1,5 @@
 import React, { useState, Suspense, useEffect } from "react";
-import { Routes, Route, Outlet, Navigate, useLocation } from "react-router-dom";
+import { Routes, Route, Outlet, Navigate, useLocation, useParams } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { socket } from "./socket";
@@ -14,10 +14,10 @@ import Notifications from "./pages/Notifications";
 import SettingsPage from "./pages/Settings";
 // import Settings from "./pages/Settings";
 // import HomePage from "./pages/HomePage";
-import OrganizationPage from "./pages/Organization/OrganizationRegistrationPage";
 import { useAuth } from "./auth/AuthContext";
 import WorkUpdates from "./pages/WorkUpdate";
-import SalaryStructureDashboard from "./pages/SalaryStructureDashboard";
+import EmployeePayslip from "./components/salary/Employeepayslip";
+// import SalaryStructureDashboard from "./pages/SalaryStructureDashboard";
 
 
 /* Pages (lazy) */
@@ -39,7 +39,7 @@ const GeneratePaySlip = React.lazy(
   () => import("./components/salary/GeneratePaySlip"),
 );
 const PayHistory = React.lazy(() => import("./components/salary/Payhistory"));
-const EmployeePayslip = React.lazy(() => import("./components/salary/EmployeePayslip"));
+// const EmployeePayslip = React.lazy(() => import("./components/salary/EmployeePayslip"));
 const PayrollPolicySetup = React.lazy(() => import("./components/salary/PayrollPolicySetup"));
 
 const Members = React.lazy(() => import("./pages/Members"));
@@ -61,6 +61,14 @@ function LayoutWrapper() {
       <Outlet />
     </AppLayout>
   );
+}
+
+function ProjectChatWrapper() {
+  const { id } = useParams<{ id: string }>();
+  const { auth } = useAuth();
+  
+  if (!id || !auth?.user) return null;
+  return <ProjectChat projectId={id} currentUser={auth.user} />;
 }
 
 export default function App() {
@@ -149,7 +157,7 @@ useEffect(() => {
               }
             />
             <Route path="/work-updates" element={
-              <WorkUpdates/>
+              <WorkUpdates  />
 
 
             }
@@ -230,7 +238,7 @@ useEffect(() => {
             )}
 
             <Route path="/projects/:id" element={<ProjectWorkspace />}>
-               <Route path="chat" element={<ProjectChat />} />
+               <Route path="chat" element={<ProjectChatWrapper />} />
             </Route>
             <Route path="/members" element={<PageContainer title="Members"><Members /></PageContainer>} />
             <Route path="/members/:id" element={<PageContainer><MemberDetails /></PageContainer>} />
