@@ -2,7 +2,6 @@
 @plugin "daisyui" {
   themes: lighttheme --default, darktheme --prefersdark;
   root: ":root";
-  include: button, input, select;
   exclude: properties;
   prefix: ;
   logs: true;
