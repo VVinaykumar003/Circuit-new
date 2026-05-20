@@ -1,9 +1,10 @@
 // api/axios.js
 import axios from "axios";
+// import { Import } from "lucide-react";
 
 // Use import.meta.env for Vite projects to access environment variables.
 // Variables must start with VITE_ to be exposed to the client.
-const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5001/api";
+const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || import.meta.env.VITE_PRODUCTION_URL ||"http://localhost:5001/api";
 
 const API = axios.create({
   baseURL: API_BASE_URL,
