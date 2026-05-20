@@ -1,0 +1,14 @@
+const express = require("express");
+const router = express.Router();
+const auth = require("../middlewares/auth.middleware");
+const tenant = require("../middlewares/tenant.middleware");
+const { addWorkUpdate } = require("../controllers/workUpdate.controller");
+const { getWorkUpdates } = require("../controllers/workUpdate.controller");
+const { editWorkUpdate } = require("../controllers/workUpdate.controller");
+const { deleteWorkUpdate } = require("../controllers/workUpdate.controller");
+const { upload } = require("../middlewares/upload");
+router.post("/:slug/workUpdate/:projectId",auth,tenant, upload.array("attachments"), addWorkUpdate);
+ router.get("/:slug/workUpdate", auth, tenant, getWorkUpdates);
+ router.put("/:slug/workUpdate/:updateId", auth, tenant, upload.array("attachments"), editWorkUpdate);
+ router.delete("/:slug/workUpdate/:updateId", auth, tenant, deleteWorkUpdate);
+module.exports = router;

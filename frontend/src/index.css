@@ -1,0 +1,145 @@
+@import "tailwindcss";
+@plugin "daisyui";
+
+/* ========================================
+   LIGHT THEME
+======================================== */
+
+@plugin "daisyui/theme" {
+  name: "lighttheme";
+  default: true;
+  prefersdark: false;
+  color-scheme: light;
+
+  /* Base */
+  --color-base-100: oklch(96% 0.004 260);
+  --color-base-200: oklch(92% 0.006 260);
+  --color-base-300: oklch(88% 0.008 260);
+  --color-base-content: oklch(22% 0.02 255);
+
+  /* Primary */
+  --color-primary: oklch(42% 0.16 295);
+  --color-primary-content: oklch(98% 0.01 295);
+
+  /* Secondary */
+  --color-secondary: oklch(55% 0.05 255);
+  --color-secondary-content: oklch(98% 0.01 255);
+
+  /* Accent */
+  --color-accent: oklch(60% 0.14 240);
+  --color-accent-content: oklch(98% 0.01 240);
+
+  /* States */
+  --color-success: oklch(65% 0.18 145);
+  --color-warning: oklch(75% 0.16 85);
+  --color-error: oklch(62% 0.20 25);
+  --color-info: oklch(65% 0.15 240);
+
+  /* Neutral */
+  --color-neutral: oklch(30% 0.02 260);
+  --color-neutral-content: oklch(96% 0.01 260);
+
+  /* Sidebar */
+  --sidebar-bg: oklch(24% 0.02 260);
+  --sidebar-hover: oklch(30% 0.03 260);
+  --sidebar-active: oklch(38% 0.06 295);
+  --sidebar-text: oklch(92% 0.01 250);
+
+  /* Radius */
+  --radius-box: 1rem;
+  --radius-field: 0.75rem;
+}
+
+/* ========================================
+   DARK THEME
+======================================== */
+
+@plugin "daisyui/theme" {
+  name: "darktheme";
+  prefersdark: true;
+  color-scheme: dark;
+
+  /* Base */
+  --color-base-100: oklch(18% 0.015 260);
+  --color-base-200: oklch(22% 0.018 260);
+  --color-base-300: oklch(26% 0.02 260);
+  --color-base-content: oklch(94% 0.01 255);
+
+  /* Primary */
+  --color-primary: oklch(42% 0.16 295);
+  --color-primary-content: oklch(98% 0.01 295);
+
+  /* Secondary */
+  --color-secondary: oklch(60% 0.08 260);
+  --color-secondary-content: oklch(98% 0.01 260);
+
+  /* Accent */
+  --color-accent: oklch(70% 0.12 220);
+  --color-accent-content: oklch(20% 0.01 220);
+
+  /* States */
+  --color-success: oklch(70% 0.18 145);
+  --color-warning: oklch(78% 0.16 85);
+  --color-error: oklch(65% 0.18 25);
+  --color-info: oklch(72% 0.15 240);
+
+  /* Neutral */
+  --color-neutral: oklch(12% 0.01 260);
+  --color-neutral-content: oklch(94% 0.01 260);
+
+  /* Sidebar */
+  --sidebar-bg: oklch(16% 0.015 260);
+  --sidebar-hover: oklch(22% 0.02 260);
+  --sidebar-active: oklch(32% 0.08 295);
+  --sidebar-text: oklch(92% 0.01 250);
+
+  /* Radius */
+  --radius-box: 1rem;
+  --radius-field: 0.75rem;
+}
+
+/* ========================================
+   GLOBAL BASE
+======================================== */
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    @apply bg-base-100 text-base-content;
+    font-family: Inter, sans-serif;
+  }
+
+  input::-webkit-outer-spin-button,
+  input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  input[type=\"number\"] {
+    -moz-appearance: textfield;
+  }
+}
+
+/* ========================================
+   CUSTOM UTILITIES
+======================================== */
+
+.modern-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.modern-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.2);
+  border-radius: 999px;
+}
+
+.modern-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.tasktable::-webkit-scrollbar {
+  display: none;
+}
