@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
 const morgan = require("morgan");
+const config = require("./config");
 const compression = require("compression");
 const routes = require("./routes");
 const authRoutes = require("./routes/auth.routes");
@@ -31,11 +32,19 @@ const app = express();
 app.use(helmet());
 
 // CORS Configuration
-app.use(cors({
-  origin:process.env.CORS_PRODUCTION_ORIGINS  || process.env.CORS_ORIGIN || "https://circuit-new.onrender.com" || "*",
+const corsOptions = {
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin || config.CORS_ALLOWED_ORIGINS.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
   credentials: true
-}));
+};
+app.use(cors(corsOptions));
 
 // HTTP Request Logger
 app.use(morgan("dev"));
