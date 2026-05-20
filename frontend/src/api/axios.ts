@@ -5,7 +5,7 @@ import { toast } from "react-toastify";
 // Use import.meta.env for Vite projects to access environment variables.
 // Variables must start with VITE_ to be exposed to the client.
 const API_BASE_URL =
-  import.meta.env.MODE === "production"
+  import.meta.env.VITE_NODE_ENV === "production"
     ? `${import.meta.env.VITE_PRODUCTION_URL}/api`
     : `${import.meta.env.VITE_DEVELOPMENT_URL || "http://localhost:5001"}/api`;
 
