@@ -3,7 +3,7 @@
   themes: light --default, dark --prefersdark;
   root: ":root";
    include: button, input, select;
-  exclude: ;
+  exclude: properties;
   prefix: ;
   logs: true;
 }
