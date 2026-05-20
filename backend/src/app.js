@@ -32,7 +32,7 @@ app.use(helmet());
 
 // CORS Configuration
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || process.env.CORS_PRODUCTION_ORIGINS || "https://circuit-new.onrender.com" || "*",
+  origin:process.env.CORS_PRODUCTION_ORIGINS  || process.env.CORS_ORIGIN || "https://circuit-new.onrender.com" || "*",
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
   credentials: true
 }));
