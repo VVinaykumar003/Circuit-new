@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Lottie from "lottie-react";
-import loginAnimation from "../assets/loginAnimation.json";
+import animationData from "../assets/LoginAnimation.json";
 import { LockIcon, User2Icon } from "lucide-react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { login as loginService } from "../services/authService";
@@ -96,7 +96,7 @@ const Login = ({ setToken }: LoginProps) => {
       <div className="w-full max-w-5xl bg-blue-200 rounded-2xl shadow-xl overflow-hidden flex flex-col md:flex-row">
         {/* LEFT */}
         <div className="w-full md:w-1/2 bg-blue-100 flex items-center justify-center p-10">
-          <Lottie animationData={loginAnimation} loop className="w-[350px]" />
+          <Lottie animationData={animationData} loop className="w-[350px]" />
         </div>
 
         {/* RIGHT */}
