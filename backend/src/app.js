@@ -4,7 +4,7 @@ const helmet = require("helmet");
 const morgan = require("morgan");
 const config = require("./config");
 const compression = require("compression");
-const routes = require("./routes");
+const routes = require("./routes/index.js");
 const authRoutes = require("./routes/auth.routes");
 const memberRoutes = require("./routes/member.routes");
 const projectRoutes = require("./routes/project.routes");
@@ -34,6 +34,7 @@ app.use(helmet());
 // CORS Configuration
 const corsOptions = {
   origin: (origin, callback) => {
+    console.log(origin);
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin || config.CORS_ALLOWED_ORIGINS.indexOf(origin) !== -1) {
       callback(null, true);
