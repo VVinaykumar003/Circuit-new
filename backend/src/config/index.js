@@ -72,8 +72,8 @@ const config = {
   APP_NAME: env("APP_NAME", "Swad Setu"),
 
   // CORS
-  CORS_ALLOWED_ORIGINS: env("CORS_ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:5173,https://circuit-new.vercel.app").split(',').map(s => s.trim()),
-};
+  CORS_ALLOWED_ORIGINS: env("CORS_PRODUCTION_ORIGINS", "http://localhost:3000", "http://localhost:5173" , "https://circuit-new.vercel.app").split(',').map(s => s.trim()),
+}; 
 
 // Build redis URL automatically
 if (!config.REDIS_URL) {
