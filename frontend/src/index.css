@@ -1,5 +1,12 @@
 @import "tailwindcss";
-@plugin "daisyui";
+@plugin "daisyui" {
+  themes: lighttheme --default, darktheme --prefersdark;
+  root: ":root";
+  include: button, input, select;
+  exclude: properties;
+  prefix: ;
+  logs: true;
+}
 
 @property --radialprogress {
   syntax: "<percentage>";
