@@ -2,7 +2,6 @@ const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
 const morgan = require("morgan");
-const config = require("./config");
 const compression = require("compression");
 const routes = require("./routes/index.js");
 const authRoutes = require("./routes/auth.routes");
@@ -34,14 +33,7 @@ app.use(helmet({
 }));
 
 const corsOptions = {
-  origin: function (origin, callback) {
-    if (!origin || !config.isProduction || config.CORS_ALLOWED_ORIGINS.includes(origin)) {
-      callback(null, true);
-    } else {
-      console.warn(`[CORS Debug] Blocked origin: ${origin}`);
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
+  origin: process.env.CORS_ORIGIN,
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
   credentials: true,
   optionsSuccessStatus: 200

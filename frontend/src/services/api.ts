@@ -6,7 +6,7 @@ const API_URL =
     ? `${import.meta.env.VITE_API_URL}/api`
     : `${import.meta.env.VITE_DEVELOPMENT_URL}/api`;
     
-console.log(API_URL);
+console.log("API_URL : ", API_URL);
 
 const api = axios.create({
   baseURL: API_URL,
