@@ -32,19 +32,27 @@ app.use(helmet({
   crossOriginResourcePolicy: { policy: "cross-origin" }
 }));
 
+// ✅ Fix — support multiple origins (local + Vercel)
+console.log("process.env.CORS_ORIGIN",process.env.CORS_ORIGIN)
 const corsOptions = {
-  origin: process.env.CORS_ORIGIN,
-  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-  credentials: true,
-  optionsSuccessStatus: 200
-};
-app.use((req, res, next) => {
-  console.log("[CORS Debug] Origin:", req.headers.origin);
-  next();
-});
+  origin: (origin, callback) => {
+    const allowed = (process.env.CORS_ORIGIN || "http://localhost:5173")
+      .split(",")
+      .map(s => s.trim())
+      .filter(Boolean);
 
+    if (!origin || allowed.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error(`Not allowed by CORS: ${origin}`));
+    }
+  },
+  credentials: true, // Needed so the frontend can send/receive cookies
+};
 
 app.use(cors(corsOptions));
+
+
 
 // HTTP Request Logger
 app.use(morgan("dev"));
@@ -78,14 +86,7 @@ app.use('/api/messages',message);
 app.use("/api", workUpdateRoutes);
 
 
-// Define a simple GET API endpoint
-app.get('/', (req, res) => {const api = axios.create({
-  baseURL:process.env.VITE_API_URL || "http://localhost:5000", // Fallback added here helps prevent undefined
-  // ...
-});
 
-  res.json({ message: 'Hello from the backend!' });
-});
 
 // ------------------------------------------------------------
 // ERROR HANDLING

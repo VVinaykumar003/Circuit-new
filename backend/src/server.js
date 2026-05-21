@@ -3,6 +3,7 @@
 require("dotenv").config();
 const http = require("http");
 
+
 // Safe Chalk Import (Handles ESM/CJS mismatch or missing package)
 let chalk;
 try {
@@ -25,7 +26,7 @@ try {
 const app = require("./app");
 const { connectDB } = require("./config/db");
 const { initializeSocket } = require("./services/socket.service");
-const config = require("./config");
+const config = require("./config/index");
 const logger = require("./common/libs/logger");
 
 const server = http.createServer(app);
@@ -95,7 +96,7 @@ async function boot() {
   // ------------------------------------------------------------
   // START SERVER
   // ------------------------------------------------------------
-  const PORT = config.PORT || 5000;
+  const PORT = process.env.PORT || config.PORT || 5000;
 
   server.listen(PORT, () => {
     console.log(chalk.green("🚀 SERVER ONLINE"));
@@ -103,8 +104,8 @@ async function boot() {
 
     console.log(chalk.white("🌐 Port: ") + chalk.cyan(PORT));
     console.log(
-      chalk.white("🗄  Database: ") +
-        chalk.green("MongoDB Atlas Connected")
+     
+chalk.white("🗄  Database: ") + chalk.green(config.isProduction ? "MongoDB Atlas" : "MongoDB Local")
     );
     console.log(
       chalk.white("🔐 Auth: ") + chalk.green("JWT Enabled")
