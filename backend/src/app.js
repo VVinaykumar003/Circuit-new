@@ -29,22 +29,29 @@ const app = express();
 // ------------------------------------------------------------
 
 // Security Headers
-app.use(helmet());
+app.use(helmet({
+  crossOriginResourcePolicy: { policy: "cross-origin" }
+}));
 
-// CORS Configuration
 const corsOptions = {
-  origin: (origin, callback) => {
-    console.log(origin);
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin || config.CORS_ALLOWED_ORIGINS.indexOf(origin) !== -1) {
+  origin: function (origin, callback) {
+    if (!origin || !config.isProduction || config.CORS_ALLOWED_ORIGINS.includes(origin)) {
       callback(null, true);
     } else {
-      callback(new Error("Not allowed by CORS"));
+      console.warn(`[CORS Debug] Blocked origin: ${origin}`);
+      callback(new Error('Not allowed by CORS'));
     }
   },
-  methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
-  credentials: true
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+  credentials: true,
+  optionsSuccessStatus: 200
 };
+app.use((req, res, next) => {
+  console.log("[CORS Debug] Origin:", req.headers.origin);
+  next();
+});
+
+
 app.use(cors(corsOptions));
 
 // HTTP Request Logger

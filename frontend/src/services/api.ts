@@ -3,7 +3,7 @@ import { toast } from "react-toastify";
 
 const API_URL =
   import.meta.env.VITE_NODE_ENV === "production"
-    ? `${import.meta.env.VITE_PRODUCTION_URL}/api`
+    ? `${import.meta.env.VITE_API_URL}/api`
     : `${import.meta.env.VITE_DEVELOPMENT_URL}/api`;
     
 console.log(API_URL);
