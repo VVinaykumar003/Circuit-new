@@ -17,6 +17,10 @@ const API = axios.create({
   },
 });
 
+console.log("API_BASE_URL : ", API_BASE_URL);
+
+
+
 // ===== Request Interceptor =====
 // This will run before every request.
 // It's useful for adding headers that are needed for every request, like an auth token.

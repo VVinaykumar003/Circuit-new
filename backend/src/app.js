@@ -76,14 +76,16 @@ app.use("/api/activity", activityRoutes);
 app.use("/api", notificationRoutes);
 app.use('/api/messages',message);
 app.use("/api", workUpdateRoutes);
-// Define a simple GET API endpoint
-// app.get('/', (req, res) => {const api = axios.create({
-//   baseURL: import.meta.env.VITE_API_URL || "http://localhost:5000", // Fallback added here helps prevent undefined
-//   // ...
-// });
 
-//   res.json({ message: 'Hello from the backend!' });
-// });
+
+// Define a simple GET API endpoint
+app.get('/', (req, res) => {const api = axios.create({
+  baseURL:process.env.VITE_API_URL || "http://localhost:5000", // Fallback added here helps prevent undefined
+  // ...
+});
+
+  res.json({ message: 'Hello from the backend!' });
+});
 
 // ------------------------------------------------------------
 // ERROR HANDLING
