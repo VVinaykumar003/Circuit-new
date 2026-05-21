@@ -72,16 +72,22 @@ function ProjectChatWrapper() {
 }
 
 export default function App() {
-  const { auth } = useAuth();
+  const { auth, loading } = useAuth();
   const isManagement = ['admin', 'owner', 'manager'].includes(auth?.user?.role || '');
 
 useEffect(() => {
-  if (!auth?.user) return;
+  // Explicitly disconnect if logged out to stop background auto-reconnect loops
+  if (!auth?.user) {
+    socket.disconnect();
+    return;
+  }
 
   const isAdmin =
     auth.user.role === "admin" || auth.user.role === "owner";
 
-  socket.connect();
+  if (socket.disconnected) {
+    socket.connect();
+  }
 
   const handleConnect = () => {
     console.log("🟢 Socket connected:", socket.id);
@@ -109,7 +115,17 @@ useEffect(() => {
     socket.off("notification", handleNotification);
     socket.disconnect();
   };
-}, [auth?.user]);
+}, [auth?.user?.userId]);
+
+  // Prevent rendering routes or redirecting while verifying the user session
+  if (loading) {
+    return (
+      <div className="flex flex-col justify-center items-center h-screen bg-base-100">
+        <span className="loading loading-spinner loading-lg text-primary"></span>
+        <p className="mt-4 text-lg font-medium text-base-content/70">Authenticating...</p>
+      </div>
+    );
+  }
 
   return (
     <Suspense fallback={
@@ -119,16 +135,18 @@ useEffect(() => {
       </div>
     }>
       <Routes>
-        <Route path="/login" element={!auth.user ? <Login /> : <Navigate to="/" replace />} />
-        <Route path="/organizationRegister" element={<OrganizationRegistrationPage />} />
 
         {!auth.user ? (
           <>
+            <Route path="/login" element={<Login />} />
             <Route path="/" element={<ERPLandingPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </>
         ) : (!auth?.slug && !auth?.user?.organization) ? (
-          <Route path="*" element={<Navigate to="/organizationRegister" replace />} />
+          <>
+            <Route path="/organizationRegister" element={<OrganizationRegistrationPage />} />
+            <Route path="*" element={<Navigate to="/organizationRegister" replace />} />
+          </>
         ) : (
           /* Protected Layout Routes */
           <Route element={<LayoutWrapper />}>

@@ -20,6 +20,7 @@ const notificationRoutes = require("./routes/notification.routes.js");
 const message = require("./routes/message.routes.js")
 const workUpdateRoutes = require("./routes/workUpdate.routes.js");
 const cookieParser = require("cookie-parser");
+const config = require("./config/index.js");
 
 const app = express();
 
@@ -33,15 +34,10 @@ app.use(helmet({
 }));
 
 // ✅ Fix — support multiple origins (local + Vercel)
-console.log("process.env.CORS_ORIGIN",process.env.CORS_ORIGIN)
+console.log("config.CORS_ORIGIN : " ,config.CORS_ALLOWED_ORIGINS)
 const corsOptions = {
   origin: (origin, callback) => {
-    const allowed = (process.env.CORS_ORIGIN || "http://localhost:5173")
-      .split(",")
-      .map(s => s.trim())
-      .filter(Boolean);
-
-    if (!origin || allowed.includes(origin)) {
+    if (!origin || CORS_ORIGIN.includes(origin)) {
       callback(null, true);
     } else {
       callback(new Error(`Not allowed by CORS: ${origin}`));
@@ -68,7 +64,7 @@ app.use(cookieParser());
 // ------------------------------------------------------------
 // ROUTES
 // ------------------------------------------------------------
-app.use("/", routes);
+
 app.use("/api/auth", authRoutes);
 app.use("/api", memberRoutes);
 app.use("/api", leavesRoutes);

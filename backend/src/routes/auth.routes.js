@@ -9,7 +9,7 @@ router.post("/register-company", registerCompany);
 router.post("/login", login);
 
 router.post("/logout", logout);
-router.get("/me", auth, getMe);
+router.get("/me", getMe);
 
 
 
