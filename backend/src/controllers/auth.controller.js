@@ -173,6 +173,7 @@ exports.login = async (req, res) => {
   secure: true,
   sameSite: "none",
   maxAge: 24 * 60 * 60 * 1000,
+  path: "/",
 });
 
     // TODO: Clear fail counter on success
