@@ -34,10 +34,10 @@ app.use(helmet({
 }));
 
 // ✅ Fix — support multiple origins (local + Vercel)
-console.log("config.CORS_ORIGIN : " ,config.CORS_ALLOWED_ORIGINS)
+console.log("config.CORS_ORIGIN : " ,process.env.CORS_ORIGINS)
 const corsOptions = {
   origin: (origin, callback) => {
-    if (!origin || CORS_ORIGIN.includes(origin)) {
+    if (!origin || process.env.CORS_ORIGIN|| config.CORS_ORIGIN.includes(origin)) {
       callback(null, true);
     } else {
       callback(new Error(`Not allowed by CORS: ${origin}`));
