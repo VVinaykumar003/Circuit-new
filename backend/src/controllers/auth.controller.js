@@ -183,6 +183,7 @@ exports.login = async (req, res) => {
 
     return res.json({
       message: "Login successful",
+      token: token,
       slug: org.slug,
       user: {
         userId: user._id,
@@ -193,6 +194,7 @@ exports.login = async (req, res) => {
         slug: org.slug,
         department: user.department || null,
         imageUrl: user.imageUrl || null,
+
       },
     });
 

@@ -53,6 +53,7 @@ const Login = ({ setToken }: LoginProps) => {
     try {
       setLoading(true);
       const response = await loginService(formData);
+      console.log(response)
 
       toast.success("Login successful");
 
@@ -61,14 +62,16 @@ const Login = ({ setToken }: LoginProps) => {
 
       // Proceed if user data is successfully returned
       if (payload && payload.user) {
-        // ✅ Save the full user details so other components (like Dashboards) can access it
-        localStorage.setItem("user", JSON.stringify(payload.user || {}));
-        
+
         // ✅ Only set token if it actually exists in the response (Fallback for non-cookie setups)
         if (payload.token) {
           localStorage.setItem("token", payload.token);
           if (setToken) setToken(payload.token);
         }
+        // ✅ Save the full user details so other components (like Dashboards) can access it
+        localStorage.setItem("user", JSON.stringify(payload.user || {}));
+        
+        
 
         socket.emit("joinUserRoom", payload.user.id); // Join the user's personal notification room
 
