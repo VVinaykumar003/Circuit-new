@@ -36,18 +36,38 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const res = await API.get<MeResponse>("/auth/me");
-        setAuth({ user: res.data.user, slug: res.data.slug });
-      } catch {
-        setAuth({ user: null, slug: null });
-      } finally {
-        setLoading(false);
+  const publicRoutes = ["/login", "/register","/"];
+
+  if (publicRoutes.includes(window.location.pathname)) {
+    setLoading(false);
+    return;
+  }
+
+  const checkAuth = async () => {
+    try {
+      const res = await API.get<MeResponse>("/auth/me");
+
+      setAuth({
+        user: res.data.user,
+        slug: res.data.slug,
+      });
+
+    } catch (err: any) {
+      if (err.response?.status !== 401) {
+        console.error("Auth error:", err);
       }
-    };
-    checkAuth();
-  }, []);
+
+      setAuth({
+        user: null,
+        slug: null,
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  checkAuth();
+}, []);
 
   const login = (data: { user: User; slug: string }) => {
     setAuth({ user: data.user, slug: data.slug });
@@ -56,9 +76,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const logout = async () => {
     try {
       await API.post("/auth/logout");
-    } catch (err) {
-      console.error("Logout failed", err);
-    } finally {
+    } catch (err: any) {
+  console.error("Auth check failed", err?.response?.data);
+
+  setAuth({ user: null, slug: null });
+}finally {
       setAuth({ user: null, slug: null });
     }
   };

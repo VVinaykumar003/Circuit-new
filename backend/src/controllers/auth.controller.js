@@ -168,12 +168,12 @@ exports.login = async (req, res) => {
     );
 
     // ✅ Secure httpOnly cookie only — no token in response body
-    res.cookie("token", token, {
-      httpOnly: true,
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-      secure: process.env.NODE_ENV === "production",
-      maxAge: 24 * 60 * 60 * 1000,
-    });
+   res.cookie("token", token, {
+  httpOnly: true,
+  secure: true,
+  sameSite: "none",
+  maxAge: 24 * 60 * 60 * 1000,
+});
 
     // TODO: Clear fail counter on success
     // await redis.del(`login_fail:${email}`);

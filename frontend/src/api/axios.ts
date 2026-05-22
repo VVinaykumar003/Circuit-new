@@ -10,7 +10,7 @@ const API_BASE_URL =
     : `${import.meta.env.VITE_DEVELOPMENT_URL || "http://localhost:5001"}/api`;
 
 const API = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL:API_BASE_URL, 
   withCredentials: true, // This is important for sending cookies with requests
   headers: {
     "Content-Type": "application/json",
