@@ -36,7 +36,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-  const publicRoutes = ["/login", "/register","/"];
+  const publicRoutes = ["/login", "/register"];
 
   if (publicRoutes.includes(window.location.pathname)) {
     setLoading(false);
