@@ -1,5 +1,5 @@
-import React, { useState, Suspense, useEffect } from "react";
-import { Routes, Route, Outlet, Navigate, useLocation } from "react-router-dom";
+import React, {  Suspense, useEffect } from "react";
+import { Routes, Route, Outlet, Navigate} from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { socket } from "./socket";
@@ -14,30 +14,31 @@ import Leads from "./pages/Sales/Leads";
 import AllLeads from "./pages/Sales/AllLeads";
 import NewContact from "./pages/Sales/NewContacts";
 import AllContacts from "./pages/Sales/AllContact";
-import SalesRepDetails from "./pages/Sales/SalesRepDetails";
+// import SalesRepDetails from "./pages/Sales/SalesRepDetails";
 import AddSalesRep from "./pages/Sales/AddSalesRep";
 import NewOrderForm from "./pages/Sales/Orders";
 import AllOrders from "./pages/Sales/AllOrders";
-import SalesLeads from "./pages/Sales/Employee/SalesLeads";
+// import SalesLeads from "./pages/Sales/Employee/SalesLeads";
 import SalesMemberProfile from "./pages/Sales/Employee/SalesMemberProfile";
-import Accounts from "./pages/Sales/Accounts";
+// import Accounts from "./pages/Sales/Accounts";
 import AllAccountDetails from "./pages/Sales/Accounts";
 import NewAccounts from "./pages/Sales/NewAccounts";
 import NewTask from "./pages/Sales/NewTask";
 import SalesTasksList from "./pages/Sales/TasksList";
 import PendingOrders from "./pages/Sales/PendingOrders";
-import SalesRepProfile from "./pages/Sales/SalesRepProfile";
+// import SalesRepProfile from "./pages/Sales/SalesRepProfile";
 import SalesRepAdminProfile from "./pages/Sales/SalesRepAdminProfile";
 import ContactDetails from "./pages/Sales/ContactDetails";
 import AllSalesReps from "./pages/Sales/AllSalesReps";
 import AllCase from "./pages/Sales/AllCase";
 import AddCases from "./pages/Sales/AddCases";
 import MyTasks from "./pages/Sales/MyTasks";
-import SalesForecastDashboard from "./pages/Sales/SalesForecastDashboard";
-import AddSalesForecast from "./pages/Sales/AddSalesForecast";
+// import SalesForecastDashboard from "./pages/Sales/SalesForecastDashboard";
+// import AddSalesForecast from "./pages/Sales/AddSalesForecast";
 import AllNotifications from "./pages/Sales/AllNotifications";
 import AdminNotificationCenter from "./pages/Sales/AdminNotificationCenter";
-import NotificationDetails from "./pages/Sales/NotificaitionDetails";
+import EmployeePayslip from "./components/salary/Employeepayslip";
+// import NotificationDetails from "./pages/Sales/NotificaitionDetails";
 
 /* Pages (lazy) */
 const AppLayout = React.lazy(() => import("./components/layout/AppLayout"));
@@ -57,9 +58,9 @@ const GeneratePaySlip = React.lazy(
   () => import("./components/salary/GeneratePaySlip"),
 );
 const PayHistory = React.lazy(() => import("./components/salary/Payhistory"));
-const EmployeePayslip = React.lazy(
-  () => import("./components/salary/EmployeePayslip"),
-);
+// const EmployeePayslip = React.lazy(
+//   () => import("./components/salary/EmployeePayslip"),
+// );
 const PayrollPolicySetup = React.lazy(
   () => import("./components/salary/PayrollPolicySetup"),
 );
