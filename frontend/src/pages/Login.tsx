@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Lottie from "lottie-react";
-import loginAnimation from "../assets/loginAnimation.json";
+import loginAnimation from "../assets/LoginAnimation.json";
 import { LockIcon, User2Icon } from "lucide-react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { login as loginService } from "../services/authService";
