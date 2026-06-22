@@ -27,7 +27,7 @@ export default function ProjectCard({
   canDelete = true,
 }: Props) {
   const navigate = useNavigate();
-  console.log("ProjectCard render", canEdit);
+  // console.log("ProjectCard render", canEdit);
   const [editProject, setEditProject] = useState<Project | null>(null);
   const { auth } = useAuth();
   //  const handleSave = async (updated: Project) => {
@@ -54,7 +54,7 @@ export default function ProjectCard({
   //     }
   //   };
 
-  console.log("Rendering ProjectCard:", project);
+  // console.log("Rendering ProjectCard:", project);
   const handleSave = async (updated: Project) => {
     try {
       const payload = {
@@ -69,7 +69,7 @@ export default function ProjectCard({
       };
 
       await updateProject(auth.slug, updated.id, payload);
-      console.log(payload);
+      // console.log(payload);
       // 🔥 IMPORTANT: remap for UI
       const mappedUpdated = {
         ...updated,

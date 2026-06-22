@@ -1,9 +1,10 @@
+require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
 const morgan = require("morgan");
 const compression = require("compression");
-const routes = require("./routes/index.js");
+const routes = require("./routes");
 const authRoutes = require("./routes/auth.routes");
 const memberRoutes = require("./routes/member.routes");
 const projectRoutes = require("./routes/project.routes");
@@ -19,8 +20,24 @@ const activityRoutes = require("./routes/activity.routes.js");
 const notificationRoutes = require("./routes/notification.routes.js");
 const message = require("./routes/message.routes.js")
 const workUpdateRoutes = require("./routes/workUpdate.routes.js");
+
+const productRoutes = require("./routes/product.routes.js");
+const orderRoutes = require("./routes/order.routes.js");
+const salesRepRoutes = require("./routes/salesRep.routes.js");
+const salesTaskRoutes = require("./routes/salesTask.routes.js");
+const caseRoutes = require("./routes/case.routes.js");
+
+const leadRoutes = require("./routes/lead.routes.js");
+const accountRoutes = require("./routes/account.routes.js");
+const contactRoutes = require("./routes/contact.routes.js");
+const salesDashboard = require("./routes/salesRoutes.js")
+const forecastRoutes = require("./routes/forecastRoutes.js")
+// Add this to the top where you require other routes
+const salesNotificationRoutes = require('./routes/salesNotification.routes');
+
+
+
 const cookieParser = require("cookie-parser");
-const config = require("./config/index.js");
 
 const app = express();
 
@@ -29,26 +46,14 @@ const app = express();
 // ------------------------------------------------------------
 
 // Security Headers
-app.use(helmet({
-  crossOriginResourcePolicy: { policy: "cross-origin" }
+app.use(helmet());
+
+// CORS Configuration
+app.use(cors({
+  origin: process.env.CORS_ORIGIN ||"http://localhost:5174" ||"*",
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+  credentials: true
 }));
-
-// ✅ Fix — support multiple origins (local + Vercel)
-console.log("config.CORS_ORIGIN : " ,process.env.CORS_ORIGINS)
-const corsOptions = {
-  origin: (origin, callback) => {
-    if (!origin || process.env.CORS_ORIGIN|| config.CORS_ORIGIN.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error(`Not allowed by CORS: ${origin}`));
-    }
-  },
-  credentials: true, // Needed so the frontend can send/receive cookies
-};
-
-app.use(cors(corsOptions));
-
-
 
 // HTTP Request Logger
 app.use(morgan("dev"));
@@ -64,8 +69,9 @@ app.use(cookieParser());
 // ------------------------------------------------------------
 // ROUTES
 // ------------------------------------------------------------
-
+app.use("/", routes);
 app.use("/api/auth", authRoutes);
+//It routes
 app.use("/api", memberRoutes);
 app.use("/api", leavesRoutes);
 app.use("/api", leavepolicyRoutes);
@@ -81,8 +87,31 @@ app.use("/api", notificationRoutes);
 app.use('/api/messages',message);
 app.use("/api", workUpdateRoutes);
 
+//sales routes
+app.use('/api/products', productRoutes);
+app.use('/api/orders', orderRoutes);
+app.use('/api/leads', leadRoutes);
+app.use('/api/reps', salesRepRoutes);
+app.use('/api/cases', caseRoutes);
+app.use('/api/tasks', salesTaskRoutes);
+app.use('/api/sales/' ,salesDashboard )
+app.use('/api/forecast' ,forecastRoutes )
 
 
+
+app.use("/api/leads", leadRoutes);
+app.use("/api/accounts",accountRoutes);
+app.use("/api/contacts",contactRoutes);
+// Add this where you declare app.use('/api', ...) middlewares
+app.use('/api/notification', salesNotificationRoutes); 
+// Define a simple GET API endpoint
+// app.get('/', (req, res) => {const api = axios.create({
+//   baseURL: import.meta.env.VITE_API_URL || "http://localhost:5000", // Fallback added here helps prevent undefined
+//   // ...
+// });
+
+//   res.json({ message: 'Hello from the backend!' });
+// });
 
 // ------------------------------------------------------------
 // ERROR HANDLING

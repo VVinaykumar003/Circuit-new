@@ -11,10 +11,12 @@ function LayoutWrapper() {
 }
 
 export const ProtectedRoute = () => {
-  const { auth, loading } = useAuth();
+  const { auth } = useAuth();
 
-  if (loading) return <div>Loading...</div>; // or a spinner
-  if (!auth.user) return <Navigate to="/login" replace />;
+  if (!auth.user) {
+    return <Navigate to="/login" replace />;
+  }
 
+  
   return <LayoutWrapper />;
 };

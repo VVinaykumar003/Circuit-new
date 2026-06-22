@@ -385,7 +385,8 @@ export default function LeaveCalendar({
   };
 
   return (
-    <div className="bg-base-100 border border-primary/60 rounded-xl p-3 sm:p-5 lg:p-6 text-base-content overflow-hidden">
+    // <div className="bg-base-100 border border-primary/60 rounded-xl p-3 sm:p-5 lg:p-6 text-base-content overflow-hidden">
+    <div className="bg-base-100 border border-primary/40 rounded-2xl p-2 sm:p-5 lg:p-6 text-base-content overflow-hidden">
       
       {/* HEADER */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-5">

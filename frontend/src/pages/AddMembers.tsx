@@ -113,7 +113,7 @@ const AddMember = () => {
          toast.error("User data not found. Please log in again.");
          return;
        }
-
+// console.log(slug,formData);
             await createMember(slug, formData);
       
             toast.success("Employee Registered Successfully");

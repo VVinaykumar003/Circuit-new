@@ -383,7 +383,7 @@ export default function PayrollDashboard() {
                 <label>
                   <input 
                     type="checkbox" 
-                    className="checkbox checkbox-sm checkbox-primary rounded-md" 
+                    className="checkbox checkbox-sm bg-white/60 rounded-md" 
                     checked={selectedSlips.size > 0 && selectedSlips.size === currentSlips.length}
                     onChange={toggleSelectAll} 
                   />

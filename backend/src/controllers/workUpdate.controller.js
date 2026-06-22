@@ -1,8 +1,8 @@
 const Activity = require("../models/Activity");
-const { cloudinary } = require("../config/cloudinary");
-const streamifier = require("streamifier");
+const { uploadOnCloudinary } = require("../config/cloudinary");
 const WorkUpdateModel = require("../models/WorkUpdate.model");
 const ProjectModel = require("../models/Project.model");
+const logger = require("../common/libs/logger");
 
 // Add Work Update
 
@@ -14,11 +14,13 @@ const addWorkUpdate = async (req, res) => {
     const { projectId } = req.params;
 
     const { description, status } = req.body;
+    logger.info(`Adding work update for project ${projectId} by user ${userId} in org ${orgId}`);
+    logger.debug(`Request body: ${JSON.stringify(req.body)}`);
 
     // Project validation
     const project = await ProjectModel.findOne({
       _id: projectId,
-      organization: orgId,
+      orgId: orgId,
     });
 
     if (!project) {
@@ -29,23 +31,20 @@ const addWorkUpdate = async (req, res) => {
     }
 
     // Upload attachments to Cloudinary
-    const files = req.files || [];
+    let files = [];
+    if (Array.isArray(req.files)) {
+      files = req.files;
+    } else if (req.files && typeof req.files === "object") {
+      files = Object.values(req.files).flat();
+    }
     const uploadedAttachments = [];
 
     for (const file of files) {
-      const result = await new Promise((resolve, reject) => {
-        const stream = cloudinary.uploader.upload_stream(
-          { folder: "work-updates" },
-          (error, result) => {
-            if (error) reject(error);
-            else resolve(result);
-          },
-        );
-
-        streamifier.createReadStream(file.buffer).pipe(stream);
-      });
-
-      uploadedAttachments.push(result.secure_url);
+      // Use your configured helper that processes 'file.path' and deletes local files automatically
+      const result = await uploadOnCloudinary(file.path);
+      if (result && result.secure_url) {
+        uploadedAttachments.push(result.secure_url);
+      }
     }
 
     // Create work update
@@ -62,16 +61,16 @@ const addWorkUpdate = async (req, res) => {
 
     const populatedWorkUpdate = await WorkUpdateModel.findById(workUpdate._id)
       .populate("createdBy", "name email role")
-      .populate("projectId", "name");
+      .populate("projectId", "projectName");
 
     // Activity log
     await Activity.create({
       organization: orgId,
       user: userId,
       action: "Work Update Added",
-      message: `Added a work update in project '${project.name}'`,
+      message: `Added a work update in project '${project.projectName}'`,
       referenceId: workUpdate._id,
-      referenceModel: "WorkUpdateModel",
+      referenceModel: "WorkUpdate",
     });
 
     // Socket notification
@@ -79,7 +78,7 @@ const addWorkUpdate = async (req, res) => {
     if (io) {
       io.emit("new_notification", {
         action: "Work Update Added",
-        message: `New work update added in project '${project.name}'`,
+        message: `New work update added in project '${project.projectName}'`,
       });
     }
 
@@ -191,23 +190,20 @@ const editWorkUpdate = async (req, res) => {
     }
 
     //  Upload new attachments
-    const files = req.files || [];
+    let files = [];
+    if (Array.isArray(req.files)) {
+      files = req.files;
+    } else if (req.files && typeof req.files === "object") {
+      files = Object.values(req.files).flat();
+    }
     const uploadedAttachments = [];
 
     for (const file of files) {
-      const result = await new Promise((resolve, reject) => {
-        const stream = cloudinary.uploader.upload_stream(
-          { folder: "work-updates" },
-          (error, result) => {
-            if (error) reject(error);
-            else resolve(result);
-          },
-        );
-
-        streamifier.createReadStream(file.buffer).pipe(stream);
-      });
-
-      uploadedAttachments.push(result.secure_url);
+      // Use your configured helper that processes 'file.path' and deletes local files automatically
+      const result = await uploadOnCloudinary(file.path);
+      if (result && result.secure_url) {
+        uploadedAttachments.push(result.secure_url);
+      }
     }
 
     // Update fields

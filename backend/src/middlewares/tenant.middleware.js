@@ -32,7 +32,7 @@ const logger = require("../common/libs/logger");
 const divider = "----------------------------------------";
 
 module.exports = async (req,res,next)=>{
-
+console.log("TENANT PASSED");
   const { slug } = req.params;
   logger.info("Resolving tenant for organization", { slug });
 
@@ -45,6 +45,6 @@ module.exports = async (req,res,next)=>{
   if(!org) return res.status(404).json({msg:"Tenant not found"});
 
   req.organization = org;
-
+  req.tenantId = org._id; 
   next();
 };

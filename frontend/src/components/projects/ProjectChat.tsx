@@ -131,7 +131,7 @@ export default function ProjectChat({ projectId, currentUser }: Props) {
       });
 
     } catch (err) {
-      console.log("Message saved locally only",err);
+      console.error("Message saved locally only",err);
     } finally {
       setLoading(false);
     }

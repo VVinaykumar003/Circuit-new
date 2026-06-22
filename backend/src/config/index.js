@@ -32,9 +32,8 @@ const config = {
   // DB
   mongo: {
     uri:
-      IS_PROD
-        ? env("MONGO_ATLAS_URI") || env("MONGO_URI")
-        : env("MONGO_URI") || "mongodb://127.0.0.1:27017/circuit",
+      env("MONGO_URI") ||
+      "mongodb://127.0.0.1:27017/circuit",
     options: {
     },
   },
@@ -72,8 +71,8 @@ const config = {
   APP_NAME: env("APP_NAME", "Swad Setu"),
 
   // CORS
-  CORS_ALLOWED_ORIGINS: (env("CORS_ORIGIN") || "http://localhost:3000,http://localhost:5173,https://circuit-new.vercel.app").split(',').map(s => s.trim()),
-}; 
+  CORS_ALLOWED_ORIGINS: env("CORS_ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:5173").split(',').map(s => s.trim()),
+};
 
 // Build redis URL automatically
 if (!config.REDIS_URL) {
@@ -89,7 +88,7 @@ if (!config.REDIS_URL) {
 function validate(throwOnError = true) {
   const errors = [];
 
-  if (!config.mongo.uri) errors.push("MongoDB URI (MONGO_URI or MONGO_ATLAS_URI) is required");
+  if (!config.mongo.uri) errors.push("MONGO_URI is required");
   if (!config.JWT_SECRET.trim()) errors.push("JWT_SECRET is required");
 
   if (IS_PROD) {

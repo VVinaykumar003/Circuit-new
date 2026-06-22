@@ -1,0 +1,41 @@
+const mongoose = require('mongoose');
+
+const salesTaskSchema = new mongoose.Schema({
+  organization: { type: mongoose.Schema.Types.ObjectId, ref: 'Organization', required: true },
+  title: { type: String, required: true },
+  description: { type: String, required: true },
+  type: { type: String, required: true },
+  category: { type: String },
+  priority: { type: String, enum: ["Low", "Medium", "High", "Urgent"], default: "Medium" },
+  status: { type: String, enum: ["Pending", "In Progress", "Completed", "On Hold", "Cancelled"], default: "Pending" },
+  assignedTo: { type: mongoose.Schema.Types.ObjectId,ref:"User", required: true }, 
+  team: { type: String },
+  customer: { type: String, required: true },
+  lead: { type: String },
+  contactPerson: { type: String },
+  phone: { type: String },
+  email: { type: String },
+  startDate: { type: Date, required: true },
+  dueDate: { type: Date, required: true },
+  dueTime: { type: String },
+  reminderDateTime: { type: Date },
+  followUpDate: { type: Date },
+  expectedDealValue: { type: Number, default: 0 },
+  opportunityStage: { type: String },
+  probability: { type: Number, min: 0, max: 100, default: 0 },
+  closingDate: { type: Date },
+  region: { type: String },
+  communicationType: { type: String },
+  meetingMode: { type: String, enum: ["Online", "Offline", ""] },
+  meetingLocation: { type: String },
+  meetingLink: { type: String },
+  progress: { type: Number, min: 0, max: 100, default: 0 },
+  completionNotes: { type: String },
+  outcome: { type: String },
+  reasonForDelay: { type: String },
+  visibility: { type: String, default: "Private" },
+  tags: [{ type: String }],
+  attachments: [{ type: String }]
+}, { timestamps: true });
+
+module.exports = mongoose.model('SalesTask', salesTaskSchema);

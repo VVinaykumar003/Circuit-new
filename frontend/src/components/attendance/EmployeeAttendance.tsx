@@ -180,7 +180,7 @@ const EmployeeAttendance = () => {
 
       {/* TAB CONTENT */}
       {activeTab === "mark" && (
-        <div className="min-h-[60vh]  pt-8">
+        <div className="min-h-[60vh]  ">
           <MarkAttendanceCard />
         </div>
       )}

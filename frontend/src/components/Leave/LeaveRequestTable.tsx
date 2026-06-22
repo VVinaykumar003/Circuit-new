@@ -79,7 +79,7 @@ export default function LeaveRequestTable({
 
   return (
     <>
-      {mode === "action" && selectedIds.length > 0 && (
+      {/* {mode === "action" && selectedIds.length > 0 && (
         <div className="flex gap-2 mb-4 bg-base-200 p-3 rounded-lg items-center justify-between">
           <span className="text-sm font-medium">
             {selectedIds.length} selected
@@ -93,7 +93,36 @@ export default function LeaveRequestTable({
             </Button>
           </div>
         </div>
-      )}
+      )} */}
+
+      {mode === "action" && selectedIds.length > 0 && (
+  <div className="mb-4 flex flex-col gap-3 rounded-lg bg-base-200 p-3 sm:flex-row sm:items-center sm:justify-between">
+    
+    <span className="text-sm font-medium text-center sm:text-left">
+      {selectedIds.length} selected
+    </span>
+
+    <div className="flex flex-col gap-2 sm:flex-row">
+      <Button
+        size="sm"
+        variant="primary"
+        onClick={handleBulkApprove}
+        className="w-full sm:w-auto"
+      >
+        Approve Selected
+      </Button>
+
+      <Button
+        size="sm"
+        variant="error"
+        onClick={handleBulkReject}
+        className="w-full text-white sm:w-auto"
+      >
+        Reject Selected
+      </Button>
+    </div>
+  </div>
+)}
 
       {/* ================= DESKTOP TABLE ================= */}
       <div className="hidden md:block bg-base-100 border border-primary/35 rounded-lg overflow-hidden">
@@ -114,7 +143,7 @@ export default function LeaveRequestTable({
                       requests.length > 0
                     }
                     onChange={handleSelectAll}
-                    className="checkbox bg-white checkbox-sm checkbox-base-content-300 border"
+                    className="checkbox bg-white/40 checkbox-sm checkbox-base-content-300 border"
                   />
                 </th>
               )}
@@ -201,7 +230,7 @@ export default function LeaveRequestTable({
                           checked={selectedIds.includes(r.id)}
                           onChange={(e) => handleSelectOne(e, r.id)}
                           onClick={(e) => e.stopPropagation()}
-                          className="checkbox checkbox-sm bg-white border checkbox-base-content-300 "
+                          className="checkbox checkbox-sm bg-primary/10 border checkbox-base-content-300 "
                         />
                       </td>
                     )}
@@ -214,133 +243,191 @@ export default function LeaveRequestTable({
       </div>
 
       {/* ================= MOBILE CARDS ================= */}
-      <div className="md:hidden space-y-3">
-        {currentRequests.length === 0 ? (
-          <div className="text-center py-10 text-base-content/60 font-medium bg-base-100 border border-base-300 rounded-xl">
-            No leave requests found
-          </div>
-        ) : (
-          currentRequests.map((r) => {
-            const Icon = leaveTypeIcon[r.type];
-            return (
-              <div
-                onClick={() => onRowClick?.(r)}
-                key={r.id}
-                className="cursor-pointer bg-base-100 border border-primary/30 rounded-xl p-4 space-y-3 "
-              >
-                <div className="flex justify-between items-start">
-                  <div className="flex gap-3">
-                    {mode=="action" &&(
-                    <input
-                      onClick={(e) => {
-                        e.stopPropagation();
-                      }}
-                      type="checkbox"
-                      checked={selectedIds.includes(r.id)}
-                      onChange={(e) => handleSelectOne(e, r.id)}
-                      className="checkbox checkbox-sm mt-1 bg-primary/40 border-primary checkbox-primary  "
-                    />)}
-                    <div>
-                      <p className="font-semibold">{r.employee}</p>
-                      <div className="flex items-center gap-2 text-sm text-base-content/60">
-                        <Icon />
-                        <span className="capitalize">{r.type}</span>
-                      </div>
-                    </div>
-                  </div>
+     
 
-                  <StatusBadge status={r.status} />
+
+<div className="md:hidden space-y-4">
+  {currentRequests.length === 0 ? (
+    <div
+      className="
+        text-center
+        py-10
+        px-4
+        text-base-content/60
+        font-medium
+        bg-base-100
+        border
+        border-base-300
+        rounded-2xl
+      "
+    >
+      No leave requests found
+    </div>
+  ) : (
+    currentRequests.map((r) => {
+      const Icon = leaveTypeIcon[r.type];
+
+      return (
+        <div
+          key={r.id}
+          onClick={() => onRowClick?.(r)}
+          className="
+            cursor-pointer
+            bg-base-100
+            border
+            border-primary/20
+            rounded-2xl
+            p-4
+            shadow-sm
+            active:scale-[0.98]
+            transition-all
+            duration-200
+            space-y-4
+          "
+        >
+          {/* TOP */}
+          <div className="flex items-start justify-between gap-3">
+            
+            {/* LEFT */}
+            <div className="flex items-start gap-3 min-w-0 flex-1">
+              
+              {mode === "action" && (
+                <input
+                  type="checkbox"
+                  checked={selectedIds.includes(r.id)}
+                  onClick={(e) => e.stopPropagation()}
+                  onChange={(e) =>
+                    handleSelectOne(e, r.id)
+                  }
+                  className="
+                    checkbox
+                    checkbox-sm
+                    mt-1
+                    shrink-0
+                    bg-primary/40
+                    border-primary
+                    checkbox-primary
+                  "
+                />
+              )}
+
+              <div className="min-w-0 flex-1">
+                <p
+                  className="
+                    font-semibold
+                    text-sm
+                    sm:text-base
+                    text-base-content
+                    break-words
+                  "
+                >
+                  {r.employee}
+                </p>
+
+                <div
+                  className="
+                    flex
+                    items-center
+                    gap-2
+                    mt-1
+                    text-xs
+                    sm:text-sm
+                    text-base-content/60
+                  "
+                >
+                  <Icon className="shrink-0" />
+
+                  <span className="capitalize truncate">
+                    {r.type}
+                  </span>
                 </div>
-
-                <div className="text-sm">
-                  <span className="font-medium">{formatDate(r.fromDate)}</span>
-                  {r.toDate && (
-                    <span className="font-medium">
-                      {" "}
-                      → {formatDate(r.toDate)}
-                    </span>
-                  )}
-                </div>
-
-                {mode === "action" && (
-                  <div
-                    onClick={(e) => e.stopPropagation()}
-                    className="flex w-full gap-4 pt-2"
-                  >
-                    <Button
-                      className={`flex-1 ${r.status === "approved" ? "opacity-80 text-base-content/50 cursor-not-allowed" : "text-white"}`}
-                      size="sm"
-                      variant="primary"
-                      onClick={(e) => {
-                        e.stopPropagation(); // 👈 warna drawer bhi open ho jayega
-                        onApprove?.(r.id);
-                      }}
-                      disabled={r.status === "approved"}
-                    >
-                      Approve
-                    </Button>
-
-                    <Button
-                      className={`flex-1 ${r.status === "rejected" ? "opacity-80 text-base-content/50 cursor-not-allowed" : "text-white"}`}
-                      size="sm"
-                      variant="error"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onReject?.(r.id);
-                      }}
-                      disabled={r.status === "rejected"}
-                    >
-                      Reject
-                    </Button>
-                  </div>
-                )}
-                {/* {(r.status === "pending" ) && (
-                <div className="flex gap-2 pt-2">
-                  {(r.status === "pending" || r.status === "rejected") && (
-                    <div className="gap-4">
-                    <Button
-                      className="flex-1"
-                      size="sm"
-                      variant="primary"
-                      onClick={() => onApprove(r.id)}
-                    >
-                      Approve
-                    </Button>
-
-                    <Button
-                      className="flex-1"
-                      size="sm"
-                      variant="error"
-                      onClick={() => onReject(r.id)}
-                    >
-                      Reject
-                    </Button>
-                   
-                    </div>
-                  )}
-                  {(r.status === "approved") && (
-
-                    <div>
-                      
-                    
-                    <Button
-                      className="flex-1"
-                      size="sm"
-                      variant="error"
-                      onClick={() => onReject(r.id)}
-                    >
-                      Reject
-                    </Button>
-                    </div>
-                  )}
-                </div>
-              )} */}
               </div>
-            );
-          })
-        )}
-      </div>
+            </div>
 
+            {/* STATUS */}
+            <div className="shrink-0">
+              <StatusBadge status={r.status} />
+            </div>
+          </div>
+
+          {/* DATE */}
+          <div
+            className="
+              flex
+              flex-wrap
+              items-center
+              gap-1
+              text-xs
+              sm:text-sm
+              text-base-content/70
+              font-medium
+            "
+          >
+            <span>{formatDate(r.fromDate)}</span>
+
+            {r.toDate && (
+              <>
+                <span>→</span>
+                <span>{formatDate(r.toDate)}</span>
+              </>
+            )}
+          </div>
+
+          {/* ACTIONS */}
+       {/* ACTIONS */}
+{mode === "action" && (
+  <div
+    onClick={(e) => e.stopPropagation()}
+    className="flex gap-3 pt-2"
+  >
+    <Button
+      className={`
+        flex-1
+        min-w-0
+        ${
+          r.status === "approved"
+            ? "opacity-70 cursor-not-allowed text-base-content/50"
+            : "text-white"
+        }
+      `}
+      size="sm"
+      variant="primary"
+      onClick={(e) => {
+        e.stopPropagation();
+        onApprove?.(r.id);
+      }}
+      disabled={r.status === "approved"}
+    >
+      <span className="truncate">Approve</span>
+    </Button>
+
+    <Button
+      className={`
+        flex-1
+        min-w-0
+        ${
+          r.status === "rejected"
+            ? "opacity-70 cursor-not-allowed text-base-content/50"
+            : "text-white"
+        }
+      `}
+      size="sm"
+      variant="error"
+      onClick={(e) => {
+        e.stopPropagation();
+        onReject?.(r.id);
+      }}
+      disabled={r.status === "rejected"}
+    >
+      <span className="truncate">Reject</span>
+    </Button>
+  </div>
+)}
+        </div>
+      );
+    })
+  )}
+</div>
       {totalPages > 1 && (
         <div className="flex justify-center mt-6">
           <Pagination

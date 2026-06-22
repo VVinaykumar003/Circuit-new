@@ -461,6 +461,7 @@ export default function TaskDrawer({
   onClose,
   onUpdate,
 }: Props) {
+  console.log("Rendering TaskDrawer with task:", task, "and mode:", mode);
   const { auth } = useAuth();
   const isEdit = mode === "edit";
 

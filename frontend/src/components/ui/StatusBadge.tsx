@@ -27,7 +27,7 @@ const STATUS_CONFIG = {
   "not marked": {
     label: "Not Marked",
     icon: "",
-    className: "bg-warning/20 text-warning border-warning/30",
+    className: "bg-warning text-white  border-warning/30",
   },
   "half day": {
     label: "Half Day",

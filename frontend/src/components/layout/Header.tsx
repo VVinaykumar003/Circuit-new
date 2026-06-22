@@ -1,46 +1,35 @@
 import { useState, useRef, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useTheme } from "../../context/use-theme";
-import {
-  MdNotifications,
-  MdMenu,
-  MdSearch,
-  MdClose,
-  MdLightMode,
-  MdDarkMode,
-} from "react-icons/md";
+import { MdNotifications, MdMenu, MdSearch, MdClose, MdLightMode, MdDarkMode } from "react-icons/md";
 import type { Notification } from "@/type/notification";
 import { useAuth } from "../../auth/AuthContext";
 import { toast } from "react-toastify";
 import { uploadImage } from "@/services/uploadService";
-import {
-  getNotifications,
-  markAsRead,
-  markAllAsRead,
-} from "@/services/notificationService";
+import { getNotifications , markAsRead, markAllAsRead } from "@/services/notificationService";
 import { socket } from "@/socket";
 import api from "@/services/api";
+
 
 interface HeaderProps {
   onMenuClick: () => void;
 }
 
 const getNotificationLink = (notification: any) => {
-  const combined =
-    `${notification.title || ""} ${notification.message || ""}`.toLowerCase();
+  const combined = `${notification.title || ""} ${notification.message || ""}`.toLowerCase();
   if (combined.includes("leave")) return "/leaves";
   if (combined.includes("task")) return "/tasks";
   if (combined.includes("project")) return "/projects";
-  if (combined.includes("member") || combined.includes("user"))
-    return "/members";
+  if (combined.includes("member") || combined.includes("user")) return "/members";
   if (combined.includes("attendance")) return "/attendance";
   return "/notifications"; // Fallback to main notifications page
 };
 
-export default function Header({ onMenuClick }: HeaderProps) {
+export default function Header({ onMenuClick }: HeaderProps)  {
   const { theme, setTheme } = useTheme();
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const { auth, logout, updateUser } = useAuth(); // Assumes `updateUser` is provided by AuthContext
+  const [notifications, setNotifications] =
+    useState<Notification[]>([]);
+  const { auth, logout } = useAuth();
   const user = auth?.user;
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -54,14 +43,11 @@ export default function Header({ onMenuClick }: HeaderProps) {
 
     // 🟢 Unlock audio context on first user interaction to prevent Autoplay blocks
     const unlockAudio = () => {
-      audio
-        .play()
-        .then(() => {
-          audio.pause();
-          audio.currentTime = 0;
-        })
-        .catch(() => {}); // Ignore silent failure
-
+      audio.play().then(() => {
+        audio.pause();
+        audio.currentTime = 0;
+      }).catch(() => {}); // Ignore silent failure
+      
       document.removeEventListener("click", unlockAudio);
       document.removeEventListener("keydown", unlockAudio);
     };
@@ -77,28 +63,31 @@ export default function Header({ onMenuClick }: HeaderProps) {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === "k") {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
         e.preventDefault();
         setSearchOpen((prev) => !prev);
       }
     };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
   const currentUserId = user?.userId || user?._id || "1";
+ const location = useLocation();
 
-  const navigate = useNavigate();
-  const isDark = theme === "darktheme";
+const isSales =
+  location.pathname.startsWith("/sales");
+ const navigate=useNavigate();
+  const isDark = theme === "dark";
 
   const toggleTheme = () => {
-    setTheme(isDark ? "lighttheme" : "darktheme");
+    setTheme(isDark ? "corporate" : "dark");
   };
 
   // Fetch initial notifications & listen for real-time updates
   useEffect(() => {
     if (!auth?.slug) return;
-
+    
     // 1. Emit the join room event as soon as the header mounts (user logs in)
     socket.emit("joinUserRoom", currentUserId);
 
@@ -113,18 +102,13 @@ export default function Header({ onMenuClick }: HeaderProps) {
           targetUserIds: n.recipients || [],
           createdBy: n.createdBy?._id,
           createdAt: n.createdAt,
-          readBy:
-            n.readBy?.map((r: any) =>
-              typeof r === "string"
-                ? r
-                : r.user?._id || r.user || r.userId || r._id,
-            ) || [],
+          readBy: n.readBy?.map((r: any) => typeof r === 'string' ? r : (r.user?._id || r.user || r.userId || r._id)) || [],
           attachments: n.attachments || [],
           sendTo: n.sendTo,
         }));
 
         // console.log("formatted : ",formatted)
-
+     
         setNotifications(formatted);
       } catch (err) {
         console.error("Failed to fetch notifications", err);
@@ -151,18 +135,13 @@ export default function Header({ onMenuClick }: HeaderProps) {
         targetUserIds: data.recipients || [],
         createdBy: data.createdBy?._id || "system",
         createdAt: data.createdAt || new Date().toISOString(),
-        readBy:
-          data.readBy?.map((r: any) =>
-            typeof r === "string"
-              ? r
-              : r.user?._id || r.user || r.userId || r._id,
-          ) || [],
+        readBy: data.readBy?.map((r: any) => typeof r === 'string' ? r : (r.user?._id || r.user || r.userId || r._id)) || [],
         attachments: data.attachments || [],
         sendTo: data.sendTo || "all",
       };
 
-      console.log("newNotif : ", newNotif);
-
+      // console.log("newNotif : ",newNotif)
+      
       setNotifications((prev) => [newNotif, ...prev]);
     };
 
@@ -174,10 +153,9 @@ export default function Header({ onMenuClick }: HeaderProps) {
   }, [auth?.slug]);
 
   const visibleNotifications = notifications.filter(
-    (n) =>
-      (n.sendTo === "all" ||
-        (n.targetUserIds && n.targetUserIds.includes(currentUserId))) &&
-      !n.readBy.includes(currentUserId),
+    (n) => (n.sendTo === "all" || 
+         (n.targetUserIds && n.targetUserIds.includes(currentUserId))) &&
+         !n.readBy.includes(currentUserId)
   );
 
   const unreadCount = visibleNotifications.length;
@@ -191,8 +169,8 @@ export default function Header({ onMenuClick }: HeaderProps) {
               ...n,
               readBy: [...n.readBy, currentUserId],
             }
-          : n,
-      ),
+          : n
+      )
     );
 
     // Backend call to persist the read status
@@ -206,51 +184,42 @@ export default function Header({ onMenuClick }: HeaderProps) {
   };
 
   const handleMarkAllAsRead = async () => {
-    const unreadIds = visibleNotifications.map((n) => n.id);
+    const unreadIds = visibleNotifications
+      .filter((n) => !n.readBy.includes(currentUserId))
+      .map((n) => n.id);
 
-    if (unreadIds.length === 0 || !auth?.slug) return;
+    if (unreadIds.length === 0) return;
 
-    const originalNotifications = notifications;
-
-    // Optimistically mark all visible notifications as read
+    // Optimistically mark as read in the UI instead of clearing to match backend state on refresh
     setNotifications((prev) =>
       prev.map((n) =>
-        unreadIds.includes(n.id)
+        !n.readBy.includes(currentUserId)
           ? { ...n, readBy: [...n.readBy, currentUserId] }
-          : n,
-      ),
+          : n
+      )
     );
 
     try {
-      // Use the single, efficient endpoint to mark all as read on the backend.
-      await markAllAsRead(auth.slug);
+      if (auth?.slug) {
+        // Fallback to individual markAsRead calls to guarantee the backend updates properly
+        await Promise.all(unreadIds.map((id) => markAsRead(auth.slug, id)));
+        try { await markAllAsRead(auth.slug); } catch (e) {}
+      }
     } catch (error) {
       console.error("Failed to mark all notifications as read", error);
-      // If the backend call fails, revert the UI to its original state and notify the user.
-      setNotifications(originalNotifications);
-      toast.error("Failed to mark notifications as read.");
     }
   };
 
-  const handleAvatarUpload = async (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) => {
+  const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (!file || !user) return;
+    if (!file) return;
 
     try {
       setIsUploading(true);
-      const imageUrl = await uploadImage(file);
-
-      // Persist the new avatar URL to the backend
-      await api.patch(`/api/members/${user.userId}`, { imageUrl });
-
-      // Update the user in the auth context to reflect the change immediately
-      if (updateUser) {
-        updateUser({ ...user, imageUrl });
-      }
+      const imgUrl = await uploadImage(file);
 
       toast.success("Avatar uploaded successfully!");
+      // TODO: Here you can update your auth context or user profile with data.imageUrl
     } catch (error) {
       console.error("Avatar upload failed", error);
       toast.error("Failed to upload avatar");
@@ -259,62 +228,44 @@ export default function Header({ onMenuClick }: HeaderProps) {
       if (fileInputRef.current) fileInputRef.current.value = "";
     }
   };
+  
 
-  const executeSearch = () => {
-    if (searchQuery.trim()) {
-      setSearchOpen(false);
-      navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
-      setSearchQuery("");
-    }
-  };
-
-  const handleLogout = () => {
+  const handleLogout=()=>{
     localStorage.removeItem("theme");
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     logout();
     navigate("/login");
-  };
+  }
   return (
     <>
-      {/* <header className="navbar bg-primary/95 backdrop-blur-md border-b border-base-300 px-4 sm:px-6 lg:pr-8 py-2 sm:py-3 sticky top-0 z-40 transition-colors"> */}
-      {/* <header className="navbar bg-primary/95 backdrop-blur-md border-b border-base-300 
-px-3 sm:px-5 lg:px-8 py-2 sticky top-0 z-40 flex items-center justify-between"> */}
-      <header
-        className="
-    navbar
-    h-16
-    bg-primary
-    border-b border-base-300
-    px-4 lg:px-6
-    sticky top-0 z-50
-    flex items-center justify-between
-    shadow-sm
-  "
-      >
-        {/* ================= LEFT ================= */}
-        <div className="flex items-center gap-3 min-w-0 shrink-0 lg:hidden">
-          {/* Hamburger - Mobile Only */}
-          <button
-            onClick={onMenuClick}
-            className="btn btn-ghost btn-circle lg:hidden text-primary-content hover:bg-black/10 dark:hover:bg-white/10"
-          >
-            <MdMenu size={22} />
-          </button>
+    {/* <header className="navbar bg-primary/95 backdrop-blur-md border-b border-base-300 px-4 sm:px-6 lg:pr-8 py-2 sm:py-3 sticky top-0 z-40 transition-colors"> */}
+    <header className="navbar bg-primary/95 backdrop-blur-md border-b border-base-300 
+px-3 sm:px-5 lg:px-4 py-2 sticky top-0 z-40 flex items-center justify-between">
 
-          {/* Logo */}
-          <div className="w-8 h-8 md:w-9 md:h-9 rounded-lg bg-base-100 text-primary flex items-center justify-center font-bold shrink-0 shadow-sm">
-            C
-          </div>
+      {/* ================= LEFT ================= */}
+      <div className="flex items-center gap-3 min-w-0 shrink-0 lg:hidden ">
+        {/* Hamburger - Mobile Only */}
+            <button
+              onClick={onMenuClick}
+              className="btn btn-ghost btn-circle lg:hidden text-primary-content hover:bg-black/10 dark:hover:bg-white/10"
+            >
+              <MdMenu size={22} />
+            </button>
 
-          {/* Hide text on very small screens */}
-          <span className="hidden sm:block text-lg font-semibold truncate text-primary-content tracking-tight">
-            Circuit
-          </span>
+        {/* Logo */}
+        <div className="w-8 h-8 md:w-9 md:h-9 rounded-lg bg-base-100 text-primary flex items-center justify-center font-bold shrink-0 shadow-sm">
+          C
         </div>
 
-        {/* ================= MIDDLE (SEARCH) ================= */}
-        {/* <div className="flex-1 flex items-center justify-center sm:justify-start px-3 sm:px-8">
+        {/* Hide text on very small screens */}
+        <span className="hidden sm:block text-lg font-semibold truncate text-primary-content tracking-tight">
+          Circuit 
+        </span>
+      </div>
+
+      {/* ================= MIDDLE (SEARCH) ================= */}
+      {/* <div className="flex-1 flex items-center justify-center sm:justify-start px-3 sm:px-8">
         <div 
           className="w-full max-w-lg relative cursor-text group"
           onClick={() => setSearchOpen(true)}
@@ -327,8 +278,8 @@ px-3 sm:px-5 lg:px-8 py-2 sticky top-0 z-40 flex items-center justify-between"> 
         </div>
       </div> */}
 
-        <div className="flex-1 ">
-          {/* <div 
+      <div className="flex-1 flex items-center px-2 sm:px-6 min-w-0">
+  {/* <div 
     className="w-full max-w-lg relative cursor-text group min-w-0"
     onClick={() => setSearchOpen(true)}
   >
@@ -358,23 +309,22 @@ px-3 sm:px-5 lg:px-8 py-2 sticky top-0 z-40 flex items-center justify-between"> 
       </span>
     </div>
   </div> */}
-        </div>
+</div>
 
-        {/* ================= RIGHT ================= */}
-        <div className="flex items-center gap-1 sm:gap-3">
-          {/* ========== NOTIFICATIONS ========== */}
-          <div className="dropdown  dropdown-end">
-            <label
-              tabIndex={0}
-              className="btn btn-ghost btn-circle relative text-primary-content hover:bg-black/10 dark:hover:bg-white/10 transition-colors "
-            >
-              {/* ICON */}
-              <MdNotifications size={24} />
+      {/* ================= RIGHT ================= */}
+      <div className="flex items-center gap-1 sm:gap-3 ">
 
-              {/* BADGE */}
-              {unreadCount > 0 && (
-                <span
-                  className="
+        {/* ========== NOTIFICATIONS ========== */}
+        <div className="dropdown dropdown-end">
+        <label tabIndex={0} className="btn btn-ghost btn-circle relative text-primary-content hover:bg-black/10 dark:hover:bg-white/10 transition-colors">
+
+    {/* ICON */}
+    <MdNotifications size={18} />
+
+    {/* BADGE */}
+    {unreadCount > 0 && (
+      <span
+        className="
           absolute top-1.5 right-1.5
           min-w-[18px] h-[18px]
           px-1
@@ -386,16 +336,30 @@ px-3 sm:px-5 lg:px-8 py-2 sticky top-0 z-40 flex items-center justify-between"> 
           ring-2 ring-primary
           animate-pulse
         "
-                >
-                  {unreadCount > 99 ? "99+" : unreadCount}
-                </span>
-              )}
-            </label>
+      >
+        {unreadCount > 99 ? "99+" : unreadCount}
+      </span>
+    )}
+  </label>
 
-            <div 
+          <div 
             tabIndex={0}
-           className="menu dropdown-content bg-base-100 rounded-box z-1 w-52 p-2  shadow-sm">
-            <div className="flex justify-between items-center px-1 pb-2 border-b border-base-200 ">
+            className="
+            dropdown-content 
+            z-50
+            mt-3 
+            w-[90vw] sm:w-80
+            bg-base-100 
+            shadow-xl 
+            rounded-xl 
+            border border-base-300 
+            p-3 
+            space-y-2 
+            max-h-96 
+            overflow-y-auto
+            text-base-content
+          ">
+            <div className="flex justify-between items-center px-1 pb-2 border-b border-base-200">
               <span className="font-semibold text-sm">Notifications</span>
               {unreadCount > 0 && (
                 <button 
@@ -438,41 +402,43 @@ px-3 sm:px-5 lg:px-8 py-2 sticky top-0 z-40 flex items-center justify-between"> 
               </div>
             ))}
           </div>
-          </div>
+        </div> 
 
-          {/* ========== THEME TOGGLE ========== */}
-          <button
-            className="hidden sm:flex btn btn-ghost btn-circle text-primary-content hover:bg-black/10 dark:hover:bg-white/10 transition-colors"
-            onClick={toggleTheme}
-            title="Toggle Theme"
+ 
+
+        {/* ========== THEME TOGGLE ========== */}
+        <button 
+          className="hidden sm:flex btn btn-ghost btn-circle text-primary-content hover:bg-black/10 dark:hover:bg-white/10 transition-colors"
+          onClick={toggleTheme}
+          title="Toggle Theme"
+        >
+          {isDark ? <MdLightMode size={22} /> : <MdDarkMode size={22} />}
+        </button>
+
+        {/* ========== PROFILE ========== */}
+        <div className="dropdown dropdown-end ml-1 sm:ml-2">
+          <label
+            tabIndex={0}
+            className="btn btn-ghost btn-circle avatar hover:ring-2 hover:ring-primary-content/50 transition-all"
           >
-            {isDark ? <MdLightMode size={22} /> : <MdDarkMode size={22} />}
-          </button>
+            <div className="w-8 md:w-9 rounded-full">
+              <img
+                src={user?.imageUrl || "https://i.pravatar.cc/100?img=12"}
+                alt="User avatar"
+                className={isUploading ? "opacity-50" : ""}
+              />
+            </div>
+          </label>
 
-          {/* ========== PROFILE ========== */}
-          <div className="dropdown dropdown-end ml-1 sm:ml-2">
-            <label
-              tabIndex={0}
-              className="btn btn-ghost btn-circle avatar hover:ring-2 hover:ring-primary-content/50 transition-all"
-            >
-              <div className="w-8 md:w-9 rounded-full">
-                <img
-                  src={user?.imageUrl || "https://i.pravatar.cc/100?img=12"}
-                  alt="User avatar"
-                  className={isUploading ? "opacity-50" : ""}
-                />
-              </div>
-            </label>
+          <input
+            type="file"
+            ref={fileInputRef}
+            className="hidden"
+            accept="image/*"
+            onChange={handleAvatarUpload}
+          />
 
-            <input
-              type="file"
-              ref={fileInputRef}
-              className="hidden"
-              accept="image/*"
-              onChange={handleAvatarUpload}
-            />
-
-            <ul
+          <ul
             tabIndex={0}
             className="
               menu menu-sm 
@@ -489,84 +455,94 @@ px-3 sm:px-5 lg:px-8 py-2 sticky top-0 z-40 flex items-center justify-between"> 
             <li className="menu-title">
               <span>Admin</span>
             </li>
-            <li onClick={()=>navigate(`/profile/${user?.userId}`)}>
+            <li onClick={() =>
+    navigate(
+      isSales
+        ? `/sales/profile/${user?.userId}`
+        : `/profile/${user?.userId}`
+    )
+  }>
               <a>Profile</a>
             </li>
-            <li onClick={() => fileInputRef.current?.click()}>
+            {/* <li onClick={() => fileInputRef.current?.click()}>
               <a>{isUploading ? "Uploading..." : "Change Avatar"}</a>
-            </li>
-            <li onClick={()=>navigate("/settings")}>
+            </li> */}
+            {/* <li onClick={()=>navigate("/settings")}>
               <a>Settings</a>
-            </li>
+            </li> */}
             <li onClick={()=>{
               handleLogout()
             }}>
               <a className="text-error">Logout</a>
             </li>
           </ul>
-          </div>
         </div>
-      </header>
+      </div>
+    </header>
 
-      {/* COMMAND PALETTE MODAL */}
-      {searchOpen && (
-        <div
-          className="fixed inset-0 z-[100] bg-black/50 flex items-start justify-center pt-[10vh]"
-          onClick={() => setSearchOpen(false)}
+    {/* COMMAND PALETTE MODAL */}
+    {searchOpen && (
+      <div className="fixed inset-0 z-[100] bg-black/50 flex items-start justify-center pt-[10vh]" onClick={() => setSearchOpen(false)}>
+        <div 
+          className="bg-base-100 w-full max-w-xl rounded-2xl shadow-2xl border border-base-300 overflow-hidden"
+          onClick={(e) => e.stopPropagation()}
         >
-          <div
-            className="bg-base-100 w-full max-w-xl rounded-2xl shadow-2xl border border-base-300 overflow-hidden"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="p-4 border-b border-base-200 flex items-center gap-3">
-              <MdSearch
-                size={22}
-                className={`text-base-content/50 ${searchQuery.trim() ? "cursor-pointer hover:text-primary transition-colors" : ""}`}
-                onClick={executeSearch}
-              />
-              <input
-                autoFocus
-                type="text"
-                placeholder="Search employees, tasks, projects..."
-                className="w-full bg-transparent outline-none text-lg text-base-content placeholder:text-base-content/40"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") {
-                    executeSearch();
-                  } else if (e.key === "Escape") {
+          <div className="p-4 border-b border-base-200 flex items-center gap-3">
+            <MdSearch 
+              size={22} 
+              className={`text-base-content/50 ${searchQuery.trim() ? "cursor-pointer hover:text-primary transition-colors" : ""}`}
+              onClick={() => {
+                if (searchQuery.trim()) {
+                  setSearchOpen(false);
+                  navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+                  setSearchQuery("");
+                }
+              }}
+            />
+            <input 
+              autoFocus
+              type="text"
+              placeholder="Search employees, tasks, projects..."
+              className="w-full bg-transparent outline-none text-lg text-base-content placeholder:text-base-content/40"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && searchQuery.trim()) {
+                  setSearchOpen(false);
+                  navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+                  setSearchQuery("");
+                } else if (e.key === "Escape") {
+                  setSearchOpen(false);
+                }
+              }}
+            />
+            <button className="btn btn-ghost btn-sm btn-square" onClick={() => setSearchOpen(false)}>
+              <MdClose size={20} />
+            </button>
+          </div>
+          <div className="p-2 max-h-64 overflow-y-auto">
+            {searchQuery ? (
+              <div 
+                className="px-3 py-4 text-sm text-base-content/60 text-center cursor-pointer hover:bg-base-200 transition-colors rounded-lg"
+                onClick={() => {
+                  if (searchQuery.trim()) {
                     setSearchOpen(false);
+                    navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+                    setSearchQuery("");
                   }
                 }}
-              />
-              <button
-                className="btn btn-ghost btn-sm btn-square"
-                onClick={() => setSearchOpen(false)}
               >
-                <MdClose size={20} />
-              </button>
-            </div>
-            <div className="p-2 max-h-64 overflow-y-auto">
-              {searchQuery ? (
-                <div
-                  className="px-3 py-4 text-sm text-base-content/60 text-center cursor-pointer hover:bg-base-200 transition-colors rounded-lg"
-                  onClick={executeSearch}
-                >
-                  Press Enter or click here to search for{" "}
-                  <span className="font-semibold text-base-content">
-                    "{searchQuery}"
-                  </span>{" "}
-                  across the organization.
-                </div>
-              ) : (
-                <div className="px-3 py-2 text-xs font-semibold text-base-content/50 uppercase">
-                  Recent Searches
-                </div>
-              )}
-            </div>
+                Press Enter or click here to search for <span className="font-semibold text-base-content">"{searchQuery}"</span> across the organization.
+              </div>
+            ) : (
+              <div className="px-3 py-2 text-xs font-semibold text-base-content/50 uppercase">
+                Recent Searches
+              </div>
+            )}
           </div>
         </div>
-      )}
+      </div>
+    )}
     </>
   );
 }

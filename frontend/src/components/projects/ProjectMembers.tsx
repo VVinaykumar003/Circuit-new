@@ -131,7 +131,7 @@ export default function ProjectMembers({ project, onUpdateProject }: Props) {
   return (
     <div className="bg-white/70 border border-base-300 rounded-lg p-6">
       <div className="flex justify-between mb-4 border-b border-base-300 pb-2">
-        <h3 className="font-semibold text-base-content ">
+        <h3 className="font-semibold text-black">
           Team Members
         </h3>
 
@@ -149,16 +149,16 @@ export default function ProjectMembers({ project, onUpdateProject }: Props) {
               className="py-3 flex justify-between items-center"
             >
               <div>
-                <p className="font-medium text-base-content">
+                <p className="font-medium text-black">
                   {participant.user?.name || "Unknown User"}
                 </p>
-                <p className="text-sm text-base-content/60">
+                <p className="text-sm text-black/50">
                   {participant.role} {participant.responsibility ? `- ${participant.responsibility}` : ""}
                 </p>
               </div>
 
               <button 
-                className="btn btn-xs btn-error btn-outline"
+                className="btn btn-xs btn-error btn-outline bg-red-600 text-white"
                 onClick={() => handleRemoveMember(userId)}
                 disabled={loading}
               >

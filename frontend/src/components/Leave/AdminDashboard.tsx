@@ -90,7 +90,7 @@ const [selectedLeave, setSelectedLeave] = useState<LeaveRequest | null>(null);
          toast.error("User data not found. Please log in again.");
          return;
        }
-       console.log("id",id)
+      //  console.log("id",id)
 
       await updateLeaveStatus(slug, id, { status });
       

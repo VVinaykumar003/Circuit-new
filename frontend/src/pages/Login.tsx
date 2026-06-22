@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Lottie from "lottie-react";
-import animationData from "../assets/LoginAnimation.json";
+import loginAnimation from "../assets/loginAnimation.json";
 import { LockIcon, User2Icon } from "lucide-react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { login as loginService } from "../services/authService";
@@ -53,7 +53,6 @@ const Login = ({ setToken }: LoginProps) => {
     try {
       setLoading(true);
       const response = await loginService(formData);
-      console.log(response)
 
       toast.success("Login successful");
 
@@ -62,16 +61,14 @@ const Login = ({ setToken }: LoginProps) => {
 
       // Proceed if user data is successfully returned
       if (payload && payload.user) {
-
+        // ✅ Save the full user details so other components (like Dashboards) can access it
+        localStorage.setItem("user", JSON.stringify(payload.user || {}));
+        
         // ✅ Only set token if it actually exists in the response (Fallback for non-cookie setups)
         if (payload.token) {
           localStorage.setItem("token", payload.token);
           if (setToken) setToken(payload.token);
         }
-        // ✅ Save the full user details so other components (like Dashboards) can access it
-        localStorage.setItem("user", JSON.stringify(payload.user || {}));
-        
-        
 
         socket.emit("joinUserRoom", payload.user.id); // Join the user's personal notification room
 
@@ -82,7 +79,15 @@ const Login = ({ setToken }: LoginProps) => {
         });
 
         // Navigate to the dashboard upon successful login
-        navigate("/", { replace: true });
+       const dept = payload.user.department?.trim().toLowerCase();
+
+if (dept === "sales") {
+  navigate("/sales/dashboard", { replace: true });
+} else if (dept === "it") {
+  navigate("/", { replace: true });
+} else {
+  navigate("/", { replace: true });
+}
       }
 
       
@@ -99,7 +104,7 @@ const Login = ({ setToken }: LoginProps) => {
       <div className="w-full max-w-5xl bg-blue-200 rounded-2xl shadow-xl overflow-hidden flex flex-col md:flex-row">
         {/* LEFT */}
         <div className="w-full md:w-1/2 bg-blue-100 flex items-center justify-center p-10">
-          <Lottie animationData={animationData} loop className="w-[350px]" />
+          <Lottie animationData={loginAnimation} loop className="w-[350px]" />
         </div>
 
         {/* RIGHT */}

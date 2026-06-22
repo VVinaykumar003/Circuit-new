@@ -1,70 +1,59 @@
 // api/axios.js
 import axios from "axios";
-import { toast } from "react-toastify";
 
 // Use import.meta.env for Vite projects to access environment variables.
 // Variables must start with VITE_ to be exposed to the client.
-const API_BASE_URL =
-  import.meta.env.VITE_NODE_ENV === "production"
-    ? `${import.meta.env.VITE_API_URL}/api`
-    : `${import.meta.env.VITE_DEVELOPMENT_URL || "http://localhost:5001"}/api`;
+const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5000/api";
 
 const API = axios.create({
-  baseURL:API_BASE_URL, 
+  baseURL: API_BASE_URL,
   withCredentials: true, // This is important for sending cookies with requests
   headers: {
     "Content-Type": "application/json",
   },
 });
 
-console.log("API_BASE_URL : ", API_BASE_URL);
-
-
-
 // ===== Request Interceptor =====
 // This will run before every request.
 // It's useful for adding headers that are needed for every request, like an auth token.
 API.interceptors.request.use(
   (config) => {
-    const auth = localStorage.getItem("auth");
+    // Get the token from wherever you store it (e.g., localStorage, Redux store, etc.)
+    const token = localStorage.getItem("token");
 
-    if (auth) {
-      const token = JSON.parse(auth).token;
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-      }
+    // If a token exists, add it to the Authorization header.
+    if (token) {
+      config.headers["Authorization"] = `Bearer ${token}`;
     }
 
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => {
+    // Do something with request error
+    return Promise.reject(error);
+  }
 );
 
 // ===== Response Interceptor =====
 // This will run for every response.
 // It's useful for handling global errors.
 API.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    // Any status code that lie within the range of 2xx cause this function to trigger.
+    // You can do something with the response data here.
+    return response;
+  },
   (error) => {
-    if (!error.response) {
-      toast.error("Network error! Please check your connection.");
-      return Promise.reject(error);
-    }
+    // Any status codes that falls outside the range of 2xx cause this function to trigger.
+    const { response } = error;
 
-    const { status, data } = error.response;
-
-    if (status === 401) {
-      toast.error("Session expired. Please login again.");
-      localStorage.removeItem("auth");
-      window.location.href = "/login";
-    } else if (status === 403) {
-      toast.error("You don't have permission.");
-    } else if (status === 404) {
-      toast.error("Resource not found.");
-    } else if (status >= 500) {
-      toast.error("Server error! Try again later.");
-    } else {
-      toast.error(data?.message || "Something went wrong.");
+    if (response && response.status === 401) {
+      // Handle Unauthorized error (e.g., token expired).
+      // You might want to redirect to the login page or try to refresh the token.
+      console.error("Unauthorized. Redirecting to login...");
+      // For example:
+      // localStorage.removeItem("token");
+      // window.location.href = "/login";
     }
 
     return Promise.reject(error);

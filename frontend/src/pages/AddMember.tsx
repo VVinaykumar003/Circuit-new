@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { toast } from "react-toastify";
-import { FaEye, FaEyeSlash, FaPen, FaUser } from "react-icons/fa";
+import { FaEye, FaEyeSlash, FaPen, FaUser, FaUserFriends, FaShieldAlt, FaBriefcase, FaUniversity } from "react-icons/fa";
 import { createMember } from "../services/memberService";
 import { useAuth } from "@/auth/AuthContext";
 import { uploadImage } from "@/services/uploadService";
@@ -16,6 +16,7 @@ type Errors = {
   aadhaar?: string;
   pan?: string;
   designation?: string;
+  department?: string;
 };
 const AddMember = () => {
   const { auth } = useAuth();
@@ -49,6 +50,8 @@ const AddMember = () => {
     // Employment
     role: "employee" as UserRole,
     designation: "", // ✅ ADD THIS
+    department: "",
+    customDepartment: "",
     joiningDate: "",
     previousCompany: "",
 
@@ -105,7 +108,12 @@ const AddMember = () => {
     if (!formData.designation) {
       newErrors.designation = "Designation is required";
     }
-
+     if (
+  formData.department === "other" &&
+  !formData.customDepartment.trim()
+) {
+  newErrors.department = "Custom department is required";
+}
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -150,6 +158,7 @@ const AddMember = () => {
         imageUrl: imgUrl,
       };
 
+
       await createMember(slug, finalData);
 
       toast.success("Employee Registered Successfully");
@@ -172,6 +181,8 @@ const AddMember = () => {
         passport: "",
         role: "employee" as UserRole,
         designation: "",
+        department: "",
+        customDepartment: "",
         joiningDate: "",
         previousCompany: "",
         bankName: "",
@@ -190,436 +201,315 @@ const AddMember = () => {
     }
   };
 
-  const inputStyle =
-    " w-full px-3 py-2 rounded-lg border border-base-300 bg-base-100 text-base-content/50 placeholder:text-base-content/50 focus:outline-none focus:ring-2 focus:ring-primary/40 transition-all";
-
   return (
-  // <div className="min-h-screen flex flex-col items-center p-6 space-y-6">
-  <div className="min-h-screen flex flex-col items-center p-4 space-y-4">
-      <div className="w-full max-w-5xl">
+    <div className="min-h-screen bg-base-200/40 py-6 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-5xl mx-auto space-y-6">
         <Breadcrumbs />
-      </div>
-      <form
-        onSubmit={handleSubmit}
-        // className="w-full max-w-5xl bg-base-200 p-8 rounded-2xl shadow-md space-y-10 border-2"
-        className="w-full max-w-4xl bg-primary/40 p-5 rounded-xl shadow-sm space-y-6 border"
-      >
-        <h2 className="text-2xl font-bold text-center text-primary-content ">
-          Employee Onboarding
-        </h2>
 
-        {/* PROFILE IMAGE */}
-        {/* <div className="flex flex-col items-center justify-center">
-          <input
-            type="file"
-            accept="image/*"
-            className="hidden"
-            id="imageUpload"
-            onChange={handleImageChange}
-          />
+        {/* Page Header */}
+        <div className="flex flex-col gap-1 mb-8">
+          <h1 className="text-2xl md:text-3xl font-bold text-base-content tracking-tight">
+            Employee Onboarding
+          </h1>
+          <p className="text-base-content/60 text-sm md:text-base">
+            Register a new team member and set up their profile, employment, and financial details.
+          </p>
+        </div>
 
-          <div className="relative w-32 h-32">
-            <label
-              htmlFor="imageUpload"
-              className="w-32 h-32 rounded-full border-2 border-dashed border-gray-500 flex items-center justify-center cursor-pointer overflow-hidden"
-            >
-              {preview ? (
-                <img
-                  src={preview}
-                  alt="Profile"
-                  className="w-full h-full object-cover rounded-full"
-                />
-              ) : (
-                <span className="text-gray-500 text-lg">
-                  <FaUser size={44} className="mb-1" />
-                </span>
-              )}
-            </label>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          
+          {/* PERSONAL INFORMATION CARD */}
+          <div className="card bg-base-100 border border-base-200 shadow-sm hover:shadow-md transition-shadow duration-200">
+            <div className="card-body p-5 md:p-7">
+              <h2 className="card-title text-lg font-semibold text-base-content mb-4 flex items-center gap-2 border-b border-base-200 pb-3">
+                <div className="p-2 bg-primary/10 text-primary rounded-lg">
+                  <FaUser size={16} />
+                </div>
+                Personal Information
+              </h2>
 
-            {preview && (
-              <label
-                htmlFor="imageUpload"
-                className="absolute bottom-2 right-2 bg-indigo-600 text-white p-2 rounded-full cursor-pointer"
-              >
-                <FaPen size={12} />
-              </label>
-            )}
-
-          </div>
-            <label className="text-center text-sm text-gray-800 mt-2">
-              {preview ? "Change Image" : "Click to Upload"}
-            </label>
-        </div> */}
-
-        {/* <div className="flex gap-8 items-start"> */}
-
-        {/* RIGHT SIDE - PERSONAL INFO */}
-        <div className="flex-1">
-          <fieldset className="grid md:grid-cols-2 gap-4 border rounded-lg border-white p-4">
-            <legend className="text-sm font-semibold text-primary-content px-2">
-              Personal Information
-            </legend>
-            <div className="flex gap-4 items-start md:col-span-2">
-              {/* Profile Image */}
-              <div className="flex flex-col items-center">
-                <input
-                  type="file"
-                  accept="image/*"
-                  className="hidden"
-                  id="imageUpload"
-                  onChange={handleImageChange}
-                />
-
-                <div className="relative w-30 h-30">
-                  <label
-                    htmlFor="imageUpload"
-                    className="w-30 h-30 rounded-full border-2 border-dashed border-white flex items-center justify-center cursor-pointer overflow-hidden"
-                  >
-                    {preview ? (
-                      <img
-                        src={preview}
-                        alt="Profile"
-                        className="w-full h-full object-cover rounded-full"
-                      />
-                    ) : (
-                      <FaUser size={30} className="text-white" />
-                    )}
-                  </label>
-
-                  {preview && (
+              <div className="flex flex-col md:flex-row gap-8">
+                {/* Profile Image */}
+                <div className="flex flex-col items-center md:w-1/4 pt-2">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    id="imageUpload"
+                    onChange={handleImageChange}
+                  />
+                  <div className="relative w-32 h-32 group">
                     <label
                       htmlFor="imageUpload"
-                      className="absolute bottom-0 right-0 bg-indigo-600 text-white p-1 rounded-full cursor-pointer"
+                      className="w-32 h-32 rounded-full border-2 border-dashed border-base-300 bg-base-200/50 hover:bg-base-200 flex items-center justify-center cursor-pointer overflow-hidden transition-all duration-200 shadow-inner"
                     >
-                      <FaPen size={10} />
+                      {preview ? (
+                        <img
+                          src={preview}
+                          alt="Profile"
+                          className="w-full h-full object-cover rounded-full"
+                        />
+                      ) : (
+                        <FaUser size={36} className="text-base-content/30" />
+                      )}
                     </label>
-                  )}
+                    <label
+                      htmlFor="imageUpload"
+                      className="absolute bottom-1 right-1 bg-primary text-primary-content p-2 rounded-full cursor-pointer shadow-lg hover:scale-110 transition-transform duration-200"
+                    >
+                      <FaPen size={12} />
+                    </label>
+                  </div>
+                  <p className="text-xs mt-3 text-base-content/60 font-medium">Upload Photo</p>
                 </div>
 
-                <p className="text-xs mt-2 text-white">Upload</p>
-              </div>
+                {/* Form Fields */}
+                <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-5">
+                  <div className="form-control w-full">
+                    <label className="label"><span className="label-text font-medium">Full Name <span className="text-error">*</span></span></label>
+                    <input name="name" value={formData.name} placeholder="Enter full name" onChange={handleChange} className={`input input-bordered w-full ${errors.name ? 'input-error' : ''}`} />
+                    {errors.name && <span className="text-error text-xs mt-1">{errors.name}</span>}
+                  </div>
 
-              {/* Name Email  */}
-              <div className="flex-1 grid gap-4">
-                <input
-                  name="name"
-                  value={formData.name}
-                  placeholder="Full Name"
-                  onChange={handleChange}
-                  className={inputStyle}
-                />
+                  <div className="form-control w-full">
+                    <label className="label"><span className="label-text font-medium">Email Address <span className="text-error">*</span></span></label>
+                    <input name="email" type="email" value={formData.email} placeholder="name@company.com" onChange={handleChange} className={`input input-bordered w-full ${errors.email ? 'input-error' : ''}`} />
+                    {errors.email && <span className="text-error text-xs mt-1">{errors.email}</span>}
+                  </div>
 
-                <input
-                  name="email"
-                  type="email"
-                  value={formData.email}
-                  placeholder="Email"
-                  onChange={handleChange} 
-                  className={inputStyle}
-                />
+                  <div className="form-control w-full">
+                    <label className="label"><span className="label-text font-medium">Password <span className="text-error">*</span></span></label>
+                    <div className="relative">
+                      <input type={showPassword ? "text" : "password"} name="password" placeholder="Min. 6 characters" value={formData.password} onChange={handleChange} className={`input input-bordered w-full pr-12 ${errors.password ? 'input-error' : ''}`} />
+                      <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-base-content/40 hover:text-primary transition-colors">
+                        {showPassword ? <FaEyeSlash size={18} /> : <FaEye size={18} />}
+                      </button>
+                    </div>
+                    {errors.password && <span className="text-error text-xs mt-1">{errors.password}</span>}
+                  </div>
+
+                  <div className="form-control w-full">
+                    <label className="label"><span className="label-text font-medium">Phone Number <span className="text-error">*</span></span></label>
+                    <input type="text" name="phone" placeholder="10-digit mobile" onChange={handleChange} value={formData.phone} className={`input input-bordered w-full ${errors.phone ? 'input-error' : ''}`} />
+                    {errors.phone && <span className="text-error text-xs mt-1">{errors.phone}</span>}
+                  </div>
+
+                  <div className="form-control w-full">
+                    <label className="label"><span className="label-text font-medium">Date of Birth</span></label>
+                    <input type="date" name="dateOfBirth" value={formData.dateOfBirth} onChange={handleChange} className="input input-bordered w-full" />
+                  </div>
+
+                  <div className="form-control w-full">
+                    <label className="label"><span className="label-text font-medium">Gender</span></label>
+                    <select name="gender" value={formData.gender} onChange={handleChange} className="select select-bordered w-full">
+                      <option value="">Select Gender</option>
+                      <option value="Male">Male</option>
+                      <option value="Female">Female</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
+
+                  <div className="form-control w-full">
+                    <label className="label"><span className="label-text font-medium">Current Address</span></label>
+                    <textarea name="currentAddress" placeholder="Enter current address" value={formData.currentAddress} onChange={handleChange} className="textarea textarea-bordered w-full h-24" />
+                  </div>
+
+                  <div className="form-control w-full">
+                    <label className="label"><span className="label-text font-medium">Permanent Address</span></label>
+                    <textarea name="permanentAddress" placeholder="Enter permanent address" value={formData.permanentAddress} onChange={handleChange} className="textarea textarea-bordered w-full h-24" />
+                  </div>
+                </div>
               </div>
             </div>
+          </div>
 
-            {/* Password */}
-            <div className="relative">
-              <input
-                type={showPassword ? "text" : "password"}
-                name="password"
-                placeholder="Password"
-                value={formData.password}
-                onChange={handleChange}
-                className={`${inputStyle} pr-12`}
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
-              >
-                {showPassword ? <FaEyeSlash /> : <FaEye />}
-              </button>
-            </div>
-
-            <input
-              type="text"
-              name="phone"
-              placeholder="Contact"
-              onChange={handleChange}
-              value={formData.phone}
-              className={inputStyle}
-            />
-
-            <input
-              type="date"
-              name="dateOfBirth"
-              value={formData.dateOfBirth}
-              placeholder="DOB"
-              onChange={handleChange}
-              className={inputStyle}
-            />
-
-            <select
-              name="gender"
-              value={formData.gender}
-              onChange={handleChange}
-              className={`${inputStyle}`}
-            >
-              <option value="">Select Gender</option>
-              <option>Male</option>
-              <option>Female</option>
-              <option>Other</option>
-            </select>
-
-            <textarea
-              name="currentAddress"
-              placeholder="Current Address"
-              value={formData.currentAddress}
-              onChange={handleChange}
-              className={inputStyle}
-            />
-            <textarea
-              name="permanentAddress"
-              placeholder="Permanent Address"
-              value={formData.permanentAddress}
-              onChange={handleChange}
-              className={inputStyle}
-            />
-          </fieldset>
-        </div>
-
-        {/* ================= EMERGENCY ================= */}
-        <section className="space-y-4">
-          {/* <h3 className="text-lg font-semibold border-b pb-2 border-base-content/20 text-base-content">
-            Emergency Contact
-          </h3> */}
-
-          <div className=" gap-6">
-            <fieldset className="grid md:grid-cols-2 gap-4 border rounded-lg border-white p-4">
-              <legend className="text-sm  text-primary-content mb-2 font-semibold p-2">
+          {/* EMERGENCY CONTACT */}
+          <div className="card bg-base-100 border border-base-200 shadow-sm hover:shadow-md transition-shadow duration-200">
+            <div className="card-body p-5 md:p-7">
+              <h2 className="card-title text-lg font-semibold text-base-content mb-4 flex items-center gap-2 border-b border-base-200 pb-3">
+                <div className="p-2 bg-error/10 text-error rounded-lg">
+                  <FaUserFriends size={16} />
+                </div>
                 Emergency Contact
-              </legend>
+              </h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                <div className="form-control w-full">
+                  <label className="label"><span className="label-text font-medium">Contact Name</span></label>
+                  <input name="emergencyName" value={formData.emergencyName} placeholder="Emergency contact name" onChange={handleChange} className="input input-bordered w-full" />
+                </div>
 
-              <input
-                name="emergencyName"
-                value={formData.emergencyName}
-                placeholder="Contact Name"
-                onChange={handleChange}
-                className={inputStyle}
-              />
+                <div className="form-control w-full">
+                  <label className="label"><span className="label-text font-medium">Contact Phone</span></label>
+                  <input type="text" name="emergencyPhone" placeholder="10-digit number" value={formData.emergencyPhone} maxLength={10} onChange={(e) => {
+                    const value = e.target.value.replace(/\D/g, "");
+                    if (value.length <= 10) setFormData((prev) => ({ ...prev, emergencyPhone: value }));
+                  }} className={`input input-bordered w-full ${errors.emergencyPhone ? 'input-error' : ''}`} />
+                  {errors.emergencyPhone && <span className="text-error text-xs mt-1">{errors.emergencyPhone}</span>}
+                </div>
 
-              <input
-                type="text"
-                name="emergencyPhone"
-                placeholder="Contact Phone"
-                value={formData.emergencyPhone}
-                maxLength={10}
-                onChange={(e) => {
-                  const value = e.target.value.replace(/\D/g, "");
-                  if (value.length <= 10) {
-                    setFormData((prev) => ({
-                      ...prev,
-                      emergencyPhone: value,
-                    }));
-                  }
-                }}
-                className={inputStyle}
-              />
-
-              {errors.emergencyPhone && (
-                <p className="text-red-500 text-sm mt-1">
-                  {errors.emergencyPhone}
-                </p>
-              )}
-
-              <input
-                name="emergencyRelation"
-                value={formData.emergencyRelation}
-                placeholder="Relation"
-                onChange={handleChange}
-                className={inputStyle}
-              />
-            </fieldset>
+                <div className="form-control w-full">
+                  <label className="label"><span className="label-text font-medium">Relation</span></label>
+                  <input name="emergencyRelation" value={formData.emergencyRelation} placeholder="e.g. Spouse, Parent" onChange={handleChange} className="input input-bordered w-full" />
+                </div>
+              </div>
+            </div>
           </div>
-        </section>
 
-        {/* ================= IDENTITY ================= */}
-        <section className="space-y-4">
-          {/* <h3 className="text-lg font-semibold border-b border-base-content/20 pb-2 text-base-content">
-            Identity & Legal Details
-          </h3> */}
-
-          <div className=" gap-6">
-            <fieldset className="grid md:grid-cols-2 gap-4 border rounded-lg border-white p-4">
-              <legend className="text-sm  text-primary-content mb-2 font-semibold p-2">
+          {/* IDENTITY & LEGAL DETAILS */}
+          <div className="card bg-base-100 border border-base-200 shadow-sm hover:shadow-md transition-shadow duration-200">
+            <div className="card-body p-5 md:p-7">
+              <h2 className="card-title text-lg font-semibold text-base-content mb-4 flex items-center gap-2 border-b border-base-200 pb-3">
+                <div className="p-2 bg-info/10 text-info rounded-lg">
+                  <FaShieldAlt size={16} />
+                </div>
                 Identity & Legal Details
-              </legend>
+              </h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                <div className="form-control w-full">
+                  <label className="label"><span className="label-text font-medium">Aadhaar Number</span></label>
+                  <input name="aadhaar" placeholder="12-digit number" value={formData.aadhaar} maxLength={12} onChange={(e) => {
+                    const value = e.target.value.replace(/\D/g, "");
+                    if (value.length <= 12) setFormData((prev) => ({ ...prev, aadhaar: value }));
+                  }} className={`input input-bordered w-full tracking-wide ${errors.aadhaar ? 'input-error' : ''}`} />
+                  {errors.aadhaar && <span className="text-error text-xs mt-1">{errors.aadhaar}</span>}
+                </div>
 
-              <input
-                name="aadhaar"
-                placeholder="Aadhaar Number"
-                value={formData.aadhaar}
-                maxLength={12}
-                onChange={(e) => {
-                  const value = e.target.value.replace(/\D/g, "");
-                  if (value.length <= 12) {
-                    setFormData((prev) => ({
-                      ...prev,
-                      aadhaar: value,
-                    }));
-                  }
-                }}
-                className={inputStyle}
-              />
+                <div className="form-control w-full">
+                  <label className="label"><span className="label-text font-medium">PAN Number</span></label>
+                  <input name="pan" placeholder="ABCDE1234F" value={formData.pan} maxLength={10} onChange={(e) => {
+                    const value = e.target.value.toUpperCase();
+                    setFormData((prev) => ({ ...prev, pan: value }));
+                  }} className={`input input-bordered w-full uppercase ${errors.pan ? 'input-error' : ''}`} />
+                  {errors.pan && <span className="text-error text-xs mt-1">{errors.pan}</span>}
+                </div>
 
-              {errors.aadhaar && (
-                <p className="text-red-500 text-sm mt-1">{errors.aadhaar}</p>
-              )}
-
-              <input
-                name="pan"
-                placeholder="PAN Number"
-                value={formData.pan}
-                maxLength={10}
-                onChange={(e) => {
-                  const value = e.target.value.toUpperCase();
-                  setFormData((prev) => ({
-                    ...prev,
-                    pan: value,
-                  }));
-                }}
-                className={inputStyle}
-              />
-
-              {errors.pan && (
-                <p className="text-red-500 text-sm mt-1">{errors.pan}</p>
-              )}
-
-              <input
-                name="passport"
-                value={formData.passport}
-                placeholder="Passport Number"
-                onChange={handleChange}
-                className={inputStyle}
-              />
-            </fieldset>
+                <div className="form-control w-full">
+                  <label className="label"><span className="label-text font-medium">Passport Number</span></label>
+                  <input name="passport" value={formData.passport} placeholder="Enter passport number" onChange={handleChange} className="input input-bordered w-full uppercase" />
+                </div>
+              </div>
+            </div>
           </div>
-        </section>
 
-        {/* ================= EMPLOYMENT ================= */}
-        <section className="space-y-4">
-          {/* <h3 className="text-lg font-semibold border-b border-base-content/20 pb-2 text-base-content">
-            Employment Details
-          </h3> */}
-          <div className=" gap-6">
-            <fieldset className="grid md:grid-cols-2 gap-4 border rounded-lg border-white p-4">
-              <legend className="text-sm  text-primary-content mb-2 font-semibold   p-2">
+          {/* EMPLOYMENT DETAILS */}
+          <div className="card bg-base-100 border border-base-200 shadow-sm hover:shadow-md transition-shadow duration-200">
+            <div className="card-body p-5 md:p-7">
+              <h2 className="card-title text-lg font-semibold text-base-content mb-4 flex items-center gap-2 border-b border-base-200 pb-3">
+                <div className="p-2 bg-success/10 text-success rounded-lg">
+                  <FaBriefcase size={16} />
+                </div>
                 Employment Details
-              </legend>
+              </h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div className="form-control w-full">
+                  <label className="label"><span className="label-text font-medium">System Role</span></label>
+                  <select name="role" value={formData.role} onChange={handleChange} className="select select-bordered w-full">
+                    <option value="employee">Employee</option>
+                    <option value="manager">Manager</option>
+                    <option value="admin">Admin</option>
+                  </select>
+                </div>
 
-              <select
-                name="role"
-                value={formData.role}
-                onChange={handleChange}
-                className={inputStyle}
-              >
-                <option value="employee">Employee</option>
-                <option value="manager">Manager</option>
-                <option value="admin">Admin</option>
-              </select>
+                <div className="form-control w-full">
+                  <label className="label"><span className="label-text font-medium">Designation <span className="text-error">*</span></span></label>
+                  <select name="designation" value={formData.designation} onChange={handleChange} className={`select select-bordered w-full ${errors.designation ? 'select-error' : ''}`}>
+                    <option value="">Select Designation</option>
+                    <option value="software-engineer">Software Engineer</option>
+                    <option value="senior-software-engineer">Senior Software Engineer</option>
+                    <option value="team-lead">Team Lead</option>
+                    <option value="project-manager">Project Manager</option>
+                    <option value="hr-manager">HR Manager</option>
+                    <option value="ui-ux-designer">UI/UX Designer</option>
+                    <option value="qa-engineer">QA Engineer</option>
+                    <option value="devops-engineer">DevOps Engineer</option>
+                    <option value="intern">Intern</option>
+                  </select>
+                  {errors.designation && <span className="text-error text-xs mt-1">{errors.designation}</span>}
+                </div>
 
-              {/* Designation */}
-              <select
-                name="designation"
-                value={formData.designation}
-                onChange={handleChange}
-                className={inputStyle}
-              >
-                <option value="">Select Designation</option>
-                <option value="software-engineer">Software Engineer</option>
-                <option value="senior-software-engineer">
-                  Senior Software Engineer
-                </option>
-                <option value="team-lead">Team Lead</option>
-                <option value="project-manager">Project Manager</option>
-                <option value="hr-manager">HR Manager</option>
-                <option value="ui-ux-designer">UI/UX Designer</option>
-                <option value="qa-engineer">QA Engineer</option>
-                <option value="devops-engineer">DevOps Engineer</option>
-                <option value="intern">Intern</option>
-              </select>
-              {errors.designation && (
-                <p className="text-red-500 text-sm mt-1">
-                  {errors.designation}
-                </p>
-              )}
+                <div className="form-control w-full">
+                  <label className="label"><span className="label-text font-medium">Department</span></label>
+                  <select name="department" value={formData.department} onChange={handleChange} className={`select select-bordered w-full ${errors.department ? 'select-error' : ''}`}>
+                    <option value="">Select Department</option>
+                    <option value="sales">Sales</option>
+                    <option value="marketing">Marketing</option>
+                    <option value="customer-support">Customer Support</option>
+                    <option value="it">IT</option>
+                    <option value="human-resource">Human Resource and Administration</option>
+                    <option value="other">Other</option>
+                  </select>
+                  {errors.department && <span className="text-error text-xs mt-1">{errors.department}</span>}
+                </div>
 
-              <input
-                type="date"
-                name="joiningDate"
-                value={formData.joiningDate}
-                onChange={handleChange}
-                className={inputStyle}
-              />
+                {formData.department === "other" && (
+                  <div className="form-control w-full animate-fade-in">
+                    <label className="label"><span className="label-text font-medium">Custom Department <span className="text-error">*</span></span></label>
+                    <input type="text" name="customDepartment" value={formData.customDepartment} onChange={handleChange} placeholder="Enter Custom Department" className={`input input-bordered w-full ${errors.department ? 'input-error' : ''}`} />
+                  </div>
+                )}
 
-              <input
-                name="previousCompany"
-                value={formData.previousCompany}
-                placeholder="Previous Company"
-                onChange={handleChange}
-                className={inputStyle}
-              />
-            </fieldset>
+                <div className="form-control w-full">
+                  <label className="label"><span className="label-text font-medium">Joining Date</span></label>
+                  <input type="date" name="joiningDate" value={formData.joiningDate} onChange={handleChange} className="input input-bordered w-full" />
+                </div>
+
+                <div className="form-control w-full">
+                  <label className="label"><span className="label-text font-medium">Previous Company</span></label>
+                  <input name="previousCompany" value={formData.previousCompany} placeholder="Previous employer name" onChange={handleChange} className="input input-bordered w-full" />
+                </div>
+              </div>
+            </div>
           </div>
-        </section>
 
-        {/* ================= FINANCIAL ================= */}
-        <section className="space-y-4">
-          {/* <h3 className="text-lg font-semibold border-b border-base-content/20 pb-2 text-base-content">
-            Financial Details
-          </h3> */}
-
-          <div className=" gap-6">
-            <fieldset className="grid md:grid-cols-2 gap-4 border rounded-lg border-white p-4">
-              <legend className="text-sm  text-primary-content mb-2 font-semibold   p-2">
+          {/* FINANCIAL DETAILS */}
+          <div className="card bg-base-100 border border-base-200 shadow-sm hover:shadow-md transition-shadow duration-200">
+            <div className="card-body p-5 md:p-7">
+              <h2 className="card-title text-lg font-semibold text-base-content mb-4 flex items-center gap-2 border-b border-base-200 pb-3">
+                <div className="p-2 bg-warning/10 text-warning rounded-lg">
+                  <FaUniversity size={16} />
+                </div>
                 Bank Account Details
-              </legend>
+              </h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                <div className="form-control w-full">
+                  <label className="label"><span className="label-text font-medium">Bank Name</span></label>
+                  <input name="bankName" value={formData.bankName} placeholder="e.g. HDFC Bank" onChange={handleChange} className="input input-bordered w-full" />
+                </div>
 
-              <input
-                name="bankName"
-                value={formData.bankName}
-                placeholder="Bank Name"
-                onChange={handleChange}
-                className={inputStyle}
-              />
-              <input
-                name="accountNumber"
-                value={formData.accountNumber}
-                placeholder="Account Number"
-                onChange={handleChange}
-                className={inputStyle}
-              />
-              <input
-                name="ifscCode"
-                value={formData.ifscCode}
-                placeholder="IFSC Code"
-                onChange={handleChange}
-                className={inputStyle}
-              />
-            </fieldset>
+                <div className="form-control w-full">
+                  <label className="label"><span className="label-text font-medium">Account Number</span></label>
+                  <input name="accountNumber" value={formData.accountNumber} placeholder="Enter account number" onChange={handleChange} className="input input-bordered w-full" />
+                </div>
+
+                <div className="form-control w-full">
+                  <label className="label"><span className="label-text font-medium">IFSC Code</span></label>
+                  <input name="ifscCode" value={formData.ifscCode} placeholder="e.g. HDFC0001234" onChange={handleChange} className="input input-bordered w-full uppercase" />
+                </div>
+              </div>
+            </div>
           </div>
-        </section>
 
-        {/* SUBMIT */}
-        <div className="flex justify-end">
-          <button
-            type="submit"
-            disabled={adding}
-            className={`px-5 py-2.5 bg-primary text-primary-content rounded-xl hover:bg-primary/80 transition ${adding ? `disabled:opacity-50 disabled:cursor-not-allowed` : ""}`}
-          >
-            {adding ? "Submitting..." : "Register Employee"}
-          </button>
-        </div>
-      </form>
+          {/* SUBMIT BUTTON */}
+          <div className="flex justify-end border-t border-base-300 pt-6 mt-4">
+            <button
+              type="submit"
+              disabled={adding}
+              className="btn btn-primary w-full sm:w-auto min-w-[200px] shadow-sm hover:shadow-md transition-all"
+            >
+              {adding ? (
+                <>
+                  <span className="loading loading-spinner loading-sm"></span>
+                  Registering...
+                </>
+              ) : (
+                "Register Employee"
+              )}
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
+  
   );
 };
 

@@ -1,15 +1,19 @@
+require('dotenv').config(); // Ensure variables are loaded before config runs
 const { v2: cloudinary } = require('cloudinary');
 const multer = require('multer');
 const fs = require('fs');
 const logger = require('../common/libs/logger');
 
+
+
 // Configure Cloudinary with your credentials
 cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_NAME,
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME || process.env.CLOUDINARY_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
+logger.info('Cloudinary configured with cloud name:', cloudinary.config().cloud_name);
 const uploadOnCloudinary = async (filePath) => {
   try {
     if(!filePath){

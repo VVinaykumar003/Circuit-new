@@ -360,7 +360,9 @@ const WorkUpdate = ({
     try {
       setLoading(true);
       const res = await getWorkUpdates(slug, { projectId });
-      setUpdates(res.data || []);
+      // console.log(res);
+      const updatesList = res?.data?.data || res?.data || [];
+      setUpdates(Array.isArray(updatesList) ? updatesList : []);
     } catch (error) {
       console.error(error);
     } finally {
@@ -448,7 +450,7 @@ const WorkUpdate = ({
 
             {/* BODY */}
             <tbody>
-              {updates.map((item) => (
+              {updates?.map((item) => (
                 <tr
                   key={item._id}
                   className="border-b border-primary/20 hover:bg-base-300/50 transition text-base-content text-sm"

@@ -31,20 +31,20 @@ const requireRole = (allowedRoles) => {
   return (req, res, next) => {
     try {
       const now = new Date().toISOString();
-      const rid = req.params?.rid || null;
 
       // Defensive: ensure user & tenant exists
-      if (!req.user || !req.user.restaurantId) {
+      if (!req.user || !req.user.organization) {
         return res
           .status(401)
-          .json({ error: "Unauthorized - User not authenticated" });
+          .json({ error: "Unauthorized - User not authenticated or missing organization" });
       }
 
       // Defensive tenant isolation check
-      if (rid && req.user.restaurantId !== rid) {
+      // req.organization is set by tenant.middleware.js
+      if (req.organization && req.user.organization.toString() !== req.organization._id.toString()) {
         console.warn(`[${now}] [requireRole] Tenant mismatch`, {
-          rid,
-          tokenRid: req.user.restaurantId,
+          orgId: req.organization._id,
+          userOrgId: req.user.organization,
           user: redactUser(req.user),
         });
         return res.status(403).json({ error: "Forbidden - Tenant mismatch" });
@@ -70,15 +70,15 @@ const requireRole = (allowedRoles) => {
 
       const normalizedAllowed = roles.map((r) => r.toString().toLowerCase());
 
-      // Admin override: admin can perform everything except public/customer endpoints
-      if (userRole === "admin") {
+      // Admin override: admin/owner can perform everything
+      if (userRole === "admin" || userRole === "owner") {
         return next();
       }
 
       // Check if user has required role
       if (!normalizedAllowed.includes(userRole)) {
         console.warn(`[${now}] [requireRole] Role mismatch`, {
-          rid,
+          orgId: req.organization?._id,
           userRole,
           required: normalizedAllowed,
           user: redactUser(req.user),

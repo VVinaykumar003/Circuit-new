@@ -1,7 +1,7 @@
 
 import { useEffect,useRef,  useState, type ReactNode } from "react";
 import Header from "./Header";
-import ERPSidebar from "./Sidebar";
+import Sidebar from "./Sidebar";
 import { useLocation } from "react-router-dom";
 
 
@@ -26,16 +26,13 @@ export default function AppLayout({ children }: Props) {
     <div className="flex h-screen bg-base-100 overflow-hidden">
       
       {/* Sidebar */}
-      <ERPSidebar
-        isOpen={sidebarOpen}
-        onClose={() => setSidebarOpen(false)}
-      />
-
+      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+ 
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         <Header onMenuClick={() => setSidebarOpen(true)} />
 
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6">
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8" >
           {children}
         </main>
       </div>

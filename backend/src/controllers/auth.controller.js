@@ -5,6 +5,7 @@ const Organization = require("../models/Organization.model");
 const User = require("../models/User.model");
 const generateSlug = require("../utils/generateSlug");
 const logger = require("../common/libs/logger");
+const redis = require("../config/redis");
 const config = require("../config");
 const { v4: uuidv4 } = require("uuid");
 const bcrypt = require("bcrypt");
@@ -126,124 +127,214 @@ exports.registerCompany = async (req, res) => {
 // ------------------------------------------------------
 
 exports.login = async (req, res) => {
+
   try {
+
     const { email, password } = req.body;
+
     logger.info(`Login attempt: ${email}`);
+    
+ 
+    // IMPORTANT: select password
+    const user = await User
+      .findOne({ email 
+      })
+      .select("+password");
 
-    // TODO: Brute force check (Requires configuring a real Redis client in config/redis.js)
-    /*
-    // const fails = await redis.get(`login_fail:${email}`);
-    // if (parseInt(fails) >= 5) {
-    //   return res.status(429).json({ message: "Too many attempts. Try again in 5 minutes." });
-    // }
-    */
-
-    const user = await User.findOne({ email }).select("+password");
     if (!user) {
+
       logger.warn(`Login failed: user not found (${email})`);
-      return res.status(404).json({ message: "User not found" });
+
+      return res.status(404).json({
+        message: "User not found"
+      });
+
     }
+
+
+    console.log(user);
 
     const valid = await user.comparePassword(password);
+
     if (!valid) {
+
       logger.warn(`Invalid password for: ${email}`);
-      // await redis.incr(`login_fail:${email}`);
-      // await redis.expire(`login_fail:${email}`, 300);
-      return res.status(401).json({ message: "Invalid password" });
+
+      await redis.incr(`login_fail:${email}`);
+      await redis.expire(`login_fail:${email}`, 300);
+
+      return res.status(401).json({
+        message: "Invalid password"
+      });
+
     }
 
-    const org = await Organization.findById(user.organization);
+     
+
+     
+
+    const secret = process.env.JWT_SECRET || config.JWT_SECRET;
+   const org = await Organization.findById(user.organization);
+
     const token = jwt.sign(
-      {
+      { imageUrl: user.imageUrl || null,
         userId: user._id,
-        name: user.name,
+         name: user.name,
         organization: user.organization,
         role: user.role,
         slug: org.slug,
         department: user.department || null,
-        imageUrl: user.imageUrl || null,
-      },
-      config.JWT_SECRET,
+
+},
+      secret,
       { expiresIn: "1d" }
     );
 
-    // ✅ Secure httpOnly cookie only — no token in response body
-   res.cookie("token", token, {
-  httpOnly: true,
-  secure: true,
-  sameSite: "none",
-  maxAge: 24 * 60 * 60 * 1000,
-  path: "/",
-});
 
-    // TODO: Clear fail counter on success
-    // await redis.del(`login_fail:${email}`);
+   
+    // Set cookie server-side to prevent "quote" issues from frontend serialization
+    res.cookie("token", token, {
+      httpOnly: true,
+        sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 24 * 60 * 60 * 1000 // 1 day
+    });
+
+  
+    // Set user details in a non-httpOnly cookie so the frontend can access it
+    res.cookie("user", JSON.stringify({
+      token: token,
+       imageUrl: user.imageUrl || null,
+      userId:user._id,
+      userId: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      organization: user.organization,
+      slug: org.slug,
+      department: user.department || null,
+      
+    
+    }), {
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 24 * 60 * 60 * 1000 // 1 day
+    });
+
+    
+    
 
     logger.info(`Login success: ${email}`);
+    
+    console.log(
+      chalk.blue(`🔐 User logged in: ${email}`)
+    );
 
-    return res.json({
-      message: "Login successful",
+    // return res.json({
+    //   message: "Login successful",
+    //   user: {
+    //     name: user.adminName,
+    //     email: user.email,
+    //     role: user.role,
+    //     slug: user.slug,
+    //   },
+    // });
+    
+      return res.json({
+        message: "Login successful",
       token: token,
-      slug: org.slug,
-      user: {
-        userId: user._id,
+        slug: org.slug,
+         user: {
+          
+        userId:user._id,
+          userId: user._id,
         name: user.name,
         email: user.email,
+
         role: user.role,
         organization: user.organization,
         slug: org.slug,
         department: user.department || null,
+        customDepartment: user.customDepartment || null,
         imageUrl: user.imageUrl || null,
-
+      
       },
-    });
+      });
+      
+
+    // res.json({
+    //   token,
+    //   slug: org.slug
+    // });
 
   } catch (error) {
-    logger.error("Login failed", { error: error.message });
-    res.status(500).json({ message: "Server error" });
+
+    logger.error("Login failed", {
+      error: error.message
+    });
+
+    res.status(500).json({
+      message: "Server error"
+    });
+
   }
+
 };
 
-exports.getMe = async (req, res) => {
+
+
+
+exports.getMe =  async (req, res) => { 
   try {
-    const user = req.user;
-    logger.info(`getMe called for userId: ${user._id}`);
-
+    const user = req.user; // attached by middleware
+    console.log("Authenticated user in getMe:", user);
     const org = await Organization.findById(user.organization);
-    if (!org) {
-      return res.status(404).json({ message: "Organization not found" });
-    }
-
-    return res.json({
+    res.json({
       user: {
         userId: user._id,
         name: user.name,
         email: user.email,
         role: user.role,
         organization: user.organization,
-        department: user.department || null,
-        imageUrl: user.imageUrl || null,
-        // ✅ No token here
+       
       },
-      slug: org.slug,
+       slug: org.slug 
     });
   } catch (err) {
-    logger.error("getMe failed", { error: err.message });
+    console.error(err);
     res.status(500).json({ message: "Server error" });
   }
 };
-
 exports.logout = (req, res) => {
-  // ✅ Options must match what was set in login
-  res.clearCookie("token", {
-    httpOnly: true,
-    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-    secure: process.env.NODE_ENV === "production",
-  });
-  res.clearCookie("user", {
-    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-    secure: process.env.NODE_ENV === "production",
-  });
+ 
+  res.clearCookie("token");
+  res.clearCookie("user");
 
-  return res.json({ message: "Logged out successfully" });
+  return res.json({
+    message: "Logged out successfully",
+  });
+};
+
+//auth.controller
+exports.getMe =  async (req, res) => {
+  try {
+    const user = req.user; // attached by middleware
+    console.log("Authenticated user in getMe:", user);
+    const org = await Organization.findById(user.organization);
+    res.json({
+      user: {
+        userId:user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        organization: user.organization,
+        department: user.department || null,
+         imageUrl: user.imageUrl || null,
+         token: req.cookies.token || null,
+      },
+       slug: org.slug ,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
 };

@@ -45,8 +45,11 @@ export const inviteMember = (slug, inviteData) =>
  * @param {object} roleData - The new role data (e.g., { role: 'admin' }).
  * @returns {Promise} Axios promise.
  */
-export const updateMemberRole = (slug, userId, roleData) =>
+export const updateMemberRole = (slug :string, userId, roleData) =>
   API.patch(`/${slug}/members/${userId}/role`, roleData);
+
+export const getSalesEmployees = (slug:string) =>
+  API.get(`/${slug}/members/sales`);
 
 /**
  * Deactivates a member's account.
@@ -56,3 +59,5 @@ export const updateMemberRole = (slug, userId, roleData) =>
  */
 export const deactivateMember = (slug, userId) =>
   API.patch(`/${slug}/members/${userId}/deactivate`);
+
+

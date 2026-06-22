@@ -140,12 +140,12 @@ export default function ProjectWorkspace() {
       {activeTab === "overview" && (
         <>
           <div className="grid grid-cols-[repeat(auto-fit,minmax(160px,1fr))] gap-4 mb-6">
-            <StatCard label="Total Tasks" color="base-content" value={totalTasks}
+            <StatCard label="Total Tasks" color="black" value={totalTasks}
             icon={<ClipboardList className="w-4 h-4" />} />
             <StatCard
               label="Completed"
               value={completedTasks}
-              color="success"
+              color="green-600"
               borderColor="border-success"
               icon={<CheckCircle2 className="w-4 h-4" />} />
             <StatCard
@@ -154,11 +154,11 @@ export default function ProjectWorkspace() {
               color="primary"
               borderColor="border-primary"
               icon={<LoaderCircle className="w-4 h-4" />} />
-            <StatCard label="Pending" value={pendingTasks} color="warning" borderColor="border-warning" icon={<Clock3 className="w-4 h-4 " />} />
+            <StatCard label="Pending" value={pendingTasks} color="yellow-600" borderColor="border-warning" icon={<Clock3 className="w-4 h-4 " />} />
             <StatCard
               label="High Priority"
               value={highPriorityTasks.length}
-              color="error"
+              color="red-600"
               borderColor="border-error"
               icon={<AlertTriangle className="w-4 h-4" />} />
           </div>
@@ -229,16 +229,16 @@ const StatCard = ({
 
 const DescriptionCard = ({ description }: { description: string }) => (
   <div className="bg-white/70 border border-primary/30 rounded-lg p-6">
-    <h3 className=" text-base-content font-semibold mb-2">Description</h3>
-    <p className="text-sm font-medium text-base-content/60">{description}</p>
+    <h3 className="text-black font-semibold mb-2">Description</h3>
+    <p className="text-sm font-medium text-black/50 ">{description}</p>
   </div>
 );
 
 const HighPriorityTasksCard = ({ tasks }: { tasks: any[] }) => (
   <div className="bg-white/70 border border-error rounded-lg p-6">
-    <h3 className=" text-base-content font-semibold mb-3">High Priority Tasks</h3>
+    <h3 className=" text-black font-semibold mb-3">High Priority Tasks</h3>
     {tasks.length === 0 ? (
-      <p className="text-sm font-medium text-base-content/50">No high priority tasks </p>
+      <p className="text-sm font-medium text-black/50">No high priority tasks </p>
     ) : (
       <ul className="space-y-2 text-sm">
         {tasks.slice(0, 3).map((task) => (
@@ -254,9 +254,9 @@ const HighPriorityTasksCard = ({ tasks }: { tasks: any[] }) => (
 
 const LatestTasksCard = ({ tasks }: { tasks: any[] }) => (
   <div className="bg-white/70 border border-primary/30 rounded-lg p-6">
-    <h3 className=" text-base-content font-semibold mb-3">Latest Tasks</h3>
+    <h3 className=" text-black font-semibold mb-3">Latest Tasks</h3>
     {tasks.length === 0 ? (
-      <p className="text-sm font-medium text-base-content/50">No latest tasks </p>
+      <p className="text-sm font-medium text-black/50">No latest tasks </p>
     ) : (
       <ul className="space-y-2 text-sm">
         {tasks.map((task) => (

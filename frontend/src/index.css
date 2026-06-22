@@ -1,17 +1,7 @@
-@import "tailwindcss";
-@plugin "daisyui" {
-  themes: lighttheme --default, darktheme --prefersdark;
-  root: ":root";
-  exclude: properties;
-  prefix: ;
-  logs: true;
-}
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
-@property --radialprogress {
-  syntax: "<percentage>";
-  inherits: true;
-  initial-value: 0%;
-}
+@import "tailwindcss";
+@plugin "daisyui";
 
 /* ========================================
    LIGHT THEME
@@ -118,10 +108,13 @@
   * {
     box-sizing: border-box;
   }
+    html {
+    font-family: 'Inter', sans-serif;
+  }
 
   body {
     @apply bg-base-100 text-base-content;
-    font-family: Inter, sans-serif;
+    font-family: 'Inter', sans-serif;
   }
 
   input::-webkit-outer-spin-button,
@@ -155,3 +148,11 @@
 .tasktable::-webkit-scrollbar {
   display: none;
 }
+
+
+/* body {
+  width:133.33%;
+  height:133.33%;
+  transform: scale(0.75);
+  transform-origin: top left;
+} */

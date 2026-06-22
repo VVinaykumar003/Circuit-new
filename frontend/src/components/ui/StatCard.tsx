@@ -149,7 +149,7 @@ export default function StatCard({
     >
       {/* TOP */}
       <div className="flex items-start justify-between gap-2">
-        <p className="text-xs sm:text-sm font-bold tracking-wide break-words">
+        <p className="text-xs sm:text-sm font-bold text-black tracking-wide break-words">
           {title}
         </p>
 
@@ -173,7 +173,7 @@ export default function StatCard({
       {/* VALUE */}
       <p
         className={`
-          text-lg sm:text-2xl
+          text-lg text-black sm:text-2xl
           font-semibold
           mt-2 sm:mt-3
           break-words
@@ -185,7 +185,7 @@ export default function StatCard({
 
       {/* HELPER */}
       {helperText && (
-        <p className="text-[11px] sm:text-xs text-base-content/50 mt-1 break-words">
+        <p className="text-[11px] sm:text-xs text-black/50 mt-1 break-words">
           {helperText}
         </p>
       )}

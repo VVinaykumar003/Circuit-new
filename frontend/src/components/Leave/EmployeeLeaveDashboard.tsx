@@ -80,7 +80,7 @@ export default function EmployeeLeaveDashboard() {
         // }
 
         if (response.status === 304) return; // keep old data
-        console.log(response.data)
+        // console.log(response.data)
         
         const fetchedLeaves: LeaveRequest[] = response.data.leaves.map((leave: any) => ({
           id: leave._id,

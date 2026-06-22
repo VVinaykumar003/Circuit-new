@@ -27,7 +27,7 @@ export default function Payhistory() {
       setSlips(res.data?.data || []);
       setCurrentPage(1); // Reset to page 1 whenever we fetch new data
     } catch (error : any) {
-      toast.error(`Failed to fetch payroll history: ${error?.message || "Unknown error"}`);
+      toast.error("Failed to fetch payroll history.",error);
     } finally {
       setLoading(false);
     }

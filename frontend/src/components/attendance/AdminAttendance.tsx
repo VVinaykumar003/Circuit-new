@@ -74,9 +74,9 @@ const AdminAttendance = () => {
     fromDate: todayISO,
     toDate: todayISO,
   });
-  console.log("Current filters state:", filters);
-  console.log(todayISO);
-  console.log(filters);
+  // console.log("Current filters state:", filters);
+  // console.log(todayISO);
+  // console.log(filters);
   const [records, setRecords] = useState<
     (AttendanceRecord & {
       attendanceDocId: string;
@@ -84,7 +84,7 @@ const AdminAttendance = () => {
       mode?: string;
     })[]
   >([]);
-  console.log("Fetched attendance records:", records);
+  // console.log("Fetched attendance records:", records);
   const [loading, setLoading] = useState(true);
   const [refetchIndex, setRefetchIndex] = useState(0);
 
@@ -201,7 +201,7 @@ const AdminAttendance = () => {
     // 🔹 Records API (unchanged)
     getAttendance(slug, filters)
       .then((res) => {
-        console.log("API RESPONSE", res.data);
+        // console.log("API RESPONSE", res.data);
         const responseData = res.data?.data || res.data || [];
 
         const arr = Array.isArray(responseData) ? responseData : [];
@@ -343,12 +343,12 @@ const AdminAttendance = () => {
 
     return record.date === today;
   });
-  console.log("Records for today:", todayRecords);
-  console.log("TODAY:", formatDate(new Date()));
-  console.log(
-    "RECORD DATES:",
-    filteredRecords.map((r) => r.date),
-  );
+  // console.log("Records for today:", todayRecords);
+  // console.log("TODAY:", formatDate(new Date()));
+  // console.log(
+  //   "RECORD DATES:",
+  //   filteredRecords.map((r) => r.date),
+  // );
 
   if (loading) {
     return <div className="p-6 text-center">Loading attendance...</div>;

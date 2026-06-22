@@ -124,7 +124,7 @@ type MemberCardProps = {
 
 const MemberCard = ({ member, isAdmin, onDelete }: MemberCardProps) => {
   const navigate = useNavigate();
- console.log("Rendering MemberCard for:", member); 
+//  console.log("Rendering MemberCard for:", member); 
 //   return (
 //     <div
 //       onClick={() => navigate(`/members/${member._id}`)}

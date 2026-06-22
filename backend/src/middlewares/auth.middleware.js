@@ -5,6 +5,7 @@ const logger = require("../common/libs/logger");
 
 
 const auth = async (req, res, next) => {
+  console.log("AUTH PASSED");
   try {
     let token;
 

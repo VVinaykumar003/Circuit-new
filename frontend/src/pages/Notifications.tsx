@@ -88,7 +88,7 @@ export default function Notifications() {
 
   //delete notification
   const handleDelete = async (id: string) => {
-    console.log("Attempting to delete notification with ID:", id);
+    // console.log("Attempting to delete notification with ID:", id);
     try {
       if (!Swal) return;
 

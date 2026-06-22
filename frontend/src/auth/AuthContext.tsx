@@ -1,15 +1,13 @@
 import API from "@/api/axios";
-import {
-  createContext, useContext, useEffect,
-  useState, type ReactNode
-} from "react";
-
+import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { useNavigate } from "react-router-dom";
 type User = {
   userId: string;
   name: string;
   email: string;
   role: string;
   organization: string;
+  department: string;
 };
 
 type AuthState = {
@@ -24,65 +22,82 @@ type AuthContextType = {
   loading: boolean;
 };
 
-type MeResponse = {
-  user: User;
-  slug: string;
-};
+// const getInitialAuth = (): AuthState => {
+//   const stored = localStorage.getItem("auth");
+//   console.log("stored" ,stored );
+//   if (stored) {
+//     try {
+//       return JSON.parse(stored);
+//     } catch (e) {
+//       console.warn("Failed to parse auth from localStorage:", e);
+//     }
+//   }
+//   return { token: null, slug: null, role: null, userId: null };
+// };
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [auth, setAuth] = useState<AuthState>({ user: null, slug: null });
+  const [auth, setAuth] = useState<AuthState>({
+    user: null,
+    slug: null,
+  });
+
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
+  //  Check login on refresh using cookie
   useEffect(() => {
-  const publicRoutes = ["/login", "/register"];
+    const checkAuth = async () => {
+      try {
+       const res = await API.get("/auth/me");
 
-  if (publicRoutes.includes(window.location.pathname)) {
-    setLoading(false);
-    return;
-  }
+        //  console.log("User from /me:", res.data);
+        //  console.log("User's slug:", res.data.slug);
 
-  const checkAuth = async () => {
-    try {
-      const res = await API.get<MeResponse>("/auth/me");
-
-      setAuth({
-        user: res.data.user,
-        slug: res.data.slug,
-      });
-
-    } catch (err: any) {
-      if (err.response?.status !== 401) {
-        console.error("Auth error:", err);
+        // Update AuthContext
+        setAuth({
+          user: res.data.user,
+          slug: res.data.slug,
+        });
+      } catch (err) {
+        setAuth({
+          user: null,
+          slug: null,
+        });
+      } finally {
+        setLoading(false);
       }
+    };
 
-      setAuth({
-        user: null,
-        slug: null,
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  checkAuth();
-}, []);
+    checkAuth();
+  }, []);
 
   const login = (data: { user: User; slug: string }) => {
-    setAuth({ user: data.user, slug: data.slug });
+    const newAuth = {
+      user: data.user,
+      slug: data.slug,
+    };
+
+    setAuth(newAuth);
+    console.log("Logged in user:", newAuth.user);
+    
   };
 
   const logout = async () => {
     try {
-      await API.post("/auth/logout");
-    } catch (err: any) {
-  console.error("Auth check failed", err?.response?.data);
-
-  setAuth({ user: null, slug: null });
-}finally {
-      setAuth({ user: null, slug: null });
+      await fetch("/api/auth/logout", {
+        method: "POST",
+        credentials: "include",
+      });
+    } catch (err) {
+      console.error("Logout failed", err);
     }
+
+    setAuth({
+      user: null,
+      slug: null,
+    });
   };
 
   return (

@@ -243,8 +243,8 @@ export default function Dashboard() {
       ),
       icon: <MdWorkspaces size={20} />,
       helperText: (
-        <span className="flex items-center justify-start gap-1 text-base-content/60 mt-1 w-full text-left">
-          <span className="text-xs font-medium">Projects you are assigned to</span>
+        <span className="flex items-center justify-start gap-1 text-black/50 mt-1 w-full text-left">
+          <span className="text-xs font-medium text-black/50">Projects you are assigned to</span>
         </span>
       ),
     },
@@ -259,7 +259,7 @@ export default function Dashboard() {
       helperText: statsData.myAttendanceStatus === "PRESENT" ? (
         <span className="flex items-center justify-start gap-1 text-success mt-1 font-medium text-xs w-full text-left">On time</span>
       ) : (
-        <span className="flex items-center justify-start gap-1 text-base-content/60 mt-1 font-medium text-xs w-full text-left">Your current status</span>
+        <span className="flex items-center justify-start gap-1 text-black/50 mt-1 ml-1 font-medium text-xs w-full text-left">Your current status</span>
       ),
     },
   ];
@@ -324,260 +324,382 @@ export default function Dashboard() {
   const primaryBtnClass = "btn btn-primary btn-sm shadow-sm transition-all hover:shadow-md  text-sm";
   const secondaryBtnClass = "btn btn-sm bg-base-100 border border-base-300 text-base-content/80 hover:bg-base-200 hover:border-base-300 shadow-sm transition-all  text-sm";
 
-  return (
-    <div className="p-6 space-y-6">
-      {/* <PageHeader
-        title="Dashboard"
-        subtitle="Overview of your organization"
-      /> */}
-      <Breadcrumbs/>
-     {/* STATS */}
-      <div className="grid grid-cols-[repeat(auto-fit,minmax(240px,1fr))] gap-4">
-        {statsToRender.map((stat) => (
-          <StatCard
-            key={stat.title}
-            title={stat.title}
-            value={stat.value}
-            icon={stat.icon}
-            helperText={stat.helperText}
-          />
-        ))}
-      </div>
-      
-      {/* QUICK ACTIONS */}
-      <div>
-        <h2 className="text-lg font-semibold text-base-content mb-3">Quick Actions</h2>
-        <div className="flex flex-wrap gap-3">
-          {isAdmin ? (
-            <>
-              <Link to="/tasks" className={primaryBtnClass}><MdAssignment size={16} /> Assign Task</Link>
-              <Link to="/createProject" className={secondaryBtnClass}><MdWorkspaces size={16} /> Create Project</Link>
-              <Link to="/addMember" className={secondaryBtnClass}><MdPersonAdd size={16} /> Add Member</Link>
-              <Link to="/members" className={secondaryBtnClass}><MdPeople size={16} /> Team Directory</Link>
-              <Link to="/leaves" className={secondaryBtnClass}><MdPeople size={16} /> Leave</Link>
-            </>
-          ) : (
-            <>
-              <Link to="/attendance" className={primaryBtnClass}><MdEventAvailable size={16} /> Attendance</Link>
-              <Link to="/tasks" className={secondaryBtnClass}><MdAssignment size={16} /> My Tasks</Link>
-              <Link to="/leaves" className={secondaryBtnClass}><MdFlightTakeoff size={16} /> Log Leave</Link>
-              <Link to="/my-salary" className={secondaryBtnClass}><MdReceiptLong size={16} /> Download Payslips</Link>
-              <Link to="/members" className={secondaryBtnClass}><MdPeople size={16} /> Team Directory</Link>
-            </>
-          )}
-        </div>
-      </div>
+ return (
+  <div className="px-4 py-5 sm:p-6 space-y-6">
+    <Breadcrumbs />
 
-  {/* BIRTHDAY SECTION */}
-{birthdayEmployees.length > 0 && (
-  <div className="mb-6">
-  {birthdayEmployees.length === 1 && (
-  <div className="bg-white rounded-2xl shadow-sm p-6">
-    <div className="flex items-center justify-between mb-4">
-      <h2 className="text-lg font-semibold">
-        🎂 Birthday Today
-      </h2>
-    </div>
-
-    <SingleBirthdayCard employee={birthdayEmployees[0]} />
-  </div>
-)}
-
-   {birthdayEmployees.length === 2 && (
-  <div className="bg-white rounded-2xl shadow-sm p-6">
-    <h2 className="text-lg font-semibold mb-4">
-      🎂 Birthdays Today
-    </h2>
-
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      {birthdayEmployees.map((emp) => (
-        <SingleBirthdayCard key={emp.id} employee={emp} />
+    {/* STATS */}
+    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+      {statsToRender.map((stat) => (
+        <StatCard
+          key={stat.title}
+          title={stat.title}
+          value={stat.value}
+          icon={stat.icon}
+          helperText={stat.helperText}
+        />
       ))}
     </div>
-  </div>
-)}
-    {birthdayEmployees.length > 2 && (
-      <BirthdayCarousel
-        employees={birthdayEmployees}
-        currentIndex={currentIndex}
-        setCurrentIndex={setCurrentIndex}
-      />
-    )}
-  </div>
-)}
 
-      {/* ATTENDANCE TREND GRAPH */}
-      {isAdmin && (
-        <div className="bg-base-100 rounded-2xl shadow-sm border border-base-300 p-6 mb-6">
-          <h2 className="text-lg font-semibold text-base-content mb-4">Attendance Trend (This Week)</h2>
-          <div className="h-64 w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={attendanceTrendData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
-                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#6b7280', fontSize: 12 }} />
-                <YAxis 
-                  axisLine={false} 
-                  tickLine={false} 
-                  tick={{ fill: '#6b7280', fontSize: 12 }} 
-                  allowDecimals={false}
-                  domain={[0, Math.max(10, statsData.totalEmployees)]}
-                />
-                <Tooltip cursor={{ fill: '#f3f4f6' }} contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }} />
-                <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '10px' }} />
-                <Bar barSize={40} dataKey="present" fill="#8b5cf6" radius={[4, 4, 0, 0]} name="Present" />
-                <Bar barSize={40} dataKey="absent" fill="#f43f5e" radius={[4, 4, 0, 0]} name="Absent" />
-              </BarChart>
-            </ResponsiveContainer>
+    {/* QUICK ACTIONS */}
+    <div>
+      <h2 className="text-lg font-semibold text-base-content mb-3">
+        Quick Actions
+      </h2>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:flex lg:flex-wrap gap-3">
+        {isAdmin ? (
+          <>
+            <Link
+              to="/tasks"
+              className="btn btn-primary btn-sm w-full sm:w-auto shadow-sm transition-all text-sm"
+            >
+              <MdAssignment size={16} />
+              Assign Task
+            </Link>
+
+            <Link
+              to="/createProject"
+              className="btn btn-sm w-full sm:w-auto bg-base-100 border border-base-300 text-base-content/80 hover:bg-base-200 shadow-sm transition-all text-sm"
+            >
+              <MdWorkspaces size={16} />
+              Create Project
+            </Link>
+
+            <Link
+              to="/addMember"
+              className="btn btn-sm w-full sm:w-auto bg-base-100 border border-base-300 text-base-content/80 hover:bg-base-200 shadow-sm transition-all text-sm"
+            >
+              <MdPersonAdd size={16} />
+              Add Member
+            </Link>
+
+            <Link
+              to="/members"
+              className="btn btn-sm w-full sm:w-auto bg-base-100 border border-base-300 text-base-content/80 hover:bg-base-200 shadow-sm transition-all text-sm"
+            >
+              <MdPeople size={16} />
+              Team Directory
+            </Link>
+
+            <Link
+              to="/leaves"
+              className="btn btn-sm w-full sm:w-auto bg-base-100 border border-base-300 text-base-content/80 hover:bg-base-200 shadow-sm transition-all text-sm"
+            >
+              <MdPeople size={16} />
+              Leave
+            </Link>
+          </>
+        ) : (
+          <>
+            <Link
+              to="/attendance"
+              className="btn btn-primary btn-sm w-full sm:w-auto shadow-sm transition-all text-sm"
+            >
+              <MdEventAvailable size={16} />
+              Attendance
+            </Link>
+
+            <Link
+              to="/tasks"
+              className="btn btn-sm w-full sm:w-auto bg-base-100 border border-base-300 text-base-content/80 hover:bg-base-200 shadow-sm transition-all text-sm"
+            >
+              <MdAssignment size={16} />
+              My Tasks
+            </Link>
+
+            <Link
+              to="/leaves"
+              className="btn btn-sm w-full sm:w-auto bg-base-100 border border-base-300 text-base-content/80 hover:bg-base-200 shadow-sm transition-all text-sm"
+            >
+              <MdFlightTakeoff size={16} />
+              Log Leave
+            </Link>
+
+            <Link
+              to="/my-salary"
+              className="btn btn-sm w-full sm:w-auto bg-base-100 border border-base-300 text-base-content/80 hover:bg-base-200 shadow-sm transition-all text-sm"
+            >
+              <MdReceiptLong size={16} />
+              Download Payslips
+            </Link>
+
+            <Link
+              to="/members"
+              className="btn btn-sm w-full sm:w-auto bg-base-100 border border-base-300 text-base-content/80 hover:bg-base-200 shadow-sm transition-all text-sm"
+            >
+              <MdPeople size={16} />
+              Team Directory
+            </Link>
+          </>
+        )}
+      </div>
+    </div>
+
+    {/* BIRTHDAY SECTION */}
+    {birthdayEmployees.length > 0 && (
+      <div className="mb-6">
+        {birthdayEmployees.length === 1 && (
+          <div className="bg-base-100 rounded-2xl shadow-sm p-4 sm:p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-semibold">
+                🎂 Birthday Today
+              </h2>
+            </div>
+
+            <SingleBirthdayCard employee={birthdayEmployees[0]} />
           </div>
-        </div>
-      )}
-    
-      {/* RECENT ACTIVITY (EMPTY STATE FOR NOW) */}
-      {/* <div>
-        <h2 className="text-lg font-semibold text-base-content mb-3">
-          Recent Activity
+        )}
+
+        {birthdayEmployees.length === 2 && (
+          <div className="bg-base-100 rounded-2xl shadow-sm p-4 sm:p-6">
+            <h2 className="text-lg font-semibold mb-4">
+              🎂 Birthdays Today
+            </h2>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {birthdayEmployees.map((emp) => (
+                <SingleBirthdayCard
+                  key={emp.id}
+                  employee={emp}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+
+        {birthdayEmployees.length > 2 && (
+          <BirthdayCarousel
+            employees={birthdayEmployees}
+            currentIndex={currentIndex}
+            setCurrentIndex={setCurrentIndex}
+          />
+        )}
+      </div>
+    )}
+
+    {/* ATTENDANCE GRAPH */}
+    {isAdmin && (
+      <div className="bg-base-100 rounded-2xl shadow-sm border border-base-300 p-4 sm:p-6 mb-6 overflow-hidden">
+        <h2 className="text-lg font-semibold text-base-content mb-4">
+          Attendance Trend (This Week)
         </h2>
 
-      {groupedActivities.length > 0 ? (
-          <div className="bg-base-100 rounded-2xl shadow-sm border border-base-300 p-6">
-            <ul className="space-y-4">
-              {paginatedActivities.map((activity) => {
-                const link = getActivityLink(activity);
-                const isClickable = link !== "#";
-                
-                return (
-                <li 
-                  key={activity._id || activity.id} 
-                  onClick={() => isClickable && navigate(link)}
-                  className={`flex justify-between items-start sm:items-center text-sm border-b border-base-200 pb-3 last:border-0 last:pb-0 ${
-                    isClickable ? "cursor-pointer hover:opacity-70 transition-opacity" : ""
-                  }`}
+        <div className="h-[280px] sm:h-64 w-full overflow-x-auto">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart
+              data={attendanceTrendData}
+              margin={{
+                top: 10,
+                right: 5,
+                left: -30,
+                bottom: 0,
+              }}
+            >
+              <CartesianGrid
+                strokeDasharray="3 3"
+                vertical={false}
+                stroke="#e5e7eb"
+              />
+
+              <XAxis
+                dataKey="name"
+                axisLine={false}
+                tickLine={false}
+                tick={{
+                  fill: "#6b7280",
+                  fontSize: 12,
+                }}
+              />
+
+              <YAxis
+                axisLine={false}
+                tickLine={false}
+                tick={{
+                  fill: "#6b7280",
+                  fontSize: 12,
+                }}
+                allowDecimals={false}
+                domain={[
+                  0,
+                  Math.max(
+                    10,
+                    statsData.totalEmployees
+                  ),
+                ]}
+              />
+
+              <Tooltip
+                cursor={{ fill: "#f3f4f6" }}
+                contentStyle={{
+                  borderRadius: "8px",
+                  border: "none",
+                  boxShadow:
+                    "0 4px 6px -1px rgba(0,0,0,0.1)",
+                }}
+              />
+
+              <Legend
+                wrapperStyle={{
+                  fontSize: "12px",
+                  paddingTop: "10px",
+                }}
+              />
+
+              <Bar
+                barSize={40}
+                dataKey="present"
+                fill="#8b5cf6"
+                radius={[4, 4, 0, 0]}
+                name="Present"
+              />
+
+              <Bar
+                barSize={40}
+                dataKey="absent"
+                fill="#f43f5e"
+                radius={[4, 4, 0, 0]}
+                name="Absent"
+              />
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+    )}
+
+    {/* RECENT ACTIVITY */}
+    <div className="bg-primary/10 rounded-2xl shadow-sm border border-base-300 p-4 sm:p-6 overflow-hidden">
+      <div className="flex items-center justify-between mb-5">
+        <h2 className="text-lg font-semibold text-base-content">
+          Recent Activity
+        </h2>
+      </div>
+
+      {paginatedActivities.length > 0 ? (
+        <>
+          <ul className="space-y-3">
+            {paginatedActivities.map((activity) => {
+              const link = getActivityLink(activity);
+              const isClickable = link !== "#";
+
+              return (
+                <li
+                  key={activity._id || activity.id}
+                  onClick={() =>
+                    isClickable && navigate(link)
+                  }
+                  className={`
+                    flex
+                    flex-col
+                    sm:flex-row
+                    sm:items-center
+                    justify-between
+                    gap-3
+                    p-3
+                    rounded-xl
+                    border
+                    border-base-200
+                    bg-base-100
+                    transition-all
+                    duration-200
+                    ${
+                      isClickable
+                        ? "cursor-pointer hover:bg-base-200 hover:shadow-sm"
+                        : ""
+                    }
+                  `}
                 >
-                  <div className="flex items-center gap-3">
+                  {/* LEFT */}
+                  <div className="flex items-start gap-3 min-w-0 flex-1">
                     {activity.user && (
                       <div className="w-9 h-9 rounded-full bg-base-200 border border-base-300 flex items-center justify-center overflow-hidden shrink-0">
                         {activity.user.imageUrl ? (
-                          <img src={activity.user.imageUrl} alt={activity.user.name || "User"} className="w-full h-full object-cover" />
+                          <img
+                            src={activity.user.imageUrl}
+                            alt={
+                              activity.user.name ||
+                              "User"
+                            }
+                            className="w-full h-full object-cover"
+                          />
                         ) : (
                           <span className="text-sm font-medium text-base-content/60">
                             {(activity.user?.name || "?")
-                              .trim()
                               .split(" ")
-                              .map((n: string) => n[0])
-                              .filter(Boolean)
+                              .map(
+                                (n: string) => n[0]
+                              )
                               .slice(0, 2)
                               .join("")
-                              .toUpperCase() || "?"}
+                              .toUpperCase()}
                           </span>
-                        )} 
+                        )}
                       </div>
                     )}
-                    <div className="flex flex-col">
-                  <span className="text-base-content font-medium">
-                    {activity.action || "Activity"}
-                    {activity.count > 1 && <span className="text-primary ml-1 text-xs">({activity.count})</span>}
-                  </span>
-                      <span className="text-base-content/70 text-xs">{activity.message || activity.title}</span>
+
+                    <div className="flex flex-col min-w-0">
+                      <span className="text-base-content font-medium truncate">
+                        {activity.action || "Activity"}
+
+                        {activity.count > 1 && (
+                          <span className="text-primary ml-1 text-xs">
+                            ({activity.count})
+                          </span>
+                        )}
+                      </span>
+
+                      <span
+                        className="
+                          text-base-content/70
+                          text-xs
+                          break-words
+                          line-clamp-2
+                        "
+                      >
+                        {activity.message ||
+                          activity.title}
+                      </span>
                     </div>
                   </div>
-                  <span className="text-base-content/50 text-xs whitespace-nowrap shrink-0 mt-1 sm:mt-0">
-                    {activity.time || (activity.createdAt ? timeAgo(activity.createdAt) : "")}
+
+                  {/* RIGHT */}
+                  <span
+                    className="
+                      text-xs
+                      text-base-content/60
+                      self-start
+                      sm:self-auto
+                      whitespace-nowrap
+                      shrink-0
+                    "
+                  >
+                    {activity.time ||
+                      (activity.createdAt
+                        ? timeAgo(
+                            activity.createdAt
+                          )
+                        : "")}
                   </span>
                 </li>
-              )})}
-            </ul>
+              );
+            })}
+          </ul>
 
-            <div className="mt-6">
-              <Pagination
-                currentPage={activityPage}
-                totalPages={totalActivityPages}
-                onPageChange={setActivityPage}
-              />
-            </div>
+          <div className="mt-6 overflow-x-auto">
+            <Pagination
+              currentPage={activityPage}
+              totalPages={totalActivityPages}
+              onPageChange={setActivityPage}
+            />
           </div>
-        ) : (
-          <EmptyState
-            title="No activity yet"
-            description="Recent attendance, tasks, and project updates will appear here."
-          />
-        )}
-      </div> */}
-
-
-      <div className="bg-primary/10 rounded-2xl shadow-sm border border-base-300 p-6">
-  <ul className="space-y-3">
-    {paginatedActivities.map((activity) => {
-      const link = getActivityLink(activity);
-      const isClickable = link !== "#";
-
-      return (
-        <li
-          key={activity._id || activity.id}
-          onClick={() => isClickable && navigate(link)}
-          className={`flex justify-between items-start sm:items-center text-sm 
-          p-3 rounded-xl border border-base-200 bg-base-100
-          transition-all duration-200
-          ${isClickable ? "cursor-pointer hover:bg-base-200 hover:shadow-sm" : ""}
-          `}
-        >
-          {/* LEFT */}
-          <div className="flex items-center gap-3">
-            {activity.user && (
-              <div className="w-9 h-9 rounded-full bg-base-200 border border-base-300 flex items-center justify-center overflow-hidden shrink-0">
-                {activity.user.imageUrl ? (
-                  <img
-                    src={activity.user.imageUrl}
-                    alt={activity.user.name || "User"}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <span className="text-sm font-medium text-base-content/60">
-                    {(activity.user?.name || "?")
-                      .split(" ")
-                      .map((n: string) => n[0])
-                      .slice(0, 2)
-                      .join("")
-                      .toUpperCase()}
-                  </span>
-                )}
-              </div>
-            )}
-
-            <div className="flex flex-col">
-              <span className="text-base-content font-medium">
-                {activity.action || "Activity"}
-                {activity.count > 1 && (
-                  <span className="text-primary ml-1 text-xs">
-                    ({activity.count})
-                  </span>
-                )}
-              </span>
-
-              <span className="text-base-content text-xs">
-                {activity.message || activity.title}
-              </span>
-            </div>
-          </div>
-
-          {/* RIGHT */}
-          <span className="text-base-content text-xs whitespace-nowrap shrink-0 mt-1 sm:mt-0">
-            {activity.time ||
-              (activity.createdAt ? timeAgo(activity.createdAt) : "")}
-          </span>
-        </li>
-      );
-    })}
-  </ul>
-
-  <div className="mt-6">
-    <Pagination
-      currentPage={activityPage}
-      totalPages={totalActivityPages}
-      onPageChange={setActivityPage}
-    />
-  </div>
-</div>
-
+        </>
+      ) : (
+        <EmptyState
+          title="No activity yet"
+          description="Recent attendance, tasks, and project updates will appear here."
+        />
+      )}
     </div>
-  );
+  </div>
+);
 }

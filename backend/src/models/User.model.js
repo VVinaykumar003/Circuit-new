@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 
 const userSchema = new mongoose.Schema({
+
   // Personal
   imageUrl: {
     type: String,
@@ -61,10 +62,12 @@ const userSchema = new mongoose.Schema({
   // Identity
   aadhaar: {
     type: String,
+    unique: true,
     trim: true
   },
   pan: {
     type: String,
+    unique: true,
     trim: true,
     uppercase: true
   },
@@ -74,6 +77,11 @@ const userSchema = new mongoose.Schema({
   },
 
   // Employment
+  employeeId: {
+    type: String,
+    unique: true,
+    trim: true
+  },
   organization: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Organization',
@@ -96,9 +104,22 @@ const userSchema = new mongoose.Schema({
     trim: true
   },
   department: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Department'
-  },
+  type: String,
+  enum: [
+    "sales",
+    "marketing",
+    "customer-support",
+    "it",
+    "human-resource and administration",
+    
+    "other",
+  ],
+  
+},
+customDepartment: {
+  type: String,
+  default: "",
+},
   joiningDate: {
     type: Date
   },

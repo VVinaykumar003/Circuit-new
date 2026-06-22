@@ -27,7 +27,8 @@ const addTask = async (req, res) => {
       tag,
       subtasks,
     } = req.body;
-    
+    console.log("Assigned To:", assignedTo);
+console.log("User:", req.user);
     let parsedSubtasks = [];
 
     let parsedTags = [];
@@ -408,12 +409,14 @@ const getTasks = async (req, res) => {
     const userRole = req.user.role;
 
     const { projectId } = req.params;
-    const { filter } = req.query;
+    const { filter,memberId } = req.query;
 
     let query = {
       organization: orgId,
     };
-
+  if (memberId) {
+  query.assignedTo = memberId;
+}
     // If projectId provided → filter by project
     if (projectId) {
       query.projectId = projectId;
