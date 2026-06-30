@@ -50,7 +50,7 @@ app.use(helmet());
 
 // CORS Configuration
 app.use(cors({
-  origin: process.env.CORS_ORIGIN ||"http://localhost:5174" ||"*",
+  origin: "https://circuit-new.vercel.app",
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
   credentials: true
 }));
