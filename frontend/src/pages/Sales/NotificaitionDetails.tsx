@@ -12,7 +12,7 @@ import {
   MdPriorityHigh,
   MdOpenInNew,
 } from "react-icons/md";
-import { useAuth } from "@/auth/AuthContext";
+import { useAuth } from "@/auth/useAuth"; 
 import {
   getNotificationById,
   markAsRead,

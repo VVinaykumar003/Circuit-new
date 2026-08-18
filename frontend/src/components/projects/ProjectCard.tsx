@@ -7,7 +7,7 @@ import Swal from "sweetalert2";
 import { useState } from "react";
 import EditProjectModal from "./EditProjectModal";
 import { updateProject } from "@/services/IT/projectServices";
-import { useAuth } from "@/auth/AuthContext";
+import { useAuth } from "@/auth/useAuth"; 
 import { Edit2 } from "lucide-react";
 
 interface Props {

@@ -1,6 +1,6 @@
 // import { useState, useEffect } from "react";
 // import type { Project, Participant } from "../../type/project";
-// import { useAuth } from "@/auth/AuthContext";
+// import { useAuth } from "@/auth/useAuth"; 
 // import API from "@/api/axios";
 // import { getMembers } from "@/services/memberService";
 
@@ -526,7 +526,7 @@
 
 import { useState, useEffect } from "react";
 import type { Project, Participant } from "../../type/project";
-import { useAuth } from "@/auth/AuthContext";
+import { useAuth } from "@/auth/useAuth"; 
 import API from "@/api/axios";
 import { getMembers } from "@/services/IT/memberService";
 

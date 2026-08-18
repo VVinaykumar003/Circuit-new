@@ -4,7 +4,7 @@ import { toast } from "react-toastify";
 import { createMember } from "../services/IT/memberService";
 // import { getOrganizationSlug } from "@/utils/auth";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
-import { useAuth } from "@/auth/AuthContext";
+import { useAuth } from "@/auth/useAuth"; 
 type UserRole = "member" | "manager" | "admin";
 type Errors = {
   name?: string;

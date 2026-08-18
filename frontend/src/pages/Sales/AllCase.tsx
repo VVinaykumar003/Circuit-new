@@ -35,7 +35,7 @@ import {
   MdTrendingUp
 } from "react-icons/md";
 import { toast } from "react-toastify";
-import { useAuth } from "@/auth/AuthContext";
+import { useAuth } from "@/auth/useAuth"; 
 import { getCases, updateCase, deleteCase, createCase, type Case } from "@/services/sales/caseServices";
 import { getSalesReps } from "@/services/sales/salesRepServices";
 import { PieChart, Pie, Cell, BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer } from "recharts";

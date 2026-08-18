@@ -24,7 +24,7 @@ import {
   MdAssignmentInd,
 } from "react-icons/md";
 import { deleteContact, getAllContacts } from "@/services/sales/salesService";
-import { useAuth } from "@/auth/AuthContext";
+import { useAuth } from "@/auth/useAuth"; 
 import Swal from "sweetalert2";
 import { toast } from "react-toastify";
 import EntityDrawer from "@/components/sales/EntityDrawer";

@@ -1,6 +1,6 @@
 import React, { Suspense } from "react";
 import type { UserRole } from "../type/attendance";
-import { useAuth } from "@/auth/AuthContext";
+import { useAuth } from "@/auth/useAuth"; 
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
 
 const EmployeeAttendanceView = React.lazy(()=> import("../components/attendance/EmployeeAttendance"));

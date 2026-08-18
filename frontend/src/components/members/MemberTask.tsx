@@ -323,7 +323,7 @@ import { useEffect, useMemo, useState } from "react";
 import TaskStatusSelect from "../projects/TaskStatusSelect";
 import { MdDelete, MdEdit } from "react-icons/md";
 import API from "@/api/axios";
-import { useAuth } from "@/auth/AuthContext";
+import { useAuth } from "@/auth/useAuth"; 
 import NewTaskModal from "../projects/NewTaskModal";
 import TaskDrawer from "../task/TaskDrawer";
 import { toast } from "react-toastify";

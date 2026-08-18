@@ -6,7 +6,7 @@ import SendNotificationModal from "@/components/notification/SendNotificationMod
 
 import { MdSend, MdNotificationsNone } from "react-icons/md";
 import { getMembers } from "@/services/IT/memberService";
-import { useAuth } from "@/auth/AuthContext";
+import { useAuth } from "@/auth/useAuth"; 
 import {
   deleteNotification,
   getNotifications,

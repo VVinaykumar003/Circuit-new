@@ -20,7 +20,7 @@ import SingleBirthdayCard from "@/components/members/SingleBirthdayCard";
 
 import BirthdayCarousel from "@/components/members/BirthdayCarousel";
 import type { Member } from "@/type/member";
-import { useAuth } from "@/auth/AuthContext";
+import { useAuth } from "@/auth/useAuth"; 
 import { getMembers } from "@/services/IT/memberService";
 import { getAttendance, getMyAttendance } from "@/services/sales/attendanceService";
 import { getProject } from "@/services/IT/projectServices";

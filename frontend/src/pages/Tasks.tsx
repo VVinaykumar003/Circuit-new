@@ -19,7 +19,7 @@ import TaskDrawer from "@/components/task/TaskDrawer";
 import TaskFilters from "@/components/task/TaskFilter";
 import type { Task } from "@/type/task";
 import MobileTabs from "@/components/task/MobileTabs";
-import { useAuth } from "@/auth/AuthContext";
+import { useAuth } from "@/auth/useAuth"; 
 import { toast } from "react-toastify";
 import API from "@/api/axios";
 import NewTaskModal from "@/components/projects/NewTaskModal";

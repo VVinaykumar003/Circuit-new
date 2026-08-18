@@ -1,4 +1,4 @@
-import { useAuth } from "@/auth/AuthContext";
+import { useAuth } from "@/auth/useAuth"; 
 import { getActivities } from "@/services/IT/activityService";
 import { useEffect, useState } from "react";
 

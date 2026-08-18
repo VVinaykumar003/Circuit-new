@@ -5,7 +5,7 @@ import * as z from "zod";
 import { MdSave, MdContentCopy, MdAttachment, MdDelete, MdAdd, MdCheckCircle } from "react-icons/md";
 import { toast } from "react-toastify";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
-import {useAuth} from "@/auth/AuthContext";
+import {useAuth} from "@/auth/useAuth"; 
 import { createProduct, getProductById, updateProduct } from "@/services/sales/productServices";
 
 /* ─────────────────────────── types ─────────────────────────── */

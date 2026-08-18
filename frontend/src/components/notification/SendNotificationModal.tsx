@@ -4,7 +4,7 @@
 // import Input from "@/components/ui/Input";
 // import Select from "@/components/ui/Select";
 // import type { Notification } from "@/type/notification";
-// import { useAuth } from "@/auth/AuthContext";
+// import { useAuth } from "@/auth/useAuth"; 
 // import { sendNotification } from "@/services/notificationService";
 // import { toast } from "react-toastify";
 
@@ -228,7 +228,7 @@ import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
 import type { Notification } from "@/type/notification";
-import { useAuth } from "@/auth/AuthContext";
+import { useAuth } from "@/auth/useAuth"; 
 import { sendNotification, updateNotification } from "@/services/IT/notificationService";
 import { toast } from "react-toastify";
 

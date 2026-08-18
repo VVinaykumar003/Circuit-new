@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { MdSave, MdContentCopy, MdDelete } from "react-icons/md";
 import { toast } from "react-toastify";
 import { getSalesEmployees } from "@/services/IT/memberService";
-import { useAuth } from "@/auth/AuthContext";
+import { useAuth } from "@/auth/useAuth"; 
 import { createLead } from "@/services/sales/salesService";
 
 /* ─────────────────────────── Zod Schema ─────────────────────────── */

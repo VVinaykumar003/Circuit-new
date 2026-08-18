@@ -5,7 +5,7 @@ import MemberRightSection from "@/components/members/MemberRightSection";
 import type { Member } from "@/type/member";
 import { getMemberById } from "@/services/IT/memberService";
 
-import { useAuth } from "@/auth/AuthContext";
+import { useAuth } from "@/auth/useAuth"; 
 import { ArrowLeft } from "lucide-react";
 
 const MemberDetails = () => {

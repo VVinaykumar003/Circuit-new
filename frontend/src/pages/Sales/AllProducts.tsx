@@ -29,7 +29,7 @@ import {
   MdWarning,
 } from "react-icons/md";
 import { getAllProducts, deleteProduct, updateProduct, createProduct } from "@/services/sales/productServices";
-import { useAuth } from "@/auth/AuthContext";
+import { useAuth } from "@/auth/useAuth"; 
 import { toast } from "react-toastify";
 import ImportExportActions from "@/components/import-export/ImportExportActions";
 import type { ColumnConfig } from "@/type/importExport.types";

@@ -1,5 +1,5 @@
 import API from "@/api/axios";
-import { useAuth } from "@/auth/AuthContext";
+import { useAuth } from "@/auth/useAuth"; 
 import { AddParticipant } from "@/components/projects/AddParticipant";
 import CreateProjectForm from "@/components/projects/CreateProjectForm";
 import { createProject } from "@/services/IT/projectServices";

@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { MdSave, MdBusiness, MdDelete } from "react-icons/md";
 import { toast } from "react-toastify";
 import { createAccount } from "@/services/sales/salesService";
-import { useAuth } from "@/auth/AuthContext";
+import { useAuth } from "@/auth/useAuth"; 
 import { getSalesEmployees } from "@/services/IT/memberService";
 
 const COUNTRIES = [

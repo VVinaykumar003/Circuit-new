@@ -20,7 +20,7 @@ import type {
 import { Clock, NotepadText } from "lucide-react";
 import MobileTabs from "../attendance/MobileTabs";
 import AttendanceMobileTopBar from "./AttendanceMobileTopBar";
-import { useAuth } from "@/auth/AuthContext";
+import { useAuth } from "@/auth/useAuth"; 
 import { getAttendance } from "@/services/sales/attendanceService";
 
 import AttendanceGrid from "./AttendanceGrid";

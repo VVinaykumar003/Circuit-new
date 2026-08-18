@@ -1,4 +1,4 @@
-import { useAuth } from '@/auth/AuthContext';
+import { useAuth } from "@/auth/useAuth"; ;
 import ProfileSidebar from '@/components/members/ProfileSidebar';
 import { getMemberById } from '@/services/IT/memberService';
 import type { Member } from '@/type/member';

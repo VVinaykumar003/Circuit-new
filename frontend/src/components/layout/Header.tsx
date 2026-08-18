@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useTheme } from "../../context/use-theme";
 import { MdNotifications, MdMenu, MdSearch, MdClose, MdLightMode, MdDarkMode } from "react-icons/md";
 import type { Notification } from "@/type/notification";
-import { useAuth } from "../../auth/AuthContext";
+import { useAuth } from  "@/auth/useAuth"; ;
 import { toast } from "react-toastify";
 import { uploadImage } from "@/services/uploadService";
 import { getNotifications , markAsRead, markAllAsRead } from "@/services/IT/notificationService";

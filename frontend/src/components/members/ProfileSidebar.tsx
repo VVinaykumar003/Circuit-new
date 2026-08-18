@@ -253,7 +253,7 @@ import {
 import { updateMember } from "@/services/IT/memberService";
 import { toast } from "react-toastify";
 import { getOrganizationSlug } from "@/utils/auth";
-import { useAuth } from "@/auth/AuthContext";
+import { useAuth } from "@/auth/useAuth"; 
 import { uploadImage } from "@/services/uploadService";
 
 interface Props {

@@ -7,7 +7,7 @@ import { MdSave, MdPerson } from "react-icons/md";
 import { toast } from "react-toastify";
 import { getSalesEmployees } from "@/services/IT/memberService";
 import { createContact } from "@/services/sales/salesService";
-import { useAuth } from "@/auth/AuthContext";
+import { useAuth } from "@/auth/useAuth"; 
 
 /* ─────────────────────────── Zod Schema ─────────────────────────── */
 // const contactSchema = z.object({

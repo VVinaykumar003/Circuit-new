@@ -1,4 +1,4 @@
-import { useAuth } from "@/auth/AuthContext";
+import { useAuth } from "@/auth/useAuth"; 
 import { updateAccount, updateContact } from "@/services/sales/salesService";
 import { useEffect, useState } from "react";
 

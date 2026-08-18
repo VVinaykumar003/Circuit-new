@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { createSalesForecast } from '../../services/addSalesForecastApi';
 import type { SalesForecastPayload } from '../../type/addSalesForecast';
 import { toast } from 'react-toastify';
-import { useAuth } from '@/auth/AuthContext';
+import { useAuth } from "@/auth/useAuth"; ;
 
 const initialFormState: SalesForecastPayload = {
   forecastName: '',
