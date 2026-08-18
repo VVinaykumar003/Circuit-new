@@ -35,7 +35,7 @@ const CheckInActions: React.FC<Props> = ({
       interval = setInterval(() => {
         const now = new Date().getTime();
         const elapsedMilliseconds = now - checkInTime;
-        let totalSeconds = Math.floor((elapsedMilliseconds - totalBreakMs) / 1000);
+        const totalSeconds = Math.floor((elapsedMilliseconds - totalBreakMs) / 1000);
         const hours = Math.floor(totalSeconds / 3600);
         const minutes = Math.floor((totalSeconds % 3600) / 60);
         const seconds = totalSeconds % 60;

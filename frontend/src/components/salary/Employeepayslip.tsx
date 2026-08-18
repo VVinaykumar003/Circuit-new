@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { getMyHistory, downloadSlipPdf } from "@/services/IT/payrollService";
-import { useAuth } from "@/auth/useAuth"; 
+import { getMyHistory, downloadSlipPdf } from "@/services/payrollService";
+import { useAuth } from "@/auth/AuthContext";
 import { toast } from "react-toastify";
 import Button from "@/components/ui/Button";
 import EmptyState from "../ui/EmptyState";
@@ -59,14 +59,14 @@ export default function EmployeePayslip() {
   />
 ) : (
       <div className="overflow-x-auto border border-primary/50 rounded-lg ">
-        <table className="w-full text-left  text-base-content border-primary/50 ">
+        <table className="table  w-full text-left  text-base-content border-primary/50 ">
           <thead className="text-primary-content">
             <tr className="bg-primary">
-              <th className="p-4 border-b border-base-300">Month / Year</th>
-              <th className="p-4 border-b border-base-300">Gross Salary</th>
-              <th className="p-4 border-b border-base-300">Net Salary</th>
-              <th className="p-4 border-b border-base-300">Status</th>
-              <th className="p-4 border-b border-base-300">Action</th>
+              <th className="p-3 border-b border-base-300">Month / Year</th>
+              <th className="p-3 border-b border-base-300">Gross Salary</th>
+              <th className="p-3 border-b border-base-300">Net Salary</th>
+              <th className="p-3 border-b border-base-300">Status</th>
+              <th className="p-3 border-b border-base-300">Action</th>
             </tr>
           </thead>
           <tbody>

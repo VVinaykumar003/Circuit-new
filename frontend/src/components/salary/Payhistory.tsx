@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { getMonthlyList, markSlipPaid, downloadSlipPdf } from "@/services/IT/payrollService";
-import { useAuth } from "@/auth/useAuth"; 
+import { getMonthlyList, markSlipPaid, downloadSlipPdf } from "@/services/payrollService";
+import { useAuth } from "@/auth/AuthContext";
 import { toast } from "react-toastify";
 import Button from "@/components/ui/Button";
 import Select from "@/components/ui/Select";
 import Pagination from "@/components/ui/Pagination"
 import PageHeader from "../ui/PageHeader";
+import { Clock1, Clock3, ClockFadingIcon, History, HistoryIcon } from "lucide-react";
 
 export default function Payhistory() {
   const { auth } = useAuth();
@@ -145,19 +146,18 @@ export default function Payhistory() {
 
 
 return (
-  <div className="space-y-4 sm:space-y-6 text-base-content p-3 sm:p-0">
+  <div className="space-y-4 sm:space-y-6 text-base-content p-4 ">
     
     {/* HEADER */}
-    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-      <div>
-        <h1 className="text-xl sm:text-2xl font-semibold text-base-content">
-          Payroll History
-        </h1>
-        <h3 className="text-sm sm:text-base text-base-content/70">
-          Overview
-        </h3>
-      </div>
-    </div>
+  <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-4">
+          <div className="sm:block hidden p-3 bg-primary/10 text-primary rounded-xl">
+            <HistoryIcon size={20} />
+          </div>
+          <div>
+            <h1 className="text-xl font-medium text-base-content">Payroll History</h1>
+            <p className="text-sm text-base-content">Overview</p>
+          </div>
+        </div>
 
     {/* FILTERS */}
     <div
@@ -169,7 +169,7 @@ return (
         sm:gap-4
         sm:items-center
         bg-base-100
-        p-4
+        p-2
         rounded-xl
         shadow-sm
         border
@@ -177,6 +177,7 @@ return (
       "
     >
       <Select
+      size="sm"
         value={month}
         onChange={(e) => setMonth(Number(e.target.value))}
         className="w-full "
@@ -215,12 +216,12 @@ return (
       
       {/* DESKTOP TABLE */}
       <div className="hidden md:block overflow-x-auto">
-        <table className="w-full text-left">
-          <thead className="bg-primary text-primary-content">
+        <table className="table-xs w-full text-left">
+          <thead className="text-[15px] bg-primary text-primary-content">
             <tr>
-              <th className="p-4 whitespace-nowrap">Employee</th>
-              <th className="p-4 whitespace-nowrap">Net Salary</th>
-              <th className="p-4 whitespace-nowrap">Status</th>
+              <th className=" whitespace-nowrap">Employee</th>
+              <th className=" whitespace-nowrap">Net Salary</th>
+              <th className=" whitespace-nowrap">Status</th>
             </tr>
           </thead>
 
@@ -256,7 +257,7 @@ return (
               <tr>
                 <td
                   colSpan={4}
-                  className="p-6 text-center text-base-content/60"
+                  className="text-sm p-6 text-center text-base-content/60"
                 >
                   No records found for this month.
                 </td>

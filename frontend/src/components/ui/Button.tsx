@@ -31,7 +31,7 @@ export default function Button({
 }: ButtonProps) {
   return (
     <button
-      className={`btn ${variantClasses[variant]} ${sizeClasses[size]} rounded-xl font-medium text-xs tracking-wide transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 active:scale-[0.98] active:translate-y-0 ${className} cursor-pointer`}
+      className={`btn ${variantClasses[variant]} ${sizeClasses[size]} rounded-xl font-medium text-[12px] tracking-wide transition-all duration-200 hover:shadow-md hover:-translate-y-0.5 active:scale-[0.98] active:translate-y-0 ${className} cursor-pointer`}
       {...props}
     >
       {children}

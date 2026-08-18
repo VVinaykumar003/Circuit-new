@@ -5,10 +5,10 @@ import * as z from "zod";
 import { MdSave, MdContentCopy, MdAdd, MdDelete, MdCloudUpload, MdPersonAdd, MdCheckCircle } from "react-icons/md";
 import { toast } from "react-toastify";
 import { useNavigate, useParams } from "react-router-dom";
-import { useAuth } from "@/auth/useAuth"; 
-import { createSalesRep, getSalesRepById, getSalesReps, updateSalesRep } from "@/services/sales/salesRepServices";
+import { useAuth } from "@/auth/AuthContext";
+import { createSalesRep, getSalesRepById, getSalesReps, updateSalesRep } from "@/services/salesRepServices";
 import { useQuery } from "@tanstack/react-query";
-import { getSalesEmployees } from "@/services/IT/memberService";
+import { getSalesEmployees } from "@/services/memberService";
 
 /* ─────────────────────────── Zod Schema ─────────────────────────── */
 const salesRepSchema = z.object({

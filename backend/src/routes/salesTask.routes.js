@@ -12,7 +12,7 @@ router.get("/:slug/get-task-by-empId",auth,tenant,getSalesTaskByEmpId);
 router.get('/:slug/get-all-sales-tasks', auth, tenant,getSalesTasks);
 router.get('/:slug/:id', auth, tenant, requireRole(allowedRoles), getSalesTaskById);
 router.put('/:slug/:id', auth, tenant, requireRole(allowedRoles), updateSalesTask);
-router.delete('/:slug/sales-tasks/:id', auth, tenant, requireRole(allowedRoles), deleteSalesTask);
+router.delete('/:slug/sales-tasks/:id', auth, tenant, requireRole(allowedRoles),  deleteSalesTask);
 
 
 module.exports = router;

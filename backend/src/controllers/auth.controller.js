@@ -184,8 +184,8 @@ exports.login = async (req, res) => {
         role: user.role,
         slug: org.slug,
         department: user.department || null,
-        employeeId: user.employeeId || null,
-        },
+
+},
       secret,
       { expiresIn: "1d" }
     );
@@ -213,33 +213,49 @@ exports.login = async (req, res) => {
       organization: user.organization,
       slug: org.slug,
       department: user.department || null,
-      employeeId: user.employeeId || null,
+      
+    
     }), {
       secure: process.env.NODE_ENV === "production",
       maxAge: 24 * 60 * 60 * 1000 // 1 day
     });
-     logger.info(`Login success: ${email}`);
+
+    
+    
+
+    logger.info(`Login success: ${email}`);
     
     console.log(
       chalk.blue(`🔐 User logged in: ${email}`)
     );
+
+    // return res.json({
+    //   message: "Login successful",
+    //   user: {
+    //     name: user.adminName,
+    //     email: user.email,
+    //     role: user.role,
+    //     slug: user.slug,
+    //   },
+    // });
     
       return res.json({
         message: "Login successful",
-        token: token,
+      token: token,
         slug: org.slug,
          user: {
           
         userId:user._id,
+          userId: user._id,
         name: user.name,
         email: user.email,
+
         role: user.role,
         organization: user.organization,
         slug: org.slug,
         department: user.department || null,
         customDepartment: user.customDepartment || null,
         imageUrl: user.imageUrl || null,
-        employeeId: user.employeeId || null,
       
       },
       });
@@ -279,7 +295,7 @@ exports.getMe =  async (req, res) => {
         email: user.email,
         role: user.role,
         organization: user.organization,
-        employeeId: user.employeeId
+       
       },
        slug: org.slug 
     });
@@ -314,7 +330,6 @@ exports.getMe =  async (req, res) => {
         department: user.department || null,
          imageUrl: user.imageUrl || null,
          token: req.cookies.token || null,
-         employeeId: user.employeeId || null,
       },
        slug: org.slug ,
     });

@@ -111,6 +111,7 @@ const userSchema = new mongoose.Schema({
     "customer-support",
     "it",
     "human-resource and administration",
+    
     "other",
   ],
   

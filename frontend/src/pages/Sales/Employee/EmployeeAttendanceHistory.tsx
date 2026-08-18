@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Download, FileText, Printer, CalendarCheck, CalendarX, Plane, Clock3, Timer, TrendingUp, List, GitBranch, Percent } from "lucide-react";
+import { Download, FileText, Printer, CalendarCheck, CalendarX, Plane, Clock3, Timer,  List, GitBranch, Percent } from "lucide-react";
 import AttendanceStats from "@/components/sales/AttendanceStats";
 import AttendanceFilters from "@/components/sales/AttendanceFilters";
 import AttendanceTable from "@/components/sales/AttendanceTable";
@@ -7,7 +7,7 @@ import AttendanceTimeline from "@/components/sales/AttendanceTimeline";
 import AttendanceDetailsDrawer from "../../../components/sales/AttendanceDetailsDrawer";
 import { useMyAttendance, useMyStats } from "../../../hooks/useAttendance";
 import { defaultAttendanceFilters } from "../../../type/attendance";
-import { useAuth } from "@/auth/useAuth"; 
+import { useAuth } from "@/auth/AuthContext";
 import type { Attendance, AttendanceFilters as Filters } from "../../../type/attendance";
 
 type ViewMode = "table" | "timeline";
@@ -33,16 +33,19 @@ export default function EmployeeAttendanceHistory() {
       ).getDate()}`,
     }),
   });
+ 
 
   const records: Attendance[] =
     data?.data?.data?.map((item: any) => ({
-      ...item.record, // Spread the nested record details
-      id: item.record._id, // Ensure a unique ID for React keys
+      ...item
+, // Spread the nested record details
+      id: item.employee._id, // Ensure a unique ID for React keys
       date: item.date, // Use the parent date
     })) ?? [];
 
 
-  const totalPages = data ? Math.max(1, Math.ceil(data.total / pageSize)) : 1;
+
+  const totalPages = data ? Math.max(1, Math.ceil(data?.data?.total / pageSize)) : 1;
 
 
   function handleFiltersChange(next: Filters) {
@@ -106,7 +109,7 @@ export default function EmployeeAttendanceHistory() {
               <GitBranch className="w-3.5 h-3.5" /> Timeline
             </button>
           </div>
-          {data && <p className="text-xs text-base-content/50">{data.total} records</p>}
+          {data && <p className="text-xs text-base-content/50">{data?.data?.total} records</p>}
         </div>
 
         {/* Content */}
@@ -115,6 +118,8 @@ export default function EmployeeAttendanceHistory() {
             records={records}
             loading={isLoading}
             error={isError ? "Failed to load attendance records." : null}
+            showEmployeeColumn={true}
+            showAdminColumns={true}
             onRetry={() => refetch()}
             onView={setSelected}
             onResetFilters={() => handleFiltersChange(defaultAttendanceFilters)}
@@ -124,7 +129,7 @@ export default function EmployeeAttendanceHistory() {
         )}
 
         {/* Pagination */}
-        {data && data.total > 0 && (
+        {data && data?.data?.total > 0 && (
           <div className="flex items-center justify-between">
             <p className="text-xs text-base-content/50">
               Page {page} of {totalPages}

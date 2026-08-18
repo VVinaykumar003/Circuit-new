@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import Button from "@/components/ui/Button";
 
-import { useAuth } from "@/auth/useAuth"; 
+import { useAuth } from "@/auth/AuthContext";
 
 interface Props {
   basic: number;
@@ -21,17 +21,17 @@ export default function GlobalPayoutConfig({
   const { auth } = useAuth();
  
   return (
-    <div className="bg-primary text-primary-content rounded-2xl p-4 shadow-lg transition-all">
+    <div className="bg-primary text-primary-content rounded-2xl p-2.5 shadow-md transition-all">
       
       {/* HEADER */}
       <div className="flex justify-between items-center">
-        <h2 className="font-semibold tracking-wide text-sm flex items-center gap-2">
+        <h2 className="font-semibold tracking-wide text-[13px] flex items-center gap-2">
            GLOBAL PAYOUT CONFIGURATION
         </h2>
 
         <button
           onClick={() => setOpen(!open)}
-          className="btn btn-sm rounded-full bg-base-100 text-primary hover:bg-base-200"
+          className="btn btn-xs rounded-full bg-base-100 text-primary hover:bg-base-200"
         >
           {open ? "Close" : "Modify Default %"}
         </button>

@@ -48,14 +48,14 @@ import {
   Line
 } from "recharts";
 import { toast } from "react-toastify";
-import { useAuth } from "@/auth/useAuth"; 
-import { getSalesReps, updateSalesRep, deleteSalesRep, createSalesRep, type SalesRep } from "@/services/sales/salesRepServices";
+import { useAuth } from "@/auth/AuthContext";
+import { getSalesReps, updateSalesRep, deleteSalesRep, createSalesRep, type SalesRep } from "@/services/salesRepServices";
 import ImportExportActions from "@/components/import-export/ImportExportActions";
 import type { ColumnConfig } from "@/type/importExport.types";
 
 const salesRepColumns: ColumnConfig[] = [
   { key: "employeeCode", label: "Employee Code", required: true, type: "string" },
-  { key: "name", label: "Full Name", required: true, type: "string" },
+  { key: "fullName", label: "Full Name", required: true, type: "string" },
   { key: "email", label: "Email", required: true, type: "email" },
   { key: "phone", label: "Phone", required: true, type: "string" },
   { key: "designation", label: "Designation", type: "string" },
@@ -102,21 +102,48 @@ export default function AllSalesReps() {
     queryFn: () => getSalesReps(auth.slug || "default-tenant"),
   });
   console.log(data)
-  const reps = useMemo(() => {
-    return (data?.data || []).map((r: any) => ({
-      ...r,
-      id: r._id || r.id,
-      name:r.memberId?.name,
-      email:r.memberId?.email,
-      phone:r.memberId?.phone,
-      joiningDate:r.memberId?.joiningDate,
-      status: r.status || r.employmentStatus || "Active",
-      achievement: r.achievement || r.monthlyAchievement || 0,
-      monthlyTarget: r.monthlyTarget || 0,
-      revenueGenerated: r.revenueGenerated || 0,
-    }));
-  }, [data]);
+  // const reps = useMemo(() => {
 
+  //   return (data?.data || []).map((r: any) => ({
+  //     ...r,
+  //     id: r._id || r.id,
+  //     name:r.memberId?.name,
+  //     email:r.memberId?.email,
+  //     phone:r.memberId?.phone,
+  //     joiningDate:r.memberId?.joiningDate,
+  //     status: r.status || r.employmentStatus || "Active",
+  //     achievement: r.achievement || r.monthlyAchievement || 0,
+  //     monthlyTarget: r.monthlyTarget || 0,
+  //     revenueGenerated: r.revenueGenerated || 0,
+  //   }));
+  // }, [data]);
+
+
+  const reps = useMemo(() => {
+  return (data?.data || []).map((r: any) => ({
+    ...r,
+    id: r._id || r.id,
+
+    fullName: r.memberId?.name || "",
+    email: r.memberId?.email || "",
+    phone: r.memberId?.phone || "",
+    joiningDate: r.memberId?.joiningDate || "",
+
+    status: r.status || r.employmentStatus || "Active",
+
+    achievement: Number(
+      r.achievement || r.monthlyAchievement || 0
+    ),
+
+    monthlyTarget: Number(
+      r.monthlyTarget || 0
+    ),
+
+    revenueGenerated: Number(
+      r.revenueGenerated || 0
+    ),
+  }));
+}, [data]);
   // Mutations
   const updateMutation = useMutation({
     mutationFn: (vars: { id: string; payload: Partial<SalesRep> }) => updateSalesRep(vars.id, vars.payload, auth.slug || "default-tenant"),
@@ -202,19 +229,57 @@ export default function AllSalesReps() {
   };
 
   // Analytics & Stats
-  const stats = useMemo(() => {
-    return {
-      total: reps.length,
-      active: reps.filter(r => r.status === "Active").length,
-      inactive: reps.filter(r => r.status === "Inactive").length,
-      onLeave: reps.filter(r => r.status === "On Leave").length,
-      totalTarget: reps.reduce((sum, r) => sum + r.monthlyTarget, 0),
-      totalAchievement: reps.reduce((sum, r) => sum + r.achievement, 0),
-      totalRevenue: reps.reduce((sum, r) => sum + r.revenueGenerated, 0),
-      avgConv: reps.length ? (reps.reduce((sum, r) => sum + (r.achievement / r.monthlyTarget), 0) / reps.length) * 100 : 0,
-    };
-  }, [reps]);
+  // const stats = useMemo(() => {
+  //   return {
+  //     total: reps.length,
+  //     active: reps.filter(r => r.status === "Active").length,
+  //     inactive: reps.filter(r => r.status === "Inactive").length,
+  //     onLeave: reps.filter(r => r.status === "On Leave").length,
+  //     totalTarget: reps.reduce((sum, r) => sum + r.monthlyTarget, 0),
+  //     totalAchievement: reps.reduce((sum, r) => sum + r.achievement, 0),
+  //     totalRevenue: reps.reduce((sum, r) => sum + r.revenueGenerated, 0),
+  //     avgConv: reps.length ? (reps.reduce((sum, r) => sum + (r.achievement / r.monthlyTarget), 0) / reps.length) * 100 : 0,
+  //   };
+  // }, [reps]);
+const stats = useMemo(() => {
+  const repsWithTarget = reps.filter(
+    r => Number(r.monthlyTarget) > 0
+  );
 
+  const avgConv = repsWithTarget.length
+    ? (
+        repsWithTarget.reduce(
+          (sum, r) =>
+            sum + (Number(r.achievement || 0) / Number(r.monthlyTarget)),
+          0
+        ) / repsWithTarget.length
+      ) * 100
+    : 0;
+
+  return {
+    total: reps.length,
+    active: reps.filter(r => r.status === "Active").length,
+    inactive: reps.filter(r => r.status === "Inactive").length,
+    onLeave: reps.filter(r => r.status === "On Leave").length,
+
+    totalTarget: reps.reduce(
+      (sum, r) => sum + Number(r.monthlyTarget || 0),
+      0
+    ),
+
+    totalAchievement: reps.reduce(
+      (sum, r) => sum + Number(r.achievement || 0),
+      0
+    ),
+
+    totalRevenue: reps.reduce(
+      (sum, r) => sum + Number(r.revenueGenerated || 0),
+      0
+    ),
+
+    avgConv,
+  };
+}, [reps]);
   const performanceData = useMemo(() => reps.map(r => ({
     name: r.fullName,
     target: r.monthlyTarget,
@@ -224,23 +289,40 @@ export default function AllSalesReps() {
 
   const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
 
-  // Filtering
-  const filteredReps = useMemo(() => {
-    let result = reps;
-    if (search) {
-      const lowerSearch = search.toLowerCase();
-      result = result.filter(r => 
-        r.fullName.toLowerCase().includes(lowerSearch) || 
-        r.employeeCode.toLowerCase().includes(lowerSearch) ||
-        r.email.toLowerCase().includes(lowerSearch) ||
-        r.team.toLowerCase().includes(lowerSearch)
-      );
-    }
-    if (filterStatus !== "All") result = result.filter(r => r.status === filterStatus);
-    if (filterDesignation !== "All") result = result.filter(r => r.designation === filterDesignation);
-    if (filterTeam !== "All") result = result.filter(r => r.team === filterTeam);
-    return result;
-  }, [reps, search, filterStatus, filterDesignation, filterTeam]);
+ const filteredReps = useMemo(() => {
+  const lowerSearch = search.trim().toLowerCase();
+
+  return reps.filter((r) => {
+    const matchesSearch =
+      !lowerSearch ||
+      r.fullName?.toLowerCase().includes(lowerSearch) ||
+      r.employeeCode?.toLowerCase().includes(lowerSearch) ||
+      r.email?.toLowerCase().includes(lowerSearch) ||
+      r.team?.toLowerCase().includes(lowerSearch);
+
+    const matchesStatus =
+      filterStatus === "All" || r.status === filterStatus;
+
+    const matchesDesignation =
+      filterDesignation === "All" || r.designation === filterDesignation;
+
+    const matchesTeam =
+      filterTeam === "All" || r.team === filterTeam;
+
+    return (
+      matchesSearch &&
+      matchesStatus &&
+      matchesDesignation &&
+      matchesTeam
+    );
+  });
+}, [
+  reps,
+  search,
+  filterStatus,
+  filterDesignation,
+  filterTeam,
+]);
 
   // Table Definition
   const columnHelper = createColumnHelper<SalesRep>();
@@ -254,7 +336,7 @@ export default function AllSalesReps() {
         <input type="checkbox" className="checkbox checkbox-sm checkbox-primary" checked={row.getIsSelected()} onChange={row.getToggleSelectedHandler()} onClick={(e) => e.stopPropagation()} />
       ),
     }),
-    columnHelper.accessor("name", {
+    columnHelper.accessor("fullName", {
       header: "Representative",
       cell: (info) => (
         <div className="flex items-center gap-3">
@@ -269,7 +351,7 @@ export default function AllSalesReps() {
     />
   ) : (
     <span>
-      {info.row.original.name?.charAt(0).toUpperCase()}
+      {info.row.original.fullName?.charAt(0).toUpperCase()}
     </span>
   )}
             </div>
@@ -460,7 +542,7 @@ export default function AllSalesReps() {
           </div>
           <div className="flex items-end gap-2">
             <button className="btn btn-sm btn-ghost flex-1" onClick={() => { setFilterStatus("All"); setFilterDesignation("All"); setFilterTeam("All"); }}>Reset</button>
-            <button className="btn btn-sm btn-primary flex-1" onClick={() => setShowFilters(false)}>Apply</button>
+            {/* <button className="btn btn-sm btn-primary flex-1" onClick={() => setShowFilters(false)}>Apply</button> */}
           </div>
         </div>
       )}
@@ -652,12 +734,12 @@ export default function AllSalesReps() {
               <div className="flex items-center gap-4">
                 <div className="avatar placeholder">
                   <div className="bg-primary text-primary-content rounded-full w-14 h-14 text-xl font-bold shadow-sm">
-                    {selectedRep?.avatarUrl ? <img src={selectedRep.avatarUrl} alt="Profile" /> : <span className="flex items-center justify-center mt-2.5">{selectedRep?.name?.[0]}</span>}
+                    {selectedRep?.avatarUrl ? <img src={selectedRep.avatarUrl} alt="Profile" /> : <span className="flex items-center justify-center mt-2.5">{selectedRep?.fullName?.[0]}</span>}
                   </div>
                 </div>
                 <div>
                   <h2 className="text-2xl font-bold text-base-content leading-tight flex items-center gap-2">
-                    {selectedRep?.name}
+                    {selectedRep?.fullName}
                     {selectedRep?.isTopPerformer && <MdCheckCircle className="text-success" title="Top Performer" />}
                   </h2>
                   <p className="text-sm font-medium text-base-content/60 mt-0.5">{selectedRep?.designation} • {selectedRep?.team}</p>

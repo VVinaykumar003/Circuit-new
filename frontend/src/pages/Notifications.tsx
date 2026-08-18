@@ -5,12 +5,12 @@ import NotificationPage from "@/components/notification/NotificationPages";
 import SendNotificationModal from "@/components/notification/SendNotificationModal";
 
 import { MdSend, MdNotificationsNone } from "react-icons/md";
-import { getMembers } from "@/services/IT/memberService";
-import { useAuth } from "@/auth/useAuth"; 
+import { getMembers } from "@/services/memberService";
+import { useAuth } from "@/auth/AuthContext";
 import {
   deleteNotification,
   getNotifications,
-} from "@/services/IT/notificationService";
+} from "@/services/notificationService";
 import Swal from "sweetalert2";
 import Button from "@/components/ui/Button";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
@@ -118,7 +118,7 @@ export default function Notifications() {
 
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <h1 className="text-xl md:text-2xl font-semibold">Notifications</h1>
+          <h1 className="text-xl sm:text-lg font-bold">Notifications</h1>
 
           {["admin", "owner"].includes(currentUserRole) && (
             <Button

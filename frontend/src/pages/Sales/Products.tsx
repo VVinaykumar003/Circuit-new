@@ -1,345 +1,93 @@
 import React, { useState, useRef, useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { MdSave, MdContentCopy, MdAttachment, MdDelete, MdAdd, MdCheckCircle } from "react-icons/md";
+import { MdSave, MdContentCopy, MdAttachment, MdDelete, MdAdd, MdCheckCircle, MdInfoOutline } from "react-icons/md";
 import { toast } from "react-toastify";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
-import {useAuth} from "@/auth/useAuth"; 
-import { createProduct, getProductById, updateProduct } from "@/services/sales/productServices";
+import { useProduct } from "@/hooks/useProduct";
+import { FaWindows, FaApple, FaLinux, FaAndroid, FaAppleWhole, FaGlobe } from "react-icons/fa6";
+import {InfoCard ,FormSection, FormRow,  } from "@/components/sales/Product/ProcductComponent";
+// import type { Product } from "@/type/salesProduct";
 
-/* ─────────────────────────── types ─────────────────────────── */
-const productSchema = z.object({
-  // Basic
-  productGroup: z.string().min(1, "Product Group is required"),
-  productName: z.string().min(1, "Product Name is required").max(200),
-  productCode: z.string().min(1, "Product Code is required"),
-  sku: z.string().optional(),
-  barcode: z.string().optional(),
-  status: z.enum(["Active", "Inactive", "Discontinued"]).default("Active"),
-  description: z.string().optional(),
-  
-  // Pricing
-  costPrice: z.coerce.number().min(0, "Must be a positive number"),
-  sellingPrice: z.coerce.number().min(0, "Must be a positive number"),
-  tax: z.coerce.number().min(0).max(100).default(18),
-  discount: z.coerce.number().min(0).max(100).default(0),
-  
-  // Inventory
-  stockTracking: z.boolean().default(true),
-  openingStock: z.coerce.number().min(0, "Cannot be negative").default(0),
-  reorderLevel: z.coerce.number().min(0, "Cannot be negative").default(0),
-  uom: z.string().optional(),
-  warehouse: z.string().optional(),
-  
-  // Categorization
-  brand: z.string().optional(),
-  category: z.string().optional(),
-  subCategory: z.string().optional(),
-  tags: z.array(z.string()).optional(),
-  
-  // Sales Config
-  availableForSale: z.boolean().default(true),
-  allowDiscount: z.boolean().default(true),
-  minQty: z.coerce.number().min(0, "Cannot be negative").default(0),
-  maxQty: z.coerce.number().min(0).optional(),
-  commission: z.coerce.number().min(0).max(100).default(0),
-  
-  // SEO
-  metaTitle: z.string().optional(),
-  metaDescription: z.string().optional(),
-  keywords: z.string().optional(),
-}).superRefine((data, ctx) => {
-  if (data.maxQty !== undefined && data.maxQty > 0 && data.maxQty <= data.minQty) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      message: "Maximum Quantity must be greater than Minimum Quantity",
-      path: ["maxQty"],
-    });
-  }
-});
-
-type ProductFormValues = z.infer<typeof productSchema>;
-
-/* ── Shared Component: Form Row ── */
-const FormRow = ({ label, required, error, children }: { label: string, required?: boolean, error?: string, children: React.ReactNode }) => (
-  <div className="grid grid-cols-1 md:grid-cols-[180px_1fr] items-start gap-4">
-    <label className="text-sm font-medium text-base-content/80 pt-2.5">
-      {label} {required && <span className="text-error">*</span>}
-    </label>
-    <div className="w-full">
-      {children}
-      {error && <p className="text-error text-xs mt-1">{error}</p>}
-    </div>
-  </div>
-);
 
 /* ─────────────────────────── component ─────────────────────── */
-export default function NewProduct() { 
+export default function NewProduct() {
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const location = useLocation();
   const duplicateProduct = location.state?.duplicateProduct;
   const isEditMode = !!id;
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [newBrandInput, setNewBrandInput] = useState(""); // Added state for newBrandInput
+  const [newCategoryInput, setNewCategoryInput] = useState(""); // Added state for newCategoryInput
   const [successModalOpen, setSuccessModalOpen] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
-  const { auth } = useAuth();
-  
-  const [images, setImages] = useState<File[]>([]);
-  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
-  const [documents, setDocuments] = useState<File[]>([]);
+
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const docInputRef = useRef<HTMLInputElement>(null);
+  // const docInputRef = useRef<HTMLInputElement>(null);
 
-  // Custom Brands and Categories State
-  const [customBrands, setCustomBrands] = useState<string[]>([]);
-  const [newBrandInput, setNewBrandInput] = useState("");
-  const [customCategories, setCustomCategories] = useState<string[]>([]);
-  const [newCategoryInput, setNewCategoryInput] = useState("");
 
-  const { register, handleSubmit, watch, setValue, reset, formState: { errors } } = useForm<ProductFormValues>({
-    resolver: zodResolver(productSchema),
-    defaultValues: {
-      status: "Active",
-      stockTracking: true,
-      tax: 18,
-      discount: 0,
-      openingStock: 0,
-      reorderLevel: 0,
-      availableForSale: true,
-      allowDiscount: true,
-      minQty: 0,
-      commission: 0,
-      costPrice: 0,
-      sellingPrice: 0,
-    }
+  const { // Destructure from useProduct
+    register,
+    handleSubmit,
+    watch,
+    control,
+    reset,
+    errors,
+    imagePreviews,
+    profitMargin,
+    // Removed unused variables from the old spec
+    handleAutoGenerateCode,
+    loadTemplate,
+    handleImageChange,
+    removeImage,
+    handleImageDragOver,
+    handleImageDrop,
+    onSubmit: hookOnSubmit,
+  } = useProduct({
+    productId: id,
+    duplicateProduct,
+    onSuccess: (message) => {
+      setSuccessMessage(message);
+      setSuccessModalOpen(true);
+    },
+    onError: (message) => {
+      toast.error(message);
+    },
   });
 
-  /* ── Fetch Product Data if in Edit Mode ── */
-  useEffect(() => {
-    if (isEditMode && id && auth?.slug) {
-      const fetchProduct = async () => {
-        try {
-          const product = await getProductById(id, auth.slug);
-          if (product) {
-            // Map backend product structure to form values
-            reset({ ...product });
-            
-            if (product.imageUrl) {
-              setImagePreviews([product.imageUrl]);
-            } else if (product.images && product.images.length > 0) {
-              setImagePreviews(product.images);
-            }
-          }
-        } catch (error: unknown) {
-          toast.error("Failed to load product details.",error);
-        }
-      };
-      fetchProduct();
-    } else if (duplicateProduct && !isEditMode) {
-      // Hydrate form using the duplicated product data
-      reset({
-        ...duplicateProduct,
-        productName: `${duplicateProduct.productName} (Copy)`,
-        productCode: `${duplicateProduct.productCode}-COPY`,
-      });
-      if (duplicateProduct.imageUrl) {
-        setImagePreviews([duplicateProduct.imageUrl]);
-      } else if (duplicateProduct.images && duplicateProduct.images.length > 0) {
-        setImagePreviews(duplicateProduct.images);
-      }
-    }
-  }, [isEditMode, id, auth?.slug, reset, duplicateProduct]);
-
-  // Watches for Real-Time UI Updates
-  const wCostPrice = watch("costPrice") || 0;
-  const wSellingPrice = watch("sellingPrice") || 0;
-  const profitMargin = wSellingPrice - wCostPrice;
-
-  const wProductGroup = watch("productGroup");
-  const wProductCode = watch("productCode");
-  const wStatus = watch("status");
-  const wStock = watch("openingStock");
-  const wBrand = watch("brand");
-
-  /* ── Smart Features ── */
-  const handleAutoGenerateCode = () => {
-    const code = `PRD-${Math.floor(Math.random() * 100000).toString().padStart(5, '0')}`;
-    setValue("productCode", code);
-  };
-
-  const loadTemplate = (type: string) => {
-    if (type === "Electronics") {
-      setValue("productGroup", "Electronics");
-      setValue("tax", 18);
-      setValue("uom", "Piece");
-    }
-  };
-
+  // Placeholder functions for adding brand/category
   const handleAddBrand = () => {
-    if (newBrandInput.trim()) {
-      setCustomBrands(prev => [...prev, newBrandInput.trim()]);
-      setValue("brand", newBrandInput.trim());
-      setNewBrandInput("");
-      (document.getElementById('add_brand_modal') as HTMLDialogElement).close();
-    }
+    // Logic to add brand (e.g., API call, update state)
+    console.log("Adding brand:", newBrandInput);
   };
 
   const handleAddCategory = () => {
-    if (newCategoryInput.trim()) {
-      setCustomCategories(prev => [...prev, newCategoryInput.trim()]);
-      setValue("category", newCategoryInput.trim());
-      setNewCategoryInput("");
-      (document.getElementById('add_category_modal') as HTMLDialogElement).close();
-    }
+    // Logic to add category (e.g., API call, update state)
+    console.log("Adding category:", newCategoryInput);
   };
-
-  /* ── Auto Save Draft ── */
-  useEffect(() => {
-    const interval = setInterval(() => {
-      console.log("Product Draft auto-saved...");
-    }, 60000); // Save draft every 60 seconds
-    return () => clearInterval(interval);
-  }, []);
-
-  /* ── File Uploads ── */
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const newFiles = Array.from(e.target.files);
-      if (images.length + newFiles.length > 5) {
-        toast.error("Maximum 5 images allowed.");
-        return;
-      }
-      const validFiles = newFiles.filter(f => ["image/jpeg", "image/png", "image/webp"].includes(f.type));
-      setImages([...images, ...validFiles]);
-      setImagePreviews([...imagePreviews, ...validFiles.map(f => URL.createObjectURL(f))]);
-    }
-  };
-
-  const removeImage = (index: number) => {
-    setImages(images.filter((_, i) => i !== index));
-    setImagePreviews(imagePreviews.filter((_, i) => i !== index));
-  };
-
-  const handleImageDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-  };
-
-  const handleImageDrop = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    if (e.dataTransfer.files) {
-      const newFiles = Array.from(e.dataTransfer.files);
-      if (images.length + newFiles.length > 5) {
-        toast.error("Maximum 5 images allowed.");
-        return;
-      }
-      const validFiles = newFiles.filter(f => ["image/jpeg", "image/png", "image/webp"].includes(f.type));
-      setImages([...images, ...validFiles]);
-      setImagePreviews([...imagePreviews, ...validFiles.map(f => URL.createObjectURL(f))]);
-    }
-  };
-
-  const handleDocChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const validDocs = Array.from(e.target.files).filter(f => 
-        f.name.endsWith(".pdf") || f.name.endsWith(".docx") || f.name.endsWith(".xlsx")
-      );
-      setDocuments([...documents, ...validDocs]);
-    }
-  };
-
-  const removeDoc = (index: number) => {
-    setDocuments(documents.filter((_, i) => i !== index));
-  };
-
-  /* ── Submit Handler ── */
-  const onSubmit = async (data: ProductFormValues) => {
-    setIsSubmitting(true);
-    try {
-      // Convert form data and files into a multipart/form-data payload
-      const formData = new FormData();
-      
-      Object.entries(data).forEach(([key, value]) => {
-        if (value !== undefined && value !== null && value !== "") {
-          if (Array.isArray(value)) {
-            value.forEach((val) => formData.append(key, val));
-          } else {
-            formData.append(key, String(value));
-          }
-        }
-      });
-
-      images.forEach((img) => formData.append("images", img));
-      documents.forEach((doc) => formData.append("documents", doc));
-
-      // Append existing image URLs if any (useful for duplicate)
-      const existingImages = imagePreviews.filter(src => src.startsWith('http'));
-      if (existingImages.length > 0) {
-        formData.append("imageUrl", existingImages[0]);
-      }
-
-      let response: { 
-        success?: boolean; 
-        status?: number; 
-        data?: { success?: boolean; message?: string }; 
-        _id?: string; 
-        id?: string; 
-        error?: string | boolean; 
-        message?: string; 
-      } | undefined;
-      if (isEditMode && id) {
-        response = await updateProduct(id, formData as any, auth.slug || "default-tenant");
-      } else {
-        console.log(formData)
-        response = await createProduct(formData as any, auth.slug || "default-tenant");
-      }
-      
-      // Check for common backend success indicators (success boolean, HTTP status, or returned IDs)
-      const isSuccess = response && (
-        response.success === true || 
-        response.status === 200 || 
-        response.status === 201 || 
-        response.data?.success === true || 
-        response._id || 
-        response.id ||
-        isEditMode // Assume implicit success on edit if no error is thrown
-      );
-      // If there's no success property but also no error/message, assume it's implicitly successful
-      const isImplicitSuccess = response && response.success === undefined && !response.error && !response.message;
-
-      if (isSuccess || isImplicitSuccess) {
-        setSuccessMessage(isEditMode ? "Product updated successfully!" : "Product created successfully!");
-        setSuccessModalOpen(true);
-      } else {
-        toast.error(response?.data?.message || response?.message || `Failed to ${isEditMode ? "update" : "create"} product.`);
-      }
-    } catch (error: unknown) {
-      const err = error as { response?: { data?: { message?: string } }; message?: string };
-      toast.error(err?.response?.data?.message || err?.message || `Failed to ${isEditMode ? "update" : "create"} product.`);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  // Use hookIsSubmitting from useProduct for the button disabled state
+  const isSubmittingLocal = isSubmitting;
 
   return (
-    <div className="min-h-screen bg-base-200 p-4 md:p-6 lg:p-8 font-sans">
+    <div className="min-h-screen bg-base-200 padding-[16px] md:padding-[24px] lg:padding-[32px] font-sans">
       
       {/* ── Page Header ── */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 bg-base-100 p-5 rounded-xl border border-base-300 shadow-sm">
-        <div>
-          <h1 className="text-2xl font-bold text-base-content tracking-tight">{isEditMode ? "Edit Product" : "Add Product"}</h1>
-          <div className="text-sm text-base-content/60 breadcrumbs mt-1">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center margin-bottom-[24px] gap-[16px] bg-base-100 padding-[20px] rounded-[12px] border border-base-300 shadow-[0_1px_3px_rgba(0,0,0,0.08)] mb-3">
+        <div className="p-2">
+          <h1 className="text-[24px] font-[700] text-base-content tracking-tight">{isEditMode ? "Edit Software Product" : "Add New Software Product"}</h1>
+          <div className="text-[14px] text-base-content/60 breadcrumbs margin-top-[4px]">
             <ul>
               <li>Dashboard</li>
               <li>Sales</li>
               <li>Products</li>
-              <li className="font-semibold text-primary">{isEditMode ? "Edit Product" : "Add Product"}</li>
+              <li className="font-[600] text-primary">{isEditMode ? "Edit Product" : "Add Product"}</li>
             </ul>
           </div>
         </div>
-        <div className="flex gap-2 flex-wrap">
-          <button type="button" className="btn btn-outline btn-sm gap-2" onClick={() => loadTemplate("Electronics")}>
+        <div className="flex gap-[8px] flex-wrap">
+          <button type="button" className="btn btn-outline btn-sm gap-2" onClick={() => loadTemplate("Software")}>
             <MdContentCopy size={16} /> Load Template
           </button>
           <button type="button" className="btn btn-outline btn-sm gap-2">
@@ -349,259 +97,233 @@ export default function NewProduct() {
         </div>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+      <form onSubmit={handleSubmit(hookOnSubmit)} className="grid grid-cols-1 lg:grid-cols-4 gap-[24px]">
         
         {/* ── Left Column (Form Sections) ── */}
-        <div className="lg:col-span-3 space-y-4">
+        <div className="lg:col-span-3 space-y-[16px]">
           
-          {/* 1. Basic Product Info */}
-          <div className="collapse collapse-arrow bg-base-100 border border-base-300 rounded-xl">
-            <input type="checkbox" defaultChecked />
-            <div className="collapse-title text-lg font-semibold border-b border-base-200">
-              1. Basic Product Information
-            </div>
-            <div className="collapse-content pt-5 space-y-4">
-              <FormRow label="Product Group" required error={errors.productGroup?.message}>
-                <select {...register("productGroup")} className={`select select-bordered w-full ${errors.productGroup ? "select-error" : ""}`}>
-                  <option value="">-Select Group-</option>
-                  <option value="Electronics">Electronics</option>
-                  <option value="Software">Software</option>
-                  <option value="Hardware">Hardware</option>
-                  <option value="Services">Services</option>
-                  <option value="Accessories">Accessories</option>
+          {/* 1. Software Information */}
+          <FormSection title="1. Software Information" defaultExpanded>
+            <FormRow label="Product Name" required error={errors.productName?.message}>
+              <input {...register("productName")} className={`input input-bordered width-full ${errors.productName ? "input-error" : ""}`} placeholder="e.g. Circuit CRM Enterprise" />
+            </FormRow>
+            
+            <FormRow label="Product Code" required error={errors.productCode?.message}>
+              <div className="flex gap-[8px]">
+                <input {...register("productCode")} className={`input input-bordered width-full ${errors.productCode ? "input-error" : ""}`} placeholder="e.g. CRM-ENT-001" />
+                <button type="button" onClick={handleAutoGenerateCode} className="btn btn-outline btn-primary whitespace-nowrap">Auto Generate</button>
+              </div>
+            </FormRow>
+
+            <FormRow label="SKU" error={errors.sku?.message}>
+              <input {...register("sku")} className="input input-bordered width-full" placeholder="Stock Keeping Unit (optional)" />
+            </FormRow>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-[16px]">
+              <FormRow label="Product Type" required error={errors.productType?.message}>
+                <select {...register("productType")} className={`select select-bordered width-full ${errors.productType ? "select-error" : ""}`}>
+                  <option value="">-Select Type-</option>
+                  <option value="ERP">ERP</option>
+                  <option value="CRM">CRM</option>
+                  <option value="SaaS">SaaS</option>
+                  <option value="POS">POS</option>
+                  <option value="HRMS">HRMS</option>
+                  <option value="Other">Other</option>
                 </select>
               </FormRow>
               
-              <FormRow label="Product Name" required error={errors.productName?.message}>
-                <input {...register("productName")} className={`input input-bordered w-full ${errors.productName ? "input-error" : ""}`} placeholder="Enter product name" />
-              </FormRow>
-              
-              <FormRow label="Product Code" required error={errors.productCode?.message}>
-                <div className="flex gap-2">
-                  <input {...register("productCode")} className={`input input-bordered w-full ${errors.productCode ? "input-error" : ""}`} placeholder="e.g. PRD-001" />
-                  <button type="button" onClick={handleAutoGenerateCode} className="btn btn-outline btn-primary whitespace-nowrap">Auto Generate</button>
-                </div>
-              </FormRow>
-
-              <FormRow label="Product SKU" error={errors.sku?.message}>
-                <input {...register("sku")} className="input input-bordered w-full" placeholder="Stock Keeping Unit" />
-              </FormRow>
-
-              <FormRow label="Barcode" error={errors.barcode?.message}>
-                <input {...register("barcode")} className="input input-bordered w-full" placeholder="Enter barcode / UPC" />
-              </FormRow>
-
-              <FormRow label="Product Status">
-                <select {...register("status")} className="select select-bordered w-full max-w-xs">
-                  <option value="Active">Active</option>
-                  <option value="Inactive">Inactive</option>
-                  <option value="Discontinued">Discontinued</option>
-                </select>
-              </FormRow>
-
-              <FormRow label="Description" error={errors.description?.message}>
-                <textarea {...register("description")} className="textarea textarea-bordered w-full" rows={4} placeholder="Product description..."></textarea>
-              </FormRow>
-            </div>
-          </div>
-
-          {/* 2. Pricing Info */}
-          <div className="collapse collapse-arrow bg-base-100 border border-base-300 rounded-xl">
-            <input type="checkbox" defaultChecked />
-            <div className="collapse-title text-lg font-semibold border-b border-base-200">
-              2. Pricing Information
-            </div>
-            <div className="collapse-content pt-5 space-y-4">
-              <FormRow label="Cost Price" required error={errors.costPrice?.message}>
-                <div className="relative">
-                  <span className="absolute left-3 top-3 text-base-content/50">₹</span>
-                  <input {...register("costPrice")} type="number" step="0.01" className={`input input-bordered w-full pl-8 ${errors.costPrice ? "input-error" : ""}`} placeholder="0.00" />
-                </div>
-              </FormRow>
-
-              <FormRow label="Selling Price" required error={errors.sellingPrice?.message}>
-                <div className="relative">
-                  <span className="absolute left-3 top-3 text-base-content/50">₹</span>
-                  <input {...register("sellingPrice")} type="number" step="0.01" className={`input input-bordered w-full pl-8 ${errors.sellingPrice ? "input-error" : ""}`} placeholder="0.00" />
-                </div>
-              </FormRow>
-
-              <FormRow label="Tax Percentage (%)" error={errors.tax?.message}>
-                <input {...register("tax")} type="number" className="input input-bordered w-full max-w-xs" placeholder="18" />
-              </FormRow>
-
-              <FormRow label="Discount Percentage (%)" error={errors.discount?.message}>
-                <input {...register("discount")} type="number" className="input input-bordered w-full max-w-xs" placeholder="0" />
-              </FormRow>
-
-              <FormRow label="Profit Margin">
-                <div className="relative">
-                  <span className="absolute left-3 top-3 text-base-content/50">₹</span>
-                  <input type="number" readOnly value={profitMargin > 0 ? profitMargin : 0} className="input input-bordered w-full max-w-xs pl-8 bg-base-200 text-success font-bold" />
-                </div>
-                <p className="text-xs text-base-content/50 mt-1">Calculated automatically (Selling Price - Cost Price)</p>
-              </FormRow>
-            </div>
-          </div>
-
-          {/* 3. Inventory Info */}
-          <div className="collapse collapse-arrow bg-base-100 border border-base-300 rounded-xl">
-            <input type="checkbox" defaultChecked />
-            <div className="collapse-title text-lg font-semibold border-b border-base-200">
-              3. Inventory Information
-            </div>
-            <div className="collapse-content pt-5 space-y-4">
-              <FormRow label="Stock Tracking">
-                <input type="checkbox" {...register("stockTracking")} className="toggle toggle-success" />
-              </FormRow>
-
-              <FormRow label="Opening Stock" error={errors.openingStock?.message}>
-                <input {...register("openingStock")} type="number" className="input input-bordered w-full max-w-xs" />
-              </FormRow>
-
-              <FormRow label="Reorder Level" error={errors.reorderLevel?.message}>
-                <input {...register("reorderLevel")} type="number" className="input input-bordered w-full max-w-xs" />
-              </FormRow>
-
-              <FormRow label="Unit of Measure" error={errors.uom?.message}>
-                <select {...register("uom")} className="select select-bordered w-full max-w-xs">
-                  <option value="">-Select UOM-</option>
-                  <option value="Piece">Piece</option>
-                  <option value="Box">Box</option>
-                  <option value="Kg">Kg</option>
-                  <option value="Gram">Gram</option>
-                  <option value="Liter">Liter</option>
-                  <option value="Meter">Meter</option>
-                </select>
-              </FormRow>
-
-              <FormRow label="Warehouse" error={errors.warehouse?.message}>
-                <select {...register("warehouse")} className="select select-bordered w-full max-w-xs">
-                  <option value="">-Select Warehouse-</option>
-                  <option value="Main Warehouse">Main Warehouse</option>
-                  <option value="Secondary Depot">Secondary Depot</option>
+              <FormRow label="Software Category" error={errors.softwareCategory?.message}>
+                <select {...register("softwareCategory")} className="select select-bordered width-full">
+                  <option value="">-Select Category-</option>
+                  <option value="Business Intelligence">Business Intelligence</option>
+                  <option value="Project Management">Project Management</option>
+                  <option value="Marketing Automation">Marketing Automation</option>
+                  <option value="Cloud Storage">Cloud Storage</option>
+                  <option value="Cybersecurity">Cybersecurity</option>
                 </select>
               </FormRow>
             </div>
-          </div>
 
-          {/* 4. Product Categorization */}
-          <div className="collapse collapse-arrow bg-base-100 border border-base-300 rounded-xl">
-            <input type="checkbox" defaultChecked />
-            <div className="collapse-title text-lg font-semibold border-b border-base-200">
-              4. Product Categorization
-            </div>
-            <div className="collapse-content pt-5 space-y-4">
-              <FormRow label="Brand" error={errors.brand?.message}>
-                <div className="flex gap-2 max-w-xs">
-                  <select {...register("brand")} className="select select-bordered w-full">
-                    <option value="">-Select Brand-</option>
-                    <option value="Sony">Sony</option>
-                    <option value="Samsung">Samsung</option>
-                    <option value="Apple">Apple</option>
-                    {customBrands.map(b => <option key={b} value={b}>{b}</option>)}
-                  </select>
-                  <button type="button" onClick={() => (document.getElementById('add_brand_modal') as HTMLDialogElement).showModal()} className="btn btn-outline btn-square"><MdAdd size={18} /></button>
+            <FormRow label="Sub Category" error={errors.subCategory?.message}>
+              <input {...register("subCategory")} className="input input-bordered width-full" placeholder="e.g. Sales CRM, Financial ERP" />
+            </FormRow>
+
+            <FormRow label="Status">
+              <select {...register("status")} className="select select-bordered width-full max-w-[200px]">
+                <option value="Active">Active</option>
+                <option value="Inactive">Inactive</option>
+                <option value="Discontinued">Discontinued</option>
+              </select>
+            </FormRow>
+
+            <FormRow label="Description" error={errors.description?.message}>
+              <textarea {...register("description")} className="textarea textarea-bordered width-full" rows={4} placeholder="Detailed product description..."></textarea>
+            </FormRow>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-[16px]">
+              <FormRow label="Version">
+                <input {...register("version")} className="input input-bordered width-full" placeholder="e.g. 1.0.0, 2024.Q3" />
+              </FormRow>
+              <FormRow label="Release Channel">
+                <div className="flex gap-[16px] padding-top-[8px]">
+                  <label className="flex items-center gap-[8px] cursor-pointer">
+                    <input type="radio" {...register("releaseChannel")} value="Stable" className="radio radio-primary" />
+                    <span className="text-[14px]">Stable</span>
+                  </label>
+                  <label className="flex items-center gap-[8px] cursor-pointer">
+                    <input type="radio" {...register("releaseChannel")} value="Beta" className="radio radio-primary" />
+                    <span className="text-[14px]">Beta</span>
+                  </label>
+                  <label className="flex items-center gap-[8px] cursor-pointer">
+                    <input type="radio" {...register("releaseChannel")} value="Alpha" className="radio radio-primary" />
+                    <span className="text-[14px]">Alpha</span>
+                  </label>
                 </div>
               </FormRow>
+            </div>
+          </FormSection>
 
-              <FormRow label="Category" error={errors.category?.message}>
-                <div className="flex gap-2 max-w-xs">
-                  <select {...register("category")} className="select select-bordered w-full">
-                    <option value="">-Select Category-</option>
-                    <option value="Audio">Audio</option>
-                    <option value="Laptops">Laptops</option>
-                    {customCategories.map(c => <option key={c} value={c}>{c}</option>)}
-                  </select>
-                  <button type="button" onClick={() => (document.getElementById('add_category_modal') as HTMLDialogElement).showModal()} className="btn btn-outline btn-square"><MdAdd size={18} /></button>
-                </div>
+          {/* 2. Licensing */}
+          <FormSection title="2. Licensing">
+            <FormRow label="License Type">
+              <select {...register("licenseType")} className="select select-bordered width-full max-w-[200px]">
+                <option value="One Time">One Time</option>
+                <option value="Monthly">Monthly</option>
+                <option value="Yearly">Yearly</option>
+                <option value="Lifetime">Lifetime</option>
+              </select>
+            </FormRow>
+            <FormRow label="Activation Type">
+              <select {...register("activationType")} className="select select-bordered width-full max-w-[200px]">
+                <option value="License Key">License Key</option>
+                <option value="Email">Email</option>
+                <option value="Domain">Domain</option>
+                <option value="Device">Device</option>
+                <option value="API Key">API Key</option>
+              </select>
+            </FormRow>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-[16px]">
+              <FormRow label="Validity (Days)">
+                <input {...register("validityDays")} type="number" className="input input-bordered width-full" placeholder="e.g. 365" />
               </FormRow>
-
-              <FormRow label="Sub Category" error={errors.subCategory?.message}>
-                <select {...register("subCategory")} className="select select-bordered w-full max-w-xs">
-                  <option value="">-Select Sub Category-</option>
-                  <option value="Headphones">Headphones</option>
-                  <option value="Gaming Laptops">Gaming Laptops</option>
-                </select>
+              <FormRow label="Maximum Users">
+                <input {...register("maximumUsers")} type="number" className="input input-bordered width-full" placeholder="e.g. 50" />
               </FormRow>
-
-              <FormRow label="Tags">
-                <select {...register("tags")} multiple className="select select-bordered w-full h-24">
-                  <option value="Best Seller">Best Seller</option>
-                  <option value="New Arrival">New Arrival</option>
-                  <option value="Featured">Featured</option>
-                  <option value="Promotional">Promotional</option>
-                  <option value="Seasonal">Seasonal</option>
-                </select>
-                <p className="text-xs text-base-content/50 mt-1">Hold Ctrl (or Cmd) to select multiple tags.</p>
+              <FormRow label="Maximum Devices">
+                <input {...register("maximumDevices")} type="number" className="input input-bordered width-full" placeholder="e.g. 3" />
               </FormRow>
             </div>
-          </div>
+          </FormSection>
 
-          {/* 5. Sales Configuration */}
-          <div className="collapse collapse-arrow bg-base-100 border border-base-300 rounded-xl">
-            <input type="checkbox" defaultChecked />
-            <div className="collapse-title text-lg font-semibold border-b border-base-200">
-              5. Sales Configuration
-            </div>
-            <div className="collapse-content pt-5 space-y-4">
-              <FormRow label="Available For Sale">
-                <input type="checkbox" {...register("availableForSale")} className="toggle toggle-success" />
-              </FormRow>
+          {/* 3. Pricing Information */}
+          <FormSection title="3. Pricing Information">
+            <FormRow label="Cost Price" error={errors.costPrice?.message}>
+              <div className="relative">
+                <span className="absolute left-[12px] top-[10px] text-base-content/50">₹</span>
+                <input {...register("costPrice")} type="number" step="0.01" className={`input input-bordered width-full padding-left-[32px] ${errors.costPrice ? "input-error" : ""}`} placeholder="0.00" />
+              </div>
+            </FormRow>
 
-              <FormRow label="Allow Discount">
-                <input type="checkbox" {...register("allowDiscount")} className="toggle toggle-success" />
-              </FormRow>
+            <FormRow label="Selling Price" required error={errors.sellingPrice?.message}>
+              <div className="relative">
+                <span className="absolute left-[12px] top-[10px] text-base-content/50">₹</span>
+                <input {...register("sellingPrice")} type="number" step="0.01" className={`input input-bordered width-full padding-left-[32px] ${errors.sellingPrice ? "input-error" : ""}`} placeholder="0.00" />
+              </div>
+            </FormRow>
 
-              <FormRow label="Minimum Sale Qty" error={errors.minQty?.message}>
-                <input {...register("minQty")} type="number" className="input input-bordered w-full max-w-xs" />
-              </FormRow>
+            <FormRow label="Tax Percentage (%)" error={errors.tax?.message}>
+              <input {...register("tax")} type="number" className="input input-bordered width-full max-w-[120px]" placeholder="18" />
+            </FormRow>
 
-              <FormRow label="Maximum Sale Qty" error={errors.maxQty?.message}>
-                <input {...register("maxQty")} type="number" className={`input input-bordered w-full max-w-xs ${errors.maxQty ? "input-error" : ""}`} />
-              </FormRow>
+            <FormRow label="Discount Percentage (%)" error={errors.discount?.message}>
+              <input {...register("discount")} type="number" className="input input-bordered width-full max-w-[120px]" placeholder="0" />
+            </FormRow>
 
-              <FormRow label="Sales Commission (%)" error={errors.commission?.message}>
-                <input {...register("commission")} type="number" className="input input-bordered w-full max-w-xs" />
-              </FormRow>
-            </div>
-          </div>
+            <FormRow label="Profit Margin">
+              <div className="relative">
+                <span className="absolute left-[12px] top-[10px] text-base-content/50">₹</span>
+                <input type="number" readOnly value={profitMargin > 0 ? profitMargin : 0} className="input input-bordered width-full max-w-[160px] padding-left-[32px] bg-base-200 text-success font-[700]" />
+              </div>
+              <p className="text-[12px] text-base-content/50 margin-top-[4px]">Calculated automatically (Selling Price - Cost Price)</p>
+            </FormRow>
+          </FormSection>
 
-          {/* 6. Product Images */}
-          <div className="collapse collapse-arrow bg-base-100 border border-base-300 rounded-xl">
-            <input type="checkbox" defaultChecked />
-            <div className="collapse-title text-lg font-semibold border-b border-base-200">
-              6. Product Images
-            </div>
-            <div className="collapse-content pt-5">
-              <div 
+          {/* 4. Platform Support */}
+          <FormSection title="4. Platform Support">
+            <FormRow label="Supported Platforms">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-[12px]">
+                {[
+                  { id: "windows", label: "Windows", icon: <FaWindows size={20} /> },
+                  { id: "macos", label: "macOS", icon: <FaApple size={20} /> },
+                  { id: "linux", label: "Linux", icon: <FaLinux size={20} /> },
+                  { id: "android", label: "Android", icon: <FaAndroid size={20} /> },
+                  { id: "ios", label: "iOS", icon: <FaAppleWhole size={20} /> },
+                  { id: "web", label: "Web", icon: <FaGlobe size={20} /> },
+                ].map((platform) => (
+                  <label key={platform.id} className="flex items-center gap-[8px] cursor-pointer bg-base-200/50 padding-[12px] rounded-[10px] border border-base-200 hover:border-primary transition-all duration-200">
+                    <input
+                      type="checkbox"
+                      {...register("platformSupport")}
+                      value={platform.id}
+                      className="checkbox checkbox-primary"
+                    />
+                    {platform.icon}
+                    <span className="text-[14px] font-[500]">{platform.label}</span>
+                  </label>
+                ))}
+              </div>
+            </FormRow>
+          </FormSection>
+
+          {/* 5. Downloads */}
+          <FormSection title="5. Downloads">
+            <FormRow label="Software Download URL">
+              <input {...register("softwareDownloadUrl")} type="url" className={`input input-bordered width-full ${errors.softwareDownloadUrl ? "input-error" : ""}`} placeholder="https://yourproduct.com/download" />
+              {errors.softwareDownloadUrl && <p className="text-error text-[12px] margin-top-[4px]">{errors.softwareDownloadUrl.message}</p>}
+            </FormRow>
+            <FormRow label="Documentation URL">
+              <input {...register("documentationUrl")} type="url" className={`input input-bordered width-full ${errors.documentationUrl ? "input-error" : ""}`} placeholder="https://yourproduct.com/docs" />
+              {errors.documentationUrl && <p className="text-error text-[12px] margin-top-[4px]">{errors.documentationUrl.message}</p>}
+            </FormRow>
+            <FormRow label="Demo URL">
+              <input {...register("demoUrl")} type="url" className={`input input-bordered width-full ${errors.demoUrl ? "input-error" : ""}`} placeholder="https://yourproduct.com/demo" />
+              {errors.demoUrl && <p className="text-error text-[12px] margin-top-[4px]">{errors.demoUrl.message}</p>}
+            </FormRow>
+            <FormRow label="Release Notes URL">
+              <input {...register("releaseNotesUrl")} type="url" className={`input input-bordered width-full ${errors.releaseNotesUrl ? "input-error" : ""}`} placeholder="https://yourproduct.com/releases" />
+              {errors.releaseNotesUrl && <p className="text-error text-[12px] margin-top-[4px]">{errors.releaseNotesUrl.message}</p>}
+            </FormRow>
+          </FormSection>
+
+          {/* 6. Media */}
+          <FormSection title="6. Media">
+            <FormRow label="Logo Upload">
+              <div
                 onClick={() => fileInputRef.current?.click()}
-        onDragOver={handleImageDragOver}
-        onDrop={handleImageDrop}
-                className="border-2 border-dashed border-base-300 rounded-xl p-8 text-center hover:bg-base-200/50 transition-colors cursor-pointer"
+                onDragOver={handleImageDragOver}
+                onDrop={handleImageDrop}
+                className="border-[2px] border-dashed border-base-300 rounded-[12px] padding-[24px] text-center hover:bg-base-200/50 transition-all duration-200 cursor-pointer"
               >
-                <MdAttachment className="mx-auto text-base-content/40 mb-2" size={32} />
-                <p className="text-sm font-medium text-base-content/70">Drag & Drop images or click to upload</p>
-                <p className="text-xs text-base-content/50 mt-1">Allowed: JPG, PNG, WEBP. Max 5 images.</p>
-                <input 
-                  type="file" 
-                  multiple 
-                  accept=".jpg,.jpeg,.png,.webp" 
-                  className="hidden" 
-                  ref={fileInputRef} 
-                  onChange={handleImageChange} 
+                <MdAttachment className="mx-auto text-base-content/40 margin-bottom-[8px]" size={32} />
+                <p className="text-[14px] font-[500] text-base-content/70">Drag & Drop Logo or click to upload</p>
+                <p className="text-[12px] text-base-content/50 margin-top-[4px]">Allowed: JPG, PNG, WEBP. Max 1 image.</p>
+                <input
+                  type="file"
+                  accept=".jpg,.jpeg,.png,.webp"
+                  className="hidden"
+                  ref={fileInputRef}
+                  onChange={handleImageChange}
                 />
               </div>
-
               {imagePreviews.length > 0 && (
-                <div className="flex flex-wrap gap-4 mt-4">
+                <div className="flex flex-wrap gap-[16px] margin-top-[16px]">
                   {imagePreviews.map((src, idx) => (
-                    <div key={idx} className="relative group w-24 h-24 rounded-lg overflow-hidden border border-base-300 shadow-sm">
-                      <img src={src} alt="Preview" className="w-full h-full object-cover" />
-                      <button 
-                        type="button" 
-                        onClick={() => removeImage(idx)} 
-                        className="absolute top-1 right-1 bg-error text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                    <div key={idx} className="relative group width-[96px] height-[96px] rounded-[10px] overflow-hidden border border-base-300 shadow-[0_1px_3px_rgba(0,0,0,0.08)]">
+                      <img src={src} alt="Preview" className="width-full height-full object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => removeImage(idx)}
+                        className="absolute top-[4px] right-[4px] bg-error text-white rounded-full padding-[4px] opacity-0 group-hover:opacity-100 transition-all duration-200"
                       >
                         <MdDelete size={14} />
                       </button>
@@ -609,127 +331,138 @@ export default function NewProduct() {
                   ))}
                 </div>
               )}
-            </div>
-          </div>
+            </FormRow>
+            {/* Add similar FormRows for Banner, Screenshots, Video URL */}
+          </FormSection>
 
-          {/* 7. Documents */}
-          <div className="collapse collapse-arrow bg-base-100 border border-base-300 rounded-xl">
-            <input type="checkbox" defaultChecked />
-            <div className="collapse-title text-lg font-semibold border-b border-base-200">
-              7. Documents
-            </div>
-            <div className="collapse-content pt-5">
-              <div className="flex items-center gap-4">
-                <button type="button" onClick={() => docInputRef.current?.click()} className="btn btn-outline btn-sm">Upload Documents</button>
-                <span className="text-xs text-base-content/50">Allow: PDF, DOCX, XLSX</span>
-                <input 
-                  type="file" 
-                  multiple 
-                  accept=".pdf,.docx,.xlsx" 
-                  className="hidden" 
-                  ref={docInputRef} 
-                  onChange={handleDocChange} 
-                />
-              </div>
-              
-              {documents.length > 0 && (
-                <ul className="mt-4 space-y-2">
-                  {documents.map((doc, idx) => (
-                    <li key={idx} className="flex justify-between items-center bg-base-200 px-4 py-2 rounded-md border border-base-300">
-                      <span className="text-sm font-medium truncate max-w-xs">{doc.name}</span>
-                      <button type="button" onClick={() => removeDoc(idx)} className="text-error hover:text-error/70">
-                        <MdDelete size={18} />
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          </div>
+          {/* 7. Features */}
+          <FormSection title="7. Features">
+            <DynamicListInput
+              label="Product Features"
+              name="features"
+              control={control}
+              register={register}
+              errors={errors}
+              placeholder="e.g. AI Reports, Inventory Management"
+            />
+          </FormSection>
 
-          {/* 8. SEO Information */}
-          <div className="collapse collapse-arrow bg-base-100 border border-base-300 rounded-xl">
-            <input type="checkbox" defaultChecked />
-            <div className="collapse-title text-lg font-semibold border-b border-base-200">
-              8. SEO Information
-            </div>
-            <div className="collapse-content pt-5 space-y-4">
-              <FormRow label="Meta Title" error={errors.metaTitle?.message}>
-                <input {...register("metaTitle")} className="input input-bordered w-full" placeholder="Enter SEO Title" />
-              </FormRow>
-              <FormRow label="Meta Description" error={errors.metaDescription?.message}>
-                <textarea {...register("metaDescription")} className="textarea textarea-bordered w-full" rows={3} placeholder="SEO description..."></textarea>
-              </FormRow>
-              <FormRow label="Keywords" error={errors.keywords?.message}>
-                <input {...register("keywords")} className="input input-bordered w-full" placeholder="Comma separated keywords" />
-              </FormRow>
-            </div>
-          </div>
+          {/* 8. Plans */}
+          <FormSection title="8. Plans">
+            <PlanEditor control={control} register={register} watch={watch} errors={errors} />
+          </FormSection>
 
-          {/* 9. Audit Information (Read-only visible if Edit Mode theoretically) */}
-          <div className="collapse bg-base-100 border border-base-300 rounded-xl opacity-60">
+          {/* 9. SEO Information */}
+          <FormSection title="9. SEO Information">
+            <FormRow label="Meta Title" error={errors.metaTitle?.message}>
+              <input {...register("metaTitle")} className="input input-bordered width-full" placeholder="Enter SEO Title" />
+            </FormRow>
+            <FormRow label="Meta Description" error={errors.metaDescription?.message}>
+              <textarea {...register("metaDescription")} className="textarea textarea-bordered width-full" rows={3} placeholder="SEO description..."></textarea>
+            </FormRow>
+            <FormRow label="Keywords" error={errors.keywords?.message}>
+              <input {...register("keywords")} className="input input-bordered width-full" placeholder="Comma separated keywords" />
+            </FormRow>
+            <FormRow label="Tags">
+              <select {...register("tags")} multiple className="select select-bordered width-full height-[96px]">
+                <option value="SaaS">SaaS</option>
+                <option value="CRM">CRM</option>
+                <option value="ERP">ERP</option>
+                <option value="Cloud">Cloud</option>
+                <option value="Business">Business</option>
+              </select>
+              <p className="text-[12px] text-base-content/50 margin-top-[4px]">Hold Ctrl (or Cmd) to select multiple tags.</p>
+            </FormRow>
+          </FormSection>
+
+          {/* 10. Publishing */}
+          <FormSection title="10. Publishing">
+            <FormRow label="Available For Sale">
+              <input type="checkbox" {...register("availableForSale")} className="toggle toggle-success" />
+            </FormRow>
+            <FormRow label="Featured Product">
+              <input type="checkbox" {...register("featured")} className="toggle toggle-primary" />
+            </FormRow>
+            <FormRow label="Show On Website">
+              <input type="checkbox" {...register("showOnWebsite")} className="toggle toggle-primary" />
+            </FormRow>
+            <FormRow label="Allow Trial">
+              <input type="checkbox" {...register("allowTrial")} className="toggle toggle-info" />
+            </FormRow>
+            <FormRow label="Allow Demo">
+              <input type="checkbox" {...register("allowDemo")} className="toggle toggle-info" />
+            </FormRow>
+            <FormRow label="Publish Status">
+              <select {...register("publishStatus")} className="select select-bordered width-full max-w-[160px]">
+                <option value="Published">Published</option>
+                <option value="Draft">Draft</option>
+                <option value="Archived">Archived</option>
+              </select>
+            </FormRow>
+          </FormSection>
+
+          {/* Audit Information (Read-only visible if Edit Mode theoretically) */}
+          <div className="collapse bg-base-100 border border-base-300 rounded-[12px] opacity-60 shadow-[0_1px_3px_rgba(0,0,0,0.08)]">
             <input type="checkbox" />
-            <div className="collapse-title text-lg font-semibold border-b border-base-200">
-              9. Audit Information (Read-Only)
+            <div className="collapse-title text-[18px] font-[600] border-b border-base-200">
+              Audit Information (Read-Only)
             </div>
-            <div className="collapse-content pt-5">
-               <div className="grid grid-cols-2 gap-4 text-sm">
-                  <div><span className="font-medium">Created By:</span> Admin User</div>
-                  <div><span className="font-medium">Created On:</span> {new Date().toLocaleDateString()}</div>
-                  <div><span className="font-medium">Updated By:</span> -</div>
-                  <div><span className="font-medium">Updated On:</span> -</div>
+            <div className="collapse-content padding-top-[20px]">
+               <div className="grid grid-cols-2 gap-[16px] text-[14px]">
+                  <div><span className="font-[500]">Created By:</span> Admin User</div>
+                  <div><span className="font-[500]">Created On:</span> {new Date().toLocaleDateString()}</div>
+                  <div><span className="font-[500]">Updated By:</span> -</div>
+                  <div><span className="font-[500]">Updated On:</span> -</div>
                </div>
             </div>
           </div>
 
+
         </div>
 
-        {/* ── Right Column (Sidebar Summary Card) ── */}
-        <div className="lg:col-span-1 space-y-4">
-          <div className="bg-base-100 border border-base-300 rounded-xl p-5 sticky top-24 shadow-sm">
-            <h3 className="font-bold text-lg mb-4 pb-2 border-b border-base-200">Product Summary</h3>
+       {/* ── Right Column (Sidebar Summary Card) ── */}
+        <div className="lg:col-span-1 space-y-4 px-[16px] lg:px-0">
+          <div className="bg-base-100 border border-base-300 rounded-[12px] p-[20px] sticky top-[96px] shadow-[0_1px_3px_rgba(0,0,0,0.08)]">
+            <h3 className="font-bold text-[18px] mb-[15px] pb-[8px] border-b border-base-200">Product Summary</h3>
             
-            <div className="space-y-4">
-              <div>
-                <span className="text-xs text-base-content/60 uppercase font-semibold">Status</span>
-                <div className="mt-1">
-                  <div className={`badge ${wStatus === 'Active' ? 'badge-success text-white' : wStatus === 'Inactive' ? 'badge-warning' : 'badge-error text-white'} badge-lg font-bold`}>
-                    {wStatus || "Active"}
-                  </div>
+            <div className="space-y-[16px] text-[14px]">
+              <InfoCard title="Software Logo" value={
+                imagePreviews.length > 0 ? (
+                  <img src={imagePreviews[0]} alt="Logo" className="w-[48px] h-[48px] rounded-[8px] object-cover" />
+                ) : (
+                  <MdInfoOutline size={24} className="text-base-content/30" />
+                )
+              } />
+              <InfoCard title="Product Name" value={watch("productName") || "N/A"} />
+              <InfoCard title="Version" value={watch("version") || "N/A"} />
+              <InfoCard title="Status" value={
+                <div className={`badge ${watch("status") === 'Active' ? 'badge-success text-white' : watch("status") === 'Inactive' ? 'badge-warning' : 'badge-error text-white'} badge-lg font-[700]`}>
+                  {watch("status") || "Active"}
                 </div>
-              </div>
-
-              <div>
-                <span className="text-xs text-base-content/60 uppercase font-semibold">Product Group</span>
-                <p className="font-medium text-base-content mt-1">{wProductGroup || "Uncategorized"}</p>
-              </div>
-
-              <div>
-                <span className="text-xs text-base-content/60 uppercase font-semibold">Product Code</span>
-                <p className="font-mono text-primary font-bold mt-1">{wProductCode || "Pending..."}</p>
-              </div>
-
-              <div>
-                <span className="text-xs text-base-content/60 uppercase font-semibold">Selling Price</span>
-                <p className="font-medium text-success text-lg mt-1">₹{wSellingPrice.toLocaleString()}</p>
-              </div>
-
-              <div>
-                <span className="text-xs text-base-content/60 uppercase font-semibold">Current Stock</span>
-                <p className="font-medium mt-1">{wStock} units</p>
-              </div>
-              
-              <div>
-                <span className="text-xs text-base-content/60 uppercase font-semibold">Brand</span>
-                <p className="font-medium mt-1">{wBrand || "No Brand"}</p>
-              </div>
+              } />
+              <InfoCard title="License Type" value={watch("licenseType") || "N/A"} />
+              <InfoCard title="Selling Price" value={`₹${watch("sellingPrice")?.toLocaleString() || '0.00'}`} />
+              <InfoCard title="Supported Platforms" value={
+                <div className="flex flex-wrap gap-[8px]">
+                  {watch("platformSupport")?.map(p => (
+                    <span key={p} className="badge badge-outline badge-primary text-[12px]">{p}</span>
+                  ))}
+                </div>
+              } />
+              <InfoCard title="Plan Count" value={watch("plans")?.length || 0} />
+              <InfoCard title="Feature Count" value={watch("features")?.length || 0} />
+              <InfoCard title="Publish Status" value={
+                <div className={`badge ${watch("publishStatus") === 'Published' ? 'badge-primary' : watch("publishStatus") === 'Draft' ? 'badge-neutral' : 'badge-error'} badge-lg font-[700]`}>
+                  {watch("publishStatus") || "Draft"}
+                </div>
+              } />
             </div>
 
-            <div className="mt-6 pt-4 border-t border-base-200 space-y-2">
-              <button type="submit" disabled={isSubmitting} className="btn btn-primary w-full shadow-sm">
+            <div className="mt-[24px] pt-[16px] border-t border-base-200 space-y-2">
+              <button type="submit" disabled={isSubmittingLocal} className="btn btn-primary w-full shadow-[0_1px_3px_rgba(0,0,0,0.08)]">
                 {isSubmitting ? <span className="loading loading-spinner loading-sm"></span> : (isEditMode ? "Update Product" : "Save Product")}
               </button>
-              <button type="button" onClick={() => reset()} className="btn btn-outline w-full shadow-sm">
+              <button type="button" onClick={() => reset()} className="btn btn-outline w-full shadow-[0_1px_3px_rgba(0,0,0,0.08)]">
                 Reset
               </button>
             </div>
@@ -740,7 +473,7 @@ export default function NewProduct() {
       {/* ── Modals ── */}
       <dialog id="add_brand_modal" className="modal">
         <div className="modal-box">
-          <h3 className="font-bold text-lg">Quick Add Brand</h3>
+          <h3 className="font-[700] text-[18px]">Quick Add Brand</h3>
           <input type="text" value={newBrandInput} onChange={(e) => setNewBrandInput(e.target.value)} className="input input-bordered w-full mt-4" placeholder="Enter Brand Name" />
           <div className="modal-action flex gap-2">
             <form method="dialog">
@@ -753,7 +486,7 @@ export default function NewProduct() {
 
       <dialog id="add_category_modal" className="modal">
         <div className="modal-box">
-          <h3 className="font-bold text-lg">Quick Add Category</h3>
+          <h3 className="font-[700] text-[18px]">Quick Add Category</h3>
           <input type="text" value={newCategoryInput} onChange={(e) => setNewCategoryInput(e.target.value)} className="input input-bordered w-full mt-4" placeholder="Enter Category Name" />
           <div className="modal-action flex gap-2">
             <form method="dialog">
@@ -766,11 +499,11 @@ export default function NewProduct() {
 
       <dialog className={`modal ${successModalOpen ? "modal-open" : ""}`}>
         <div className="modal-box flex flex-col items-center justify-center p-8">
-          <MdCheckCircle className="text-success w-16 h-16 mb-4" />
-          <h3 className="font-bold text-xl text-center mb-2">Success!</h3>
+          <MdCheckCircle className="text-success width-[64px] height-[64px] margin-bottom-[16px]" />
+          <h3 className="font-[700] text-[20px] text-center margin-bottom-[8px]">Success!</h3>
           <p className="text-base-content/80 text-center">{successMessage}</p>
-          <div className="modal-action mt-6 w-full justify-center">
-            <button className="btn btn-primary px-8" onClick={() => { setSuccessModalOpen(false); navigate("/sales/products"); }}>Close</button>
+          <div className="modal-action margin-top-[24px] width-full justify-center">
+            <button className="btn btn-primary padding-left-[32px] padding-right-[32px]" onClick={() => { setSuccessModalOpen(false); navigate("/sales/products"); }}>Close</button>
           </div>
         </div>
       </dialog>
@@ -779,36 +512,88 @@ export default function NewProduct() {
   );
 }
 
-/* ─────────────────────────── usage example ─────────────────────
-
-import NewProduct from "./NewProduct";
-import { useNavigate } from "react-router-dom";
-import { toast } from "react-hot-toast";
-
-export default function NewProductPage() {
-  const navigate = useNavigate();
-  const [loading, setLoading] = useState(false);
-
-  const handleSubmit = async (data) => {
-    setLoading(true);
-    try {
-      await api.post("/sales/products", data);
-      toast.success("Product created!");
-      navigate("/sales/products");
-    } catch (err) {
-      toast.error("Failed to create product.");
-    } finally {
-      setLoading(false);
-    }
-  };
+/* ── DynamicListInput Component (for Features) ── */
+const DynamicListInput = ({ label, name, control, register, errors, placeholder }: any) => {
+  const { fields, append, remove } = useFieldArray({
+    control: control, // Explicitly pass control
+    name: name,
+  });
 
   return (
-    <NewProduct
-      productGroups={["Electronics", "Software", "Hardware"]}
-      onSubmit={handleSubmit}
-      isLoading={loading}
-    />
+    <FormRow label={label} error={errors[name]?.message}>
+      <div className="space-y-[8px]">
+        {fields.map((field, index) => (
+          <div key={field.id} className="flex gap-[8px] items-center">
+            <input
+              {...register(`${name}.${index}.name` as const, { required: "Required" })}
+              className={`input input-bordered width-full ${errors[name]?.[index]?.name ? "input-error" : ""}`}
+              placeholder={placeholder}
+            />
+            <button type="button" onClick={() => remove(index)} className="btn btn-outline btn-square btn-error">
+              <MdDelete size={18} />
+            </button>
+          </div>
+        ))}
+        <button type="button" onClick={() => append({ name: "" })} className="btn btn-outline btn-primary btn-sm gap-[8px]">
+          <MdAdd size={18} /> Add Item
+        </button>
+      </div>
+    </FormRow>
   );
-}
+};
 
-──────────────────────────────────────────────────────────────── */
+/* ── PlanEditor Component ── */
+const PlanEditor = ({ control, register, watch, errors }: any) => {
+  const { fields, append, remove } = useFieldArray({
+    control: control, // Explicitly pass control
+    name: "plans",
+  });
+
+  const allFeatures = watch("features")?.map((f: any) => f.name) || [];
+
+  return (
+    <FormRow label="Pricing Plans" error={errors.plans?.message}>
+      <div className="space-y-[16px]">
+        {fields.map((plan, index) => (
+          <div key={plan.id} className="bg-base-200/50 padding-[16px] rounded-[12px] border border-base-200 space-y-[12px]">
+            <div className="flex justify-between items-center margin-bottom-[8px]">
+              <h4 className="font-[600] text-[16px]">Plan #{index + 1}</h4>
+              <button type="button" onClick={() => remove(index)} className="btn btn-ghost btn-square btn-sm text-error">
+                <MdDelete size={18} />
+              </button>
+            </div>
+            <FormRow label="Plan Name" required error={errors.plans?.[index]?.name?.message}>
+              <input {...register(`plans.${index}.name` as const, { required: "Plan name is required" })} className={`input input-bordered width-full ${errors.plans?.[index]?.name ? "input-error" : ""}`} placeholder="e.g. Starter, Professional" />
+            </FormRow>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-[16px]">
+              <FormRow label="Price" required error={errors.plans?.[index]?.price?.message}>
+                <div className="relative">
+                  <span className="absolute left-[12px] top-[10px] text-base-content/50">₹</span>
+                  <input {...register(`plans.${index}.price` as const, { required: "Price is required" })} type="number" step="0.01" className={`input input-bordered width-full padding-left-[32px] ${errors.plans?.[index]?.price ? "input-error" : ""}`} placeholder="0.00" />
+                </div>
+              </FormRow>
+              <FormRow label="Billing Cycle">
+                <select {...register(`plans.${index}.billingCycle` as const)} className="select select-bordered width-full">
+                  <option value="Monthly">Monthly</option>
+                  <option value="Yearly">Yearly</option>
+                  <option value="One Time">One Time</option>
+                </select>
+              </FormRow>
+            </div>
+            <FormRow label="Included Features">
+              <select {...register(`plans.${index}.features` as const)} multiple className="select select-bordered width-full height-[120px]">
+                {allFeatures.map((feature: string) => (
+                  <option key={feature} value={feature}>{feature}</option>
+                ))}
+              </select>
+              <p className="text-[12px] text-base-content/50 margin-top-[4px]">Select features from the "Features" section above.</p>
+            </FormRow>
+          </div>
+        ))}
+        <button type="button" onClick={() => append({ name: "", price: 0, billingCycle: "Monthly", features: [] })} className="btn btn-outline btn-primary btn-sm gap-[8px]">
+          <MdAdd size={18} /> Add Plan
+        </button>
+      </div>
+    </FormRow>
+  );
+};

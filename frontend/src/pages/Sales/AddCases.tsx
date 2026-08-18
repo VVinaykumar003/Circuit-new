@@ -5,10 +5,10 @@ import * as z from "zod";
 import { MdSave, MdAttachment, MdDelete, MdCheckCircle } from "react-icons/md";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/auth/useAuth"; 
+import { useAuth } from "@/auth/AuthContext";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { createCase, type Case } from "@/services/sales/caseServices";
-import { getSalesReps } from "@/services/sales/salesRepServices";
+import { createCase, type Case } from "@/services/caseServices";
+import { getSalesReps } from "@/services/salesRepServices";
 
 /* ─────────────────────────── Zod Schema ─────────────────────────── */
 const caseSchema = z.object({

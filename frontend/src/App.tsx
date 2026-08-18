@@ -6,7 +6,7 @@ import { socket } from "./socket";
 import ProjectChat from "./components/projects/ProjectChat";
 import Notifications from "./pages/Notifications";
 import SettingsPage from "./pages/Settings";
-import { useAuth } from  "@/auth/useAuth"; ;
+import { useAuth } from "./auth/AuthContext";
 import WorkUpdates from "./pages/WorkUpdate";
 import NewProduct from "./pages/Sales/Products";
 import AllProducts from "./pages/Sales/AllProducts";
@@ -16,8 +16,8 @@ import NewContact from "./pages/Sales/NewContacts";
 import AllContacts from "./pages/Sales/AllContact";
 // import SalesRepDetails from "./pages/Sales/SalesRepDetails";
 import AddSalesRep from "./pages/Sales/AddSalesRep";
-import NewOrderForm from "./pages/Sales/Orders";
-import AllOrders from "./pages/Sales/AllOrders";
+import NewOrderForm from "./pages/Sales/Orders.updated";
+import AllOrders from "./pages/Sales/AllOrders.updated";
 // import SalesLeads from "./pages/Sales/Employee/SalesLeads";
 import SalesMemberProfile from "./pages/Sales/Employee/SalesMemberProfile";
 // import Accounts from "./pages/Sales/Accounts";
@@ -33,6 +33,7 @@ import AllSalesReps from "./pages/Sales/AllSalesReps";
 import AllCase from "./pages/Sales/AllCase";
 import AddCases from "./pages/Sales/AddCases";
 import MyTasks from "./pages/Sales/MyTasks";
+
 // import SalesForecastDashboard from "./pages/Sales/SalesForecastDashboard";
 // import AddSalesForecast from "./pages/Sales/AddSalesForecast";
 import AllNotifications from "./pages/Sales/AllNotifications";
@@ -76,6 +77,7 @@ const AddMemberPage = React.lazy(() => import("./pages/AddMembers"));
 const OrganizationRegistrationPage = React.lazy(() => import("./pages/Organization/OrganizationRegistrationPage"));
 const ERPLandingPage = React.lazy(() => import("./pages/ERPLandingPage"));
 const SalesDashboard = React.lazy(() => import("./pages/Sales/SalesDashboard"));
+
 
 
 /* ---------- Layout Wrapper ---------- */
@@ -130,7 +132,7 @@ export default function App() {
   }, [auth?.user]);
 
   return (
-    <Suspense fallback={
+   <Suspense fallback={
       <div className="flex flex-col justify-center items-center h-screen bg-base-100">
         <span className="loading loading-spinner loading-lg text-primary"></span>
         <p className="mt-4 text-lg font-medium text-base-content/70">Loading...</p>
@@ -179,7 +181,7 @@ export default function App() {
 
             <Route path="/sales/orders" element={<AllOrders />} />
             <Route path="/sales/orders/pending" element={<PendingOrders />} />
-            <Route path="/sales/orders/new" element={<NewOrderForm />} />
+            <Route path="/sales/orders/new" element={<NewOrderForm/>} />
 
             <Route path="/sales/accounts" element={<AllAccountDetails />} />
             <Route path="/sales/accounts/new" element={<NewAccounts />} />

@@ -1,9 +1,9 @@
-import { useAuth } from "@/auth/useAuth"; 
-import { getActivities } from "@/services/IT/activityService";
+import { useAuth } from "@/auth/AuthContext";
+import { getActivities } from "@/services/activityService";
 import { useEffect, useState } from "react";
 
 
-export const useActivities = () => {
+export const useActivities = () => { // Consider defining a type for Activity, e.g., useState<Activity[]>([])
   const [activities, setActivities] = useState([]);
   const {auth} = useAuth();
   const slug = auth?.slug || "";

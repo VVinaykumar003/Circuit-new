@@ -12,7 +12,7 @@ import {
 } from '../../components/sales/ForecastWidgets';
 import { formatCurrency, formatPercent } from '../../components/sales/ForecastUtils';
 import { RegionalTable, RepPerformanceTable, FullForecastTable } from '../../components/sales/ForecastTables';
-import { useAuth } from "@/auth/useAuth"; ;
+import { useAuth } from '@/auth/AuthContext';
 import { useQuery } from '@tanstack/react-query';
 
 const SkeletonDashboard = () => (

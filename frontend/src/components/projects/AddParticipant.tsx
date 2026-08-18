@@ -1,9 +1,9 @@
 
 import { MdDelete } from "react-icons/md";
 
-import { useAuth } from "@/auth/useAuth"; 
+import { useAuth } from "@/auth/AuthContext";
 import { useEffect, useState } from "react";
-import { getMembers } from "@/services/IT/memberService";
+import { getMembers } from "@/services/memberService";
 
 
 interface User {
@@ -16,6 +16,7 @@ interface Participant {
   userId: string;
   role: string;
   responsibility: string;
+   customResponsibility?: string;
 }
 
 interface AddParticipantProps {
@@ -39,6 +40,7 @@ export const AddParticipant: React.FC<AddParticipantProps> = ({
     userId: "",
     role: "",
     responsibility: "",
+     customResponsibility: "",
   });
 
   // Fetch org users from backend
@@ -59,18 +61,28 @@ export const AddParticipant: React.FC<AddParticipantProps> = ({
   }, [auth.slug]);
 
   // Handle form changes
-  const handleChange = (
-    e: React.ChangeEvent<HTMLSelectElement | HTMLTextAreaElement>
-  ) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
+ const handleChange = (
+  e: React.ChangeEvent<
+    HTMLSelectElement | HTMLTextAreaElement | HTMLInputElement
+  >
+) => {
+  setForm({
+    ...form,
+    [e.target.name]: e.target.value,
+  });
+};
 
   // Add participant
   const handleAdd = () => {
-    if (!form.userId || !form.role || !form.responsibility) {
-      alert("Please fill all fields");
-      return;
-    }
+   if (
+  !form.userId ||
+  !form.role ||
+  !form.responsibility ||
+  (form.responsibility === "Other" && !form.customResponsibility)
+) {
+  alert("Please fill all fields");
+  return;
+}
 
     const alreadyExists = participants.some(
       (p) => p.userId === form.userId
@@ -82,7 +94,12 @@ export const AddParticipant: React.FC<AddParticipantProps> = ({
     }
 
     setParticipants([...participants, form]);
-    setForm({ userId: "", role: "", responsibility: "" });
+ setForm({
+  userId: "",
+  role: "",
+  responsibility: "",
+  customResponsibility: "",
+});
   };
 
   // Remove participant
@@ -96,7 +113,7 @@ export const AddParticipant: React.FC<AddParticipantProps> = ({
 
   return (
     <div className="bg-base-200/40 backdrop-blur-md p-4 sm:p-6 rounded-xl border border-base-300 space-y-4 transition-all text-sm">
-      <h2 className="text-xl font-semibold mb-4 text-primary-content text-center">
+      <h2 className="text-lg font-semibold mb-4  text-center">
         Add Participant
       </h2>
 
@@ -105,7 +122,7 @@ export const AddParticipant: React.FC<AddParticipantProps> = ({
         name="userId"
         value={form.userId}
         onChange={handleChange}
-        className="w-full px-3 py-2 rounded-lg bg-base-100 border border-base-content/10 focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-200 text-base-content"
+        className="select text-[13px] w-full  rounded-lg bg-base-100 border border-base-content/10 focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-200 text-base-content"
       >
         <option value="">Select User</option>
         {users?.map((user) => (
@@ -120,7 +137,7 @@ export const AddParticipant: React.FC<AddParticipantProps> = ({
         name="role"
         value={form.role}
         onChange={handleChange}
-        className="w-full px-3 py-2 rounded-lg bg-base-100 border border-base-content/10 focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-200 text-base-content"
+        className="w-full select text-[13px] rounded-lg bg-base-100 border border-base-content/10 focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-200 text-base-content"
       >
         <option value="">Select Role</option>
         <option value="Member">Project Member</option>
@@ -132,7 +149,7 @@ export const AddParticipant: React.FC<AddParticipantProps> = ({
         name="responsibility"
         value={form.responsibility}
         onChange={handleChange}
-        className="w-full px-3 py-2 rounded-lg bg-base-100 border border-base-content/10 focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-200 text-base-content"
+        className="w-full select text-[13px]  rounded-lg bg-base-100 border border-base-content/10 focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-200 text-base-content"
       >
         <option value="">Select Responsibility</option>
         <option value="Frontend Development">Frontend Development</option>
@@ -145,23 +162,34 @@ export const AddParticipant: React.FC<AddParticipantProps> = ({
         <option value="Research">Research</option>
         <option value="Maintain">Maintain</option>
         <option value="Design">Design</option>
+        <option value="Other">Other</option>
       </select>
+      {form.responsibility === "Other" && (
+  <input
+    type="text"
+    name="customResponsibility"
+    value={form.customResponsibility || ""}
+    onChange={handleChange}
+    placeholder="Enter Custom Responsibility"
+    className="w-full px-3 py-2 rounded-lg bg-base-100 border border-base-content/10 focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-200 text-base-content mt-2"
+  />
+)}
 
       {/* Add Button */}
       <button
         onClick={handleAdd}
-        className="w-full py-2 rounded-lg text-sm bg-primary text-primary-content font-medium hover:opacity-90 transition-all shadow-md active:scale-[0.98]"
+        className="w-full py-1.5 rounded-md text-sm bg-primary text-primary-content font-medium hover:opacity-90 transition-all shadow-md active:scale-[0.98]"
       >
         Add Participant
       </button>
 
       {/* Participants List */}
-      <div className="mt-4 space-y-2 rounded-lg p-1.5 border border-base-300 ">
-        <h3 className="text-sm uppercase tracking-wide text-base-content/60 font-semibold">
+      <div className="mt-4 space-y-2 rounded-lg p-2 border border-base-300 ">
+        <h3 className="text-xs uppercase tracking-wide text-base-content/60 font-semibold">
           Project Members
         </h3>
         {participants?.length === 0 ? (
-          <p className="text-base-content/60 text-sm">No members added yet</p>
+          <p className="text-base-content/60 text-xs">No members added yet</p>
         ) : (
           participants?.map((p, index) => (
             <div
@@ -173,9 +201,11 @@ export const AddParticipant: React.FC<AddParticipantProps> = ({
                   {getUserName(p.userId)}
                 </p>
                 <p className="text-sm   text-base-content/60">Role: {p.role}</p>
-                <p className="text-sm text-base-content/60">
-                  {p.responsibility}
-                </p>
+               <p className="text-sm text-base-content/60">
+  {p.responsibility === "Other"
+    ? p.customResponsibility
+    : p.responsibility}
+</p>
               </div>
               <button
                 onClick={() => handleDelete(index)}
@@ -192,7 +222,7 @@ export const AddParticipant: React.FC<AddParticipantProps> = ({
       <button
         onClick={onCreate}
         disabled={creating}
-        className="w-full mt-6 py-2 rounded-lg bg-primary text-primary-content font-medium hover:opacity-90 transition-all shadow-md disabled:opacity-60 active:scale-[0.98]"
+        className="w-full mt-6 py-1.5 rounded-md bg-primary text-primary-content font-medium hover:opacity-90 transition-all shadow-md disabled:opacity-60 active:scale-[0.98]"
       >
         {creating ? "Creating Project..." : "Create Project"}
       </button>

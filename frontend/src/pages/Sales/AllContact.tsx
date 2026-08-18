@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import {
   useReactTable,
   getCoreRowModel,
@@ -23,11 +24,12 @@ import {
   MdDelete,
   MdAssignmentInd,
 } from "react-icons/md";
-import { deleteContact, getAllContacts } from "@/services/sales/salesService";
-import { useAuth } from "@/auth/useAuth"; 
+import { deleteContact, getAllContacts } from "@/services/salesService";
+import { useAuth } from "@/auth/AuthContext";
 import Swal from "sweetalert2";
 import { toast } from "react-toastify";
 import EntityDrawer from "@/components/sales/EntityDrawer";
+import { getSalesReps } from "@/services/salesRepServices";
 
 /* ─────────────────────────── types ─────────────────────────── */
 export interface Contact {
@@ -37,7 +39,7 @@ export interface Contact {
   email: string;
   phoneNumber: string;
   company: string;
-  lead: string;
+  leadSource: string;
   city: string;
   status: "Active" | "Inactive" | "Prospect" | "Customer" | "VIP" | "Blocked";
   assignedRep: string;
@@ -46,72 +48,16 @@ export interface Contact {
   avatarUrl?: string;
 }
 
-/* ─────────────────────────── mock data ──────────────────────── */
-const SAMPLE: Contact[] = [
-  {
-    id: "CON-1001",
-    name: "Alice Johnson",
-    designation: "CEO",
-    email: "alice@zager.com",
-    phoneNumber: "+91 9876543210",
-    company: "Zager Digital Services",
-    lead: "ERP Implementation",
-    city: "Bangalore",
-    status: "VIP",
-    assignedRep: "V VINAY Kumar",
-    lastActivity: "2026-06-02",
-    createdDate: "2024-01-15",
-  },
-  {
-    id: "CON-1002",
-    name: "Bob Smith",
-    designation: "Procurement Head",
-    email: "bob@acme.com",
-    phoneNumber: "+1 555-0198",
-    company: "Acme Corp",
-    lead: "-",
-    city: "New York",
-    status: "Customer",
-    assignedRep: "Riya Sharma",
-    lastActivity: "2026-05-28",
-    createdDate: "2025-11-20",
-  },
-  {
-    id: "CON-1003",
-    name: "Tony Stark",
-    designation: "Founder",
-    email: "tony@stark.com",
-    phoneNumber: "+1 555-0200",
-    company: "Stark Industries",
-    lead: "Defense Contract",
-    city: "Malibu",
-    status: "Active",
-    assignedRep: "Arjun Mehta",
-    lastActivity: "2026-06-01",
-    createdDate: "2023-08-10",
-  },
-  {
-    id: "CON-1004",
-    name: "Sarah Connor",
-    designation: "Operations Manager",
-    email: "sarah.c@cyberdyne.com",
-    phoneNumber: "+44 20 7123 4567",
-    company: "Cyberdyne Systems",
-    lead: "Security AI Upgrade",
-    city: "London",
-    status: "Prospect",
-    assignedRep: "V VINAY Kumar",
-    lastActivity: "2026-05-30",
-    createdDate: "2026-05-01",
-  },
-];
-
 /* ─────────────────────────── component ─────────────────────── */
 export default function ContactsDashboard() {
   const navigate = useNavigate();
 
   // State
-const [rawContacts, setRawContacts] = useState<any[]>([]);
+
+  const [statusFilter, setStatusFilter] = useState("All");
+  const [sourceFilter, setSourceFilter] = useState("All");
+  const [ownerFilter, setOwnerFilter] = useState("All");
+  const [rawContacts, setRawContacts] = useState<any[]>([]);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [drawerMode, setDrawerMode] = useState<"view" | "edit">("view");
   const [drawerType] = useState("contact");
@@ -122,12 +68,25 @@ const [rawContacts, setRawContacts] = useState<any[]>([]);
   const [showFilters, setShowFilters] = useState(false);
   const [rowSelection, setRowSelection] = useState({});
   const [sorting, setSorting] = useState<SortingState>([]);
-    const { auth } = useAuth();
+  const { auth } = useAuth();
   const slug = auth?.slug;
+  // useEffect(() => {
+  //   fetchContacts();
+  // }, [slug]);
   useEffect(() => {
+    if (!slug) return;
+
     fetchContacts();
   }, [slug]);
+  const { data: repsData } = useQuery({
+    queryKey: ["salesReps", auth.slug],
+    queryFn: () => getSalesReps(auth.slug || "default-tenant"),
+  });
 
+  const salesReps = useMemo(() => {
+    return repsData?.data || [];
+  }, [repsData]);
+  console.log("Sales Reps:", salesReps);
   if (!slug) {
     return null; // or a loading state
   }
@@ -185,15 +144,13 @@ const [rawContacts, setRawContacts] = useState<any[]>([]);
       toast.error("Failed to delete contact. Please try again.");
     }
   };
-const handleRowClick = (row: any) => {
-  const raw = rawContacts.find((c) => c._id === row.original.id);
+  const handleRowClick = (row: any) => {
+    const raw = rawContacts.find((c) => c._id === row.original.id);
 
-  setSelectedContact(raw);
-  setDrawerMode("view");
-  setDrawerOpen(true);
-};
-
-
+    setSelectedContact(raw);
+    setDrawerMode("view");
+    setDrawerOpen(true);
+  };
 
   const handleBulkDelete = async () => {
     const selectedIds = table
@@ -350,7 +307,11 @@ const handleRowClick = (row: any) => {
             className="dropdown dropdown-end"
             onClick={(e) => e.stopPropagation()}
           >
-            <button  onClick={(e) => e.stopPropagation()} tabIndex={0} className="btn btn-ghost btn-xs btn-square">
+            <button
+              onClick={(e) => e.stopPropagation()}
+              tabIndex={0}
+              className="btn btn-ghost btn-xs btn-square"
+            >
               <MdMoreVert size={18} />
             </button>
             <ul
@@ -367,14 +328,14 @@ const handleRowClick = (row: any) => {
               <li>
                 <a
                   onClick={() => {
-      const raw = rawContacts.find(
-        (c) => c._id === row.original.id
-      );
+                    const raw = rawContacts.find(
+                      (c) => c._id === row.original.id,
+                    );
 
-      setSelectedContact(raw);
-      setDrawerMode("edit");
-      setDrawerOpen(true);
-    }}
+                    setSelectedContact(raw);
+                    setDrawerMode("edit");
+                    setDrawerOpen(true);
+                  }}
                 >
                   <MdEdit size={16} /> Edit Contact
                 </a>
@@ -405,18 +366,27 @@ const handleRowClick = (row: any) => {
     ],
     [navigate],
   );
- 
 
   const filteredContacts = useMemo(() => {
-    return contacts.filter(
-      (c) =>
+    return contacts.filter((c) => {
+      const matchesSearch =
         c.name.toLowerCase().includes(search.toLowerCase()) ||
         c.company.toLowerCase().includes(search.toLowerCase()) ||
         c.email.toLowerCase().includes(search.toLowerCase()) ||
-        c.assignedRep.toLowerCase().includes(search.toLowerCase()),
-    );
-  }, [contacts, search]);
+        c.assignedRep.toLowerCase().includes(search.toLowerCase());
 
+      const matchesStatus = statusFilter === "All" || c.status === statusFilter;
+
+      const matchesSource =
+        sourceFilter === "All" || c.leadSource === sourceFilter;
+
+      const matchesOwner =
+        ownerFilter === "All" || c.assignedRep === ownerFilter;
+
+      return matchesSearch && matchesStatus && matchesSource && matchesOwner;
+    });
+  }, [contacts, search, statusFilter, sourceFilter, ownerFilter]);
+  console.log("Filtered Contacts:", filteredContacts);
   const table = useReactTable({
     data: filteredContacts,
     columns,
@@ -527,36 +497,70 @@ const handleRowClick = (row: any) => {
             <label className="text-xs font-bold text-base-content/70 mb-1 block uppercase">
               Status
             </label>
-            <select className="select select-sm select-bordered w-full">
+            {/* <select className="select select-sm select-bordered w-full">
               <option>All</option>
               <option>Active</option>
               <option>VIP</option>
               <option>Prospect</option>
+            </select> */}
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="select select-sm select-bordered w-full"
+            >
+              <option value="All">All</option>
+              <option value="Active">Active</option>
+              <option value="Inactive">Inactive</option>
+              <option value="Prospect">Prospect</option>
+              <option value="Customer">Customer</option>
+              <option value="VIP">VIP</option>
+              <option value="Blocked">Blocked</option>
             </select>
           </div>
           <div>
             <label className="text-xs font-bold text-base-content/70 mb-1 block uppercase">
               Contact Source
             </label>
-            <select className="select select-sm select-bordered w-full">
-              <option>All</option>
-              <option>Website</option>
-              <option>Cold Call</option>
-              <option>Referral</option>
+            <select
+              className="select select-sm select-bordered w-full"
+              value={sourceFilter}
+              onChange={(e) => setSourceFilter(e.target.value)}
+            >
+              <option value="All">All</option>
+              <option value="Website">Website</option>
+              <option value="Referral">Referral</option>
+              <option value="Cold Call">Cold Call</option>
+              <option value="Trade Show">Trade Show</option>
             </select>
           </div>
           <div>
             <label className="text-xs font-bold text-base-content/70 mb-1 block uppercase">
               Assigned Rep
             </label>
-            <select className="select select-sm select-bordered w-full">
-              <option>All</option>
-              <option>V VINAY Kumar</option>
+            <select
+              value={ownerFilter}
+              onChange={(e) => setOwnerFilter(e.target.value)}
+              className="select select-sm select-bordered w-full"
+            >
+              <option value="All">All</option>
+              {salesReps.map((rep: any) => (
+                <option key={String(rep._id)} value={rep.memberId?.name}>
+                  {rep.memberId?.name}
+                </option>
+              ))}
             </select>
           </div>
           <div className="flex items-end gap-2">
-            <button className="btn btn-sm btn-primary flex-1">Apply</button>
-            <button className="btn btn-sm btn-ghost flex-1">Reset</button>
+            <button
+              className="btn btn-sm btn-ghost flex-1"
+              onClick={() => {
+                setStatusFilter("All");
+                setSourceFilter("All");
+                setOwnerFilter("All");
+              }}
+            >
+              Reset
+            </button>
           </div>
         </div>
       )}
@@ -693,32 +697,35 @@ const handleRowClick = (row: any) => {
         </div>
       </div>
       <EntityDrawer
-  open={drawerOpen}
-  mode={drawerMode}
-  type={drawerType}
-  data={selectedContact}
-  onClose={() => setDrawerOpen(false)}
-  onSave={(updated: any) => {
-    setContacts((prev) =>
-      prev.map((c) => (c.id === updated._id ? {
-        ...c,
-        name: updated.firstName + " " + updated.lastName,
-        email: updated.email,
-        phoneNumber: updated.phone?.number,
-        company: updated.company,
-        designation: updated.designation ?? "",
-        leadSource: updated.leadSource ?? "-",
-        city: updated.address?.city ?? "",
-        status: updated.status ?? "Active",
-        assignedRep: updated.assignedRep?.name ?? updated.assignedRep ?? "",
-      } : c))
-    );
+        open={drawerOpen}
+        mode={drawerMode}
+        type={drawerType}
+        data={selectedContact}
+        onClose={() => setDrawerOpen(false)}
+        onSave={(updated: any) => {
+          setContacts((prev) =>
+            prev.map((c) =>
+              c.id === updated._id
+                ? {
+                    ...c,
+                    name: updated.firstName + " " + updated.lastName,
+                    email: updated.email,
+                    phoneNumber: updated.phone?.number,
+                    company: updated.company,
+                    designation: updated.designation ?? "",
+                    leadSource: updated.leadSource ?? "-",
+                    city: updated.address?.city ?? "",
+                    status: updated.status ?? "Active",
+                    assignedRep:
+                      updated.assignedRep?.name ?? updated.assignedRep ?? "",
+                  }
+                : c,
+            ),
+          );
 
-    setDrawerOpen(false);
-  }}
-
-/>
+          setDrawerOpen(false);
+        }}
+      />
     </div>
-    
   );
 }

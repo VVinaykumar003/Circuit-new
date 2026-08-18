@@ -1,7 +1,7 @@
 import type { UserRole } from "./attendance";
 
 export type Member={
-  id: string;
+  _id: string;
   name: string;
   email: string;
   role:UserRole;

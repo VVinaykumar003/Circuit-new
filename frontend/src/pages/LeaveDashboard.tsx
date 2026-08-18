@@ -1,6 +1,6 @@
 import AdminLeaveDashboard from "../components/Leave/AdminDashboard";
 import EmployeeLeaveDashboard from "../components/Leave/EmployeeLeaveDashboard";
-import { useAuth } from "@/auth/useAuth"; 
+import { useAuth } from "@/auth/AuthContext";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
 
 export default function LeavePage() {

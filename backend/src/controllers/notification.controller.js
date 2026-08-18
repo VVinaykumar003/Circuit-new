@@ -41,9 +41,12 @@ const sendNotification = async (req, res) => {
 
     for (const file of files) {
       const result = await new Promise((resolve, reject) => {
-        const stream = cloudinary.uploader.upload_stream(
-          { folder: "notifications" },
-          (error, result) => {
+      const stream = cloudinary.uploader.upload_stream(
+  {
+    folder: "notifications",
+    resource_type: "auto",
+  },
+  (error, result) => {
             if (error) reject(error);
             else resolve(result);
           }
@@ -182,9 +185,12 @@ const updateNotification = async (req, res) => {
 
       for (const file of files) {
         const result = await new Promise((resolve, reject) => {
-          const stream = cloudinary.uploader.upload_stream(
-            { folder: "notifications" },
-            (error, result) => {
+       const stream = cloudinary.uploader.upload_stream(
+  {
+    folder: "notifications",
+    resource_type: "auto",
+  },
+  (error, result) => {
               if (error) reject(error);
               else resolve(result);
             }

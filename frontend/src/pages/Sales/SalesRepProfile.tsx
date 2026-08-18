@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { getSalesRepById } from "@/services/sales/salesRepServices";
-import { useAuth } from "@/auth/useAuth"; 
+import { getSalesRepById } from "@/services/salesRepServices";
+import { useAuth } from "@/auth/AuthContext";
 import {
   MdEdit,
   MdPictureAsPdf,
@@ -255,7 +255,7 @@ export default function SalesRepProfile() {
 
             <div className="w-full space-y-3 text-sm text-left">
               <div className="flex items-center gap-3"><MdPhone size={18} className="text-base-content/40" /> <span className="font-medium">{rep.phone}</span></div>
-              <div className="flex items-center gap-3"><MdEmail size={18} className="text-base-content/40" /> <span className="font-medium break-all">{rep.email}</span></div>
+              <div className="flex items-center gap-3"><MdEmail size={18} className="text-base-content/40" /> <span className="font-medium break-all max-w-[200px]">{rep.email}</span></div>
             </div>
           </div>
 

@@ -19,6 +19,7 @@ export type AttendanceStatus =
   | "WFH";
 
 export interface Attendance {
+  imageUrl:string,
   id: string;
   employeeId: string;
   employeeName: string;

@@ -23,7 +23,7 @@ export default function AppLayout({ children }: Props) {
   }, [location.pathname]);
 
   return (
-    <div className="flex h-screen bg-base-100 overflow-hidden">
+    <div className="flex h-screen bg-base-100 overflow-hidden  ">
       
       {/* Sidebar */}
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
@@ -32,7 +32,7 @@ export default function AppLayout({ children }: Props) {
       <div className="flex-1 flex flex-col overflow-hidden">
         <Header onMenuClick={() => setSidebarOpen(true)} />
 
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8" >
+        <main className="flex-1 overflow-y-auto p-2 sm:p-4">
           {children}
         </main>
       </div>

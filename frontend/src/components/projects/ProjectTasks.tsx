@@ -15,7 +15,7 @@ import {
   X,
 } from "lucide-react";
 import API from "@/api/axios";
-import { useAuth } from "@/auth/useAuth"; 
+import { useAuth } from "@/auth/AuthContext";
 import { toast } from "react-toastify";
 import { Edit2, FileEdit, Trash } from "lucide-react";
 
@@ -542,7 +542,7 @@ const canDelete =
           </div>
         ) : (
           <div className="overflow-x-auto rounded-lg">
-            <table className="table min-w-[600px] border border-base-300 rounded-lg">
+            <table className="table table-sm min-w-[600px] border border-base-300 rounded-lg">
               <thead className="bg-primary text-primary-content ">
                 <tr className="divide-x divide-white/20">
                   <th>Task</th>

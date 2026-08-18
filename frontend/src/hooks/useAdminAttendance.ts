@@ -4,9 +4,9 @@ import {
   getAdminDashboard,
   approveAttendance as apiApprove,
   // We will reuse apiApprove for rejections
-} from "@/services/sales/attendanceService";
+} from "@/services/attendanceService";
 import type { AdminDashboardData } from '@/type/index';
-import { useAuth } from "@/auth/useAuth"; 
+import { useAuth } from "@/auth/AuthContext";
 
 // import {dummyAdminDashboardData} from '@/data/dummyData'
 
@@ -24,10 +24,9 @@ export const useAdminAttendance = () => {
     setError(null);
     try {
       const response = await getAdminDashboard(slug);
-      console.log(response.data.data);
       setData(response.data.data);
       if (showToast) toast.success("Admin data refreshed!");
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
       setError("Unable to load admin attendance data.");
       if (showToast) toast.error("Failed to refresh admin data.");
@@ -35,7 +34,7 @@ export const useAdminAttendance = () => {
       setIsLoading(false);
     }
   }, []);
-
+  // Dependency array for useCallback should include 'slug'
   useEffect(() => {
     fetchData();
   }, [fetchData]);
@@ -60,7 +59,7 @@ export const useAdminAttendance = () => {
   };
 
   const handleApprove = (attendanceDocId: string, employeeId: string) => {
-    console.log(employeeId)
+    // console.log(employeeId) // Debug log, can be removed
     const actionFn = () => apiApprove(slug, attendanceDocId, { employeeId, status: 'PRESENT' });
     handleAction(actionFn as any, attendanceDocId, "Attendance approved.");
   };

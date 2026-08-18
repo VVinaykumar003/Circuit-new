@@ -5,10 +5,10 @@ import * as z from "zod";
 import { MdSave, MdContentCopy, MdAttachment, MdSend, MdDelete, MdCheckCircle } from "react-icons/md";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/auth/useAuth"; 
+import { useAuth } from "@/auth/AuthContext";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createSalesTask } from "@/services/sales/salesTaskServices";
-import { getSalesReps } from "@/services/sales/salesRepServices";
+import { createSalesTask } from "@/services/salesTaskServices";
+import { getSalesReps } from "@/services/salesRepServices";
 
 /* ─────────────────────────── Zod Schema ─────────────────────────── */
 const taskSchema = z.object({
@@ -49,6 +49,7 @@ const taskSchema = z.object({
   communicationType: z.string().optional(),
   meetingMode: z.enum(["Online", "Offline", ""]).optional(),
   meetingLocation: z.string().optional(),
+  meetingLocation: z.string().optional(), // Make optional as it depends on meetingMode
   meetingLink: z.string().url("Invalid URL").or(z.literal("")).optional(),
   
   // Progress

@@ -27,6 +27,7 @@ const { connectDB } = require("./config/db");
 const { initializeSocket } = require("./services/socket.service");
 const config = require("./config");
 const logger = require("./common/libs/logger");
+require('dns').setServers(['1.1.1.1', '8.8.8.8']);
 
 const server = http.createServer(app);
 let io = null;

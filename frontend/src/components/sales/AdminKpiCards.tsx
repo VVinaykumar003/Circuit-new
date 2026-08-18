@@ -6,9 +6,9 @@ interface Props {
 }
 
 const KpiCard: React.FC<{ title: string; value: number; className?: string }> = ({ title, value, className = '' }) => (
-  <div className={`card bg-base-100 border border-base-300 shadow-md rounded-2xl p-4 text-center ${className}`}>
-    <div className="text-4xl font-extrabold">{value}</div>
-    <div className="text-sm font-medium text-base-content/70 mt-1">{title}</div>
+  <div className={`card bg-base-100 border border-base-300 shadow-md rounded-2xl p-2 text-center ${className}`}>
+    <div className="text-2xl font-extrabold">{value}</div>
+    <div className="text-xs font-medium text-base-content/70 mt-1">{title}</div>
   </div>
 );
 

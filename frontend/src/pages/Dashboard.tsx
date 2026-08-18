@@ -20,12 +20,12 @@ import SingleBirthdayCard from "@/components/members/SingleBirthdayCard";
 
 import BirthdayCarousel from "@/components/members/BirthdayCarousel";
 import type { Member } from "@/type/member";
-import { useAuth } from "@/auth/useAuth"; 
-import { getMembers } from "@/services/IT/memberService";
-import { getAttendance, getMyAttendance } from "@/services/sales/attendanceService";
-import { getProject } from "@/services/IT/projectServices";
-import api from "@/services/IT/api";
-import { getAllLeaves } from "@/services/IT/leaveService";
+import { useAuth } from "@/auth/AuthContext";
+import { getMembers } from "@/services/memberService";
+import { getAttendance, getMyAttendance } from "@/services/attendanceService";
+import { getProject } from "@/services/projectServices";
+import api from "@/services/api";
+import { getAllLeaves } from "@/services/leaveService";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
 import Pagination from "@/components/ui/Pagination";
@@ -190,7 +190,7 @@ export default function Dashboard() {
     {
       title: "Employees",
       value: statsData.totalEmployees,
-      icon: <MdPeople size={20} />,
+      icon: <MdPeople size={18} />,
       helperText: (
         <span className="flex items-center gap-1 text-base-content/60 mt-1">
           <span className="text-xs font-medium text-primary/80">Active workforce</span>
@@ -200,7 +200,7 @@ export default function Dashboard() {
     {
       title: "Present Today",
       value: statsData.presentToday,
-      icon: <MdEventAvailable size={20} />,
+      icon: <MdEventAvailable size={18} />,
       helperText: (
         <span className="flex items-center gap-1 text-base-content/60 mt-1">
           <span className="text-xs font-medium text-primary/80">
@@ -214,7 +214,7 @@ export default function Dashboard() {
     {
       title: "Active Projects",
       value: statsData.activeProjects,
-      icon: <MdWorkspaces size={20} />,
+      icon: <MdWorkspaces size={18} />,
       helperText: (
         <span className="flex items-center gap-1 text-base-content/60 mt-1">
           <span className="text-xs font-medium text-primary/80">Stable</span>
@@ -224,7 +224,7 @@ export default function Dashboard() {
     {
       title: "Pending Leaves",
       value: statsData.pendingLeaves,
-      icon: <MdPendingActions size={20} />,
+      icon: <MdPendingActions size={18} />,
       helperText: (
         <span className="flex items-center gap-1 text-base-content/60 mt-1">
           <span className="text-xs font-medium text-primary/80">Awaiting review</span>
@@ -241,7 +241,7 @@ export default function Dashboard() {
           {statsData.activeProjects}
         </span>
       ),
-      icon: <MdWorkspaces size={20} />,
+      icon: <MdWorkspaces size={18} />,
       helperText: (
         <span className="flex items-center justify-start gap-1 text-black/50 mt-1 w-full text-left">
           <span className="text-xs font-medium text-black/50">Projects you are assigned to</span>
@@ -252,10 +252,10 @@ export default function Dashboard() {
       title: "Today's Attendance",
       value: (
         <span className="inline-block text-left w-full">
-          <StatusBadge status={statsData.myAttendanceStatus.replace('_', ' ').toLowerCase()} size="md" />
+          <StatusBadge status={statsData.myAttendanceStatus.replace('_', ' ').toLowerCase()} size="sm" />
         </span>
       ),
-      icon: <MdEventAvailable size={20} />,
+      icon: <MdEventAvailable size={18} />,
       helperText: statsData.myAttendanceStatus === "PRESENT" ? (
         <span className="flex items-center justify-start gap-1 text-success mt-1 font-medium text-xs w-full text-left">On time</span>
       ) : (
@@ -325,11 +325,11 @@ export default function Dashboard() {
   const secondaryBtnClass = "btn btn-sm bg-base-100 border border-base-300 text-base-content/80 hover:bg-base-200 hover:border-base-300 shadow-sm transition-all  text-sm";
 
  return (
-  <div className="px-4 py-5 sm:p-6 space-y-6">
+  <div className="px-3 py-3 sm:p-4 space-y-4">
     <Breadcrumbs />
 
     {/* STATS */}
-    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-2">
       {statsToRender.map((stat) => (
         <StatCard
           key={stat.title}
@@ -343,16 +343,16 @@ export default function Dashboard() {
 
     {/* QUICK ACTIONS */}
     <div>
-      <h2 className="text-lg font-semibold text-base-content mb-3">
+      <h2 className="text-base font-semibold text-base-content mb-2">
         Quick Actions
       </h2>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:flex lg:flex-wrap gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:flex lg:flex-wrap gap-2">
         {isAdmin ? (
           <>
             <Link
               to="/tasks"
-              className="btn btn-primary btn-sm w-full sm:w-auto shadow-sm transition-all text-sm"
+              className="btn btn-primary btn-xs w-full sm:w-auto shadow-sm transition-all text-xs"
             >
               <MdAssignment size={16} />
               Assign Task
@@ -360,7 +360,7 @@ export default function Dashboard() {
 
             <Link
               to="/createProject"
-              className="btn btn-sm w-full sm:w-auto bg-base-100 border border-base-300 text-base-content/80 hover:bg-base-200 shadow-sm transition-all text-sm"
+              className="btn btn-xs w-full sm:w-auto bg-base-100 border border-base-300 text-base-content/80 hover:bg-base-200 shadow-sm transition-all text-xs"
             >
               <MdWorkspaces size={16} />
               Create Project
@@ -368,7 +368,7 @@ export default function Dashboard() {
 
             <Link
               to="/addMember"
-              className="btn btn-sm w-full sm:w-auto bg-base-100 border border-base-300 text-base-content/80 hover:bg-base-200 shadow-sm transition-all text-sm"
+              className="btn btn-xs w-full sm:w-auto bg-base-100 border border-base-300 text-base-content/80 hover:bg-base-200 shadow-sm transition-all text-xs"
             >
               <MdPersonAdd size={16} />
               Add Member
@@ -376,7 +376,7 @@ export default function Dashboard() {
 
             <Link
               to="/members"
-              className="btn btn-sm w-full sm:w-auto bg-base-100 border border-base-300 text-base-content/80 hover:bg-base-200 shadow-sm transition-all text-sm"
+              className="btn btn-xs w-full sm:w-auto bg-base-100 border border-base-300 text-base-content/80 hover:bg-base-200 shadow-sm transition-all text-xs"
             >
               <MdPeople size={16} />
               Team Directory
@@ -384,7 +384,7 @@ export default function Dashboard() {
 
             <Link
               to="/leaves"
-              className="btn btn-sm w-full sm:w-auto bg-base-100 border border-base-300 text-base-content/80 hover:bg-base-200 shadow-sm transition-all text-sm"
+              className="btn btn-xs w-full sm:w-auto bg-base-100 border border-base-300 text-base-content/80 hover:bg-base-200 shadow-sm transition-all text-xs"
             >
               <MdPeople size={16} />
               Leave
@@ -394,7 +394,7 @@ export default function Dashboard() {
           <>
             <Link
               to="/attendance"
-              className="btn btn-primary btn-sm w-full sm:w-auto shadow-sm transition-all text-sm"
+              className="btn btn-primary btn-xs w-full sm:w-auto shadow-sm transition-all text-xs"
             >
               <MdEventAvailable size={16} />
               Attendance
@@ -402,7 +402,7 @@ export default function Dashboard() {
 
             <Link
               to="/tasks"
-              className="btn btn-sm w-full sm:w-auto bg-base-100 border border-base-300 text-base-content/80 hover:bg-base-200 shadow-sm transition-all text-sm"
+              className="btn btn-xs w-full sm:w-auto bg-base-100 border border-base-300 text-base-content/80 hover:bg-base-200 shadow-sm transition-all text-xs"
             >
               <MdAssignment size={16} />
               My Tasks
@@ -410,7 +410,7 @@ export default function Dashboard() {
 
             <Link
               to="/leaves"
-              className="btn btn-sm w-full sm:w-auto bg-base-100 border border-base-300 text-base-content/80 hover:bg-base-200 shadow-sm transition-all text-sm"
+              className="btn btn-xs w-full sm:w-auto bg-base-100 border border-base-300 text-base-content/80 hover:bg-base-200 shadow-sm transition-all text-xs"
             >
               <MdFlightTakeoff size={16} />
               Log Leave
@@ -418,19 +418,19 @@ export default function Dashboard() {
 
             <Link
               to="/my-salary"
-              className="btn btn-sm w-full sm:w-auto bg-base-100 border border-base-300 text-base-content/80 hover:bg-base-200 shadow-sm transition-all text-sm"
+              className="btn btn-xs w-full sm:w-auto bg-base-100 border border-base-300 text-base-content/80 hover:bg-base-200 shadow-sm transition-all text-xs"
             >
               <MdReceiptLong size={16} />
               Download Payslips
             </Link>
 
-            <Link
+            {/* <Link
               to="/members"
-              className="btn btn-sm w-full sm:w-auto bg-base-100 border border-base-300 text-base-content/80 hover:bg-base-200 shadow-sm transition-all text-sm"
+              className="btn btn-xs w-full sm:w-auto bg-base-100 border border-base-300 text-base-content/80 hover:bg-base-200 shadow-sm transition-all text-xs"
             >
               <MdPeople size={16} />
               Team Directory
-            </Link>
+            </Link> */}
           </>
         )}
       </div>
@@ -440,9 +440,9 @@ export default function Dashboard() {
     {birthdayEmployees.length > 0 && (
       <div className="mb-6">
         {birthdayEmployees.length === 1 && (
-          <div className="bg-base-100 rounded-2xl shadow-sm p-4 sm:p-6">
+          <div className="bg-base-100 rounded-2xl shadow-sm p-3 sm:p-4">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold">
+              <h2 className="text-base font-semibold">
                 🎂 Birthday Today
               </h2>
             </div>
@@ -452,12 +452,12 @@ export default function Dashboard() {
         )}
 
         {birthdayEmployees.length === 2 && (
-          <div className="bg-base-100 rounded-2xl shadow-sm p-4 sm:p-6">
+          <div className="bg-base-100 rounded-2xl shadow-sm p-3 sm:p-4">
             <h2 className="text-lg font-semibold mb-4">
               🎂 Birthdays Today
             </h2>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {birthdayEmployees.map((emp) => (
                 <SingleBirthdayCard
                   key={emp.id}
@@ -480,12 +480,12 @@ export default function Dashboard() {
 
     {/* ATTENDANCE GRAPH */}
     {isAdmin && (
-      <div className="bg-base-100 rounded-2xl shadow-sm border border-base-300 p-4 sm:p-6 mb-6 overflow-hidden">
-        <h2 className="text-lg font-semibold text-base-content mb-4">
+      <div className="bg-base-100 rounded-xl shadow-sm border border-base-300 p-3 sm:p-4 mb-6 overflow-hidden">
+        <h2 className="text-base font-semibold text-base-content mb-4">
           Attendance Trend (This Week)
         </h2>
 
-        <div className="h-[280px] sm:h-64 w-full overflow-x-auto">
+        <div className="h-[220px] sm:h-64 w-full overflow-x-auto">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
               data={attendanceTrendData}
@@ -547,7 +547,7 @@ export default function Dashboard() {
               />
 
               <Bar
-                barSize={40}
+                barSize={28}
                 dataKey="present"
                 fill="#8b5cf6"
                 radius={[4, 4, 0, 0]}
@@ -555,7 +555,7 @@ export default function Dashboard() {
               />
 
               <Bar
-                barSize={40}
+                barSize={28}
                 dataKey="absent"
                 fill="#f43f5e"
                 radius={[4, 4, 0, 0]}
@@ -568,9 +568,9 @@ export default function Dashboard() {
     )}
 
     {/* RECENT ACTIVITY */}
-    <div className="bg-primary/10 rounded-2xl shadow-sm border border-base-300 p-4 sm:p-6 overflow-hidden">
-      <div className="flex items-center justify-between mb-5">
-        <h2 className="text-lg font-semibold text-base-content">
+    <div className="bg-primary/10 rounded-xl shadow-sm border border-base-300 p-3  overflow-hidden">
+      <div className="flex items-center justify-between mb-2">
+        <h2 className="text-base font-semibold text-base-content">
           Recent Activity
         </h2>
       </div>
@@ -594,8 +594,8 @@ export default function Dashboard() {
                     sm:flex-row
                     sm:items-center
                     justify-between
-                    gap-3
-                    p-3
+                    gap-2
+                    p-2
                     rounded-xl
                     border
                     border-base-200
@@ -610,9 +610,9 @@ export default function Dashboard() {
                   `}
                 >
                   {/* LEFT */}
-                  <div className="flex items-start gap-3 min-w-0 flex-1">
+                  <div className="flex items-start gap-2 min-w-0 flex-1">
                     {activity.user && (
-                      <div className="w-9 h-9 rounded-full bg-base-200 border border-base-300 flex items-center justify-center overflow-hidden shrink-0">
+                      <div className="w-7 h-7  rounded-full bg-base-200 border border-base-300 flex items-center justify-center overflow-hidden shrink-0">
                         {activity.user.imageUrl ? (
                           <img
                             src={activity.user.imageUrl}
@@ -638,7 +638,7 @@ export default function Dashboard() {
                     )}
 
                     <div className="flex flex-col min-w-0">
-                      <span className="text-base-content font-medium truncate">
+                      <span className="text-base-content font-medium text-sm  truncate">
                         {activity.action || "Activity"}
 
                         {activity.count > 1 && (

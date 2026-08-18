@@ -27,8 +27,8 @@ import {
   getSalesTaskByEmpId,
   getSalesTaskById,
   updateSalesTask,
-} from "@/services/sales/salesTaskServices";
-import { useAuth } from "@/auth/useAuth"; 
+} from "@/services/salesTaskServices";
+import { useAuth } from "@/auth/AuthContext";
 
 /* ─────────────────────────────────────────────────────────────
    TYPES & INTERFACES

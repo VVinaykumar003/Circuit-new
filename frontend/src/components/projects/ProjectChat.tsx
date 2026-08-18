@@ -1,6 +1,6 @@
 import { connect, socket } from "@/ws";
 import { useEffect, useState , useRef } from "react";
-import { useAuth } from "@/auth/useAuth"; // Import useAuth
+import { useAuth } from "@/auth/AuthContext"; // Import useAuth
 import API from "@/api/axios";
 
 interface Message {

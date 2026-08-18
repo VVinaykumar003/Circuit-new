@@ -73,7 +73,7 @@ export default function StatusBadge({
       className={`
         inline-flex items-center gap-1
         rounded-full border
-        ${size === "sm" ? "px-4 py-0.5 text-xs" : "px-3 py-1 text-sm"}
+        ${size === "sm" ? "px-3 py-0.4 text-xs" : "px-3 py-1 text-sm"}
         font-medium
         ${config.className}
       `}

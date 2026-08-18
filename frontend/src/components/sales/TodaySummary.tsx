@@ -1,6 +1,8 @@
 import React from 'react';
 import { FaHourglassHalf, FaArrowUp, FaCoffee } from 'react-icons/fa';
-import type { TodaySummaryData } from "@/type/index";
+import type {  TodaySummaryData } from "@/type/index";
+
+
 
 interface Props {
   summary: TodaySummaryData;

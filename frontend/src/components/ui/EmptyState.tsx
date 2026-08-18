@@ -22,7 +22,7 @@ export default function EmptyState({
         text-center
         border border-dashed border-base-300
         rounded-xl
-        p-10
+        p-7
         bg-base-200
       "
     >
@@ -31,7 +31,7 @@ export default function EmptyState({
       </h3>
 
       {description && (
-        <p className="text-sm text-base-content/60 mt-1 max-w-sm">
+        <p className="text-xs text-base-content/60 mt-1 max-w-sm">
           {description}
         </p>
       )}

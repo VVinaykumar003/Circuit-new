@@ -3,7 +3,8 @@ const { uploadOnCloudinary } = require("../config/cloudinary");
 const WorkUpdateModel = require("../models/WorkUpdate.model");
 const ProjectModel = require("../models/Project.model");
 const logger = require("../common/libs/logger");
-
+const { cloudinary } = require("../config/cloudinary");
+const streamifier = require("streamifier");
 // Add Work Update
 
 const addWorkUpdate = async (req, res) => {
@@ -29,23 +30,49 @@ const addWorkUpdate = async (req, res) => {
         message: "Project not found in this organization",
       });
     }
+let files = [];
 
+if (Array.isArray(req.files)) {
+  files = req.files;
+} else if (req.files && typeof req.files === "object") {
+  files = Object.values(req.files).flat();
+}
     // Upload attachments to Cloudinary
-    let files = [];
-    if (Array.isArray(req.files)) {
-      files = req.files;
-    } else if (req.files && typeof req.files === "object") {
-      files = Object.values(req.files).flat();
-    }
     const uploadedAttachments = [];
 
-    for (const file of files) {
-      // Use your configured helper that processes 'file.path' and deletes local files automatically
-      const result = await uploadOnCloudinary(file.path);
-      if (result && result.secure_url) {
-        uploadedAttachments.push(result.secure_url);
-      }
+for (const file of files) {
+  const result = await new Promise((resolve, reject) => {
+
+    let resourceType = "raw";
+
+    if (file.mimetype.startsWith("image/")) {
+      resourceType = "image";
     }
+
+    const stream = cloudinary.uploader.upload_stream(
+      {
+        folder: "work-updates",
+        resource_type: resourceType,
+         public_id: file.originalname,
+        use_filename: true,
+        unique_filename: true,
+      },
+      (error, result) => {
+        if (error) reject(error);
+        else resolve(result);
+      }
+    );
+
+    streamifier
+      .createReadStream(file.buffer)
+      .pipe(stream);
+
+  });
+
+  if (result?.secure_url) {
+    uploadedAttachments.push(result.secure_url);
+  }
+}
 
     // Create work update
     const workUpdate = new WorkUpdateModel({
@@ -198,13 +225,41 @@ const editWorkUpdate = async (req, res) => {
     }
     const uploadedAttachments = [];
 
-    for (const file of files) {
-      // Use your configured helper that processes 'file.path' and deletes local files automatically
-      const result = await uploadOnCloudinary(file.path);
-      if (result && result.secure_url) {
-        uploadedAttachments.push(result.secure_url);
-      }
+   for (const file of files) {
+
+  const result = await new Promise((resolve, reject) => {
+
+    let resourceType = "raw";
+
+    if (file.mimetype.startsWith("image/")) {
+      resourceType = "image";
     }
+
+    const stream = cloudinary.uploader.upload_stream(
+      {
+        folder: "work-updates",
+        resource_type: resourceType,
+          public_id: file.originalname,
+        use_filename: true,
+        unique_filename: true,
+      },
+      (error, result) => {
+        if (error) reject(error);
+        else resolve(result);
+      }
+    );
+
+    streamifier
+      .createReadStream(file.buffer)
+      .pipe(stream);
+
+  });
+
+
+  if (result?.secure_url) {
+    uploadedAttachments.push(result.secure_url);
+  }
+}
 
     // Update fields
     if (description) workUpdate.description = description;

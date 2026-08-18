@@ -10,7 +10,7 @@ interface SelectProps
 }
 
 export default function Select({
-  size = "md",
+  size = "sm",
   className,
   ...props
 }: SelectProps) {

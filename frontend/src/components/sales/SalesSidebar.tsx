@@ -17,13 +17,25 @@ import {
   MdNotifications,
   MdEventAvailable,
 } from "react-icons/md";
-import { useAuth } from  "@/auth/useAuth"; ;
+import { useAuth } from "../../auth/AuthContext";
 
 interface Props {
   isOpen: boolean;
   onClose: () => void;
 }
 
+// Define font sizes and line height based on ERP standards
+const FONT_SIZES = {
+  body: '14px', // 0.875rem
+  dataTable: '13px', // 0.8125rem
+  secondary: '12px', // 0.75rem
+  metadata: '11px', // 0.6875rem
+  h3: '16px', // 1rem
+  h2: '18px', // 1.125rem
+  h1: '20px', // 1.25rem
+  pageTitle: '24px', // 1.5rem
+};
+const LINE_HEIGHT = '1.3'; // Compact line height
 export default function SalesSidebar({ isOpen, onClose }: Props) {
   const { auth } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
@@ -162,10 +174,10 @@ useEffect(() => {
 
             {!collapsed && (
               <div>
-                <p className="font-semibold text-base-100">
+                <p className="font-semibold text-base-100" style={{ fontSize: FONT_SIZES.body, lineHeight: LINE_HEIGHT }}>
                Circuit 
                 </p>
-                {/* <p className="text-xs text-base-100">
+                {/* <p className="text-base-100" style={{ fontSize: FONT_SIZES.metadata, lineHeight: LINE_HEIGHT }}>
                   Management
                 </p> */}
               </div>
@@ -204,8 +216,7 @@ useEffect(() => {
               onClick={onClose}
               className={linkClass}
             >
-              {item.icon}
-              {!collapsed && <span>{item.label}</span>}
+              {item.icon}{!collapsed && <span style={{ fontSize: FONT_SIZES.body, lineHeight: LINE_HEIGHT }}>{item.label}</span>}
             </NavLink>
           ))}
         </nav>
@@ -226,11 +237,11 @@ useEffect(() => {
             </div>
 
             {!collapsed && (
-              <div>
-                <p className="text-sm font-semibold text-base-100">
+              <div style={{ lineHeight: LINE_HEIGHT }}>
+                <p className="font-semibold text-base-100" style={{ fontSize: FONT_SIZES.body }}>
                   {user?.name}
                 </p>
-                <p className="text-xs text-base-100 capitalize">
+                <p className="text-base-100 capitalize" style={{ fontSize: FONT_SIZES.metadata }}>
                   {user?.role}
                 </p>
               </div>

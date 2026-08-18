@@ -112,7 +112,7 @@ return (
     
     {/* HEADER */}
     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-b border-base-content pb-3">
-      <h3 className="text-base sm:text-lg font-semibold text-base-content">
+      <h3 className="text-md font-semibold text-base-content">
         Company Leave Policy
       </h3>
 
@@ -133,11 +133,11 @@ return (
       {/* CASUAL */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-3 bg-base-200 rounded-lg">
         <div className="flex-1 min-w-0">
-          <h4 className="font-medium text-base-content text-sm sm:text-base">
+          <h4 className="font-medium text-base-content text-sm">
             Casual Leave
           </h4>
 
-          <p className="text-xs sm:text-sm text-base-content/70">
+          <p className="text-[13px] text-base-content/70">
             Cannot carry forward to the next year.
           </p>
         </div>
@@ -150,7 +150,7 @@ return (
             onChange={(e) => handleChange("casual", e.target.value)}
           />
         ) : (
-          <span className="font-semibold text-base-content bg-base-100 px-3 py-2 rounded-md text-center whitespace-nowrap">
+          <span className="font-medium text-base-content bg-base-100 px-2 py-1 rounded-md text-center whitespace-nowrap">
             {formData.casual} Days
           </span>
         )}
@@ -159,11 +159,11 @@ return (
       {/* SICK */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-3 bg-base-200 rounded-lg">
         <div className="flex-1 min-w-0">
-          <h4 className="font-medium text-base-content text-sm sm:text-base">
+          <h4 className="font-medium text-base-content text-sm ">
             Sick Leave
           </h4>
 
-          <p className="text-xs sm:text-sm text-base-content/70">
+          <p className="text-base-content/70">
             Medical certificate required if more than 2 days.
           </p>
         </div>
@@ -176,7 +176,7 @@ return (
             onChange={(e) => handleChange("sick", e.target.value)}
           />
         ) : (
-          <span className="font-semibold text-base-content bg-base-100 px-3 py-2 rounded-md text-center whitespace-nowrap">
+          <span className="font-medium text-base-content bg-base-100 px-2 py-1 rounded-md text-center whitespace-nowrap">
             {formData.sick} Days
           </span>
         )}
@@ -185,11 +185,11 @@ return (
       {/* PAID */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-3 bg-base-200 rounded-lg">
         <div className="flex-1 min-w-0">
-          <h4 className="font-medium text-base-content text-sm sm:text-base">
+          <h4 className="font-medium text-base-content text-sm">
             Paid Leave
           </h4>
 
-          <p className="text-xs sm:text-sm text-base-content/70">
+          <p className="text-[13px] text-base-content/70">
             Up to 5 days can be carried forward.
           </p>
         </div>
@@ -202,7 +202,7 @@ return (
             onChange={(e) => handleChange("paid", e.target.value)}
           />
         ) : (
-          <span className="font-semibold text-base-content bg-base-100 px-3 py-2 rounded-md text-center whitespace-nowrap">
+          <span className="font-medium text-base-content bg-base-100 px-2 py-1 rounded-md text-center whitespace-nowrap">
             {formData.paid} Days
           </span>
         )}
@@ -210,11 +210,11 @@ return (
 
       {/* APPROVAL */}
       <div className="bg-base-200 rounded-lg p-3">
-        <h4 className="font-medium text-base-content text-sm sm:text-base mb-1">
+        <h4 className="font-medium text-base-content text-sm  mb-1">
           Approval Process
         </h4>
 
-        <p className="text-xs sm:text-sm text-base-content/70 leading-relaxed">
+        <p className="text-[13px] text-base-content/70 leading-relaxed">
           All leave requests must be approved by reporting manager.
         </p>
       </div>

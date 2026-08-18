@@ -5,9 +5,9 @@ import * as z from "zod";
 import { useNavigate } from "react-router-dom";
 import { MdSave, MdContentCopy, MdDelete } from "react-icons/md";
 import { toast } from "react-toastify";
-import { getSalesEmployees } from "@/services/IT/memberService";
-import { useAuth } from "@/auth/useAuth"; 
-import { createLead } from "@/services/sales/salesService";
+import { getSalesEmployees } from "@/services/memberService";
+import { useAuth } from "@/auth/AuthContext";
+import { createLead } from "@/services/leadServices";
 
 /* ─────────────────────────── Zod Schema ─────────────────────────── */
 
@@ -163,7 +163,8 @@ export default function Leads() {
     try {
       const payload = {
         ...data,
-        leadOwner: data.leadOwner, // ObjectId already
+        leadOwner: data.leadOwner,
+
         leadSource:
           data.leadSource === "Other" ? data.customLeadSource : data.leadSource,
 
@@ -174,9 +175,11 @@ export default function Leads() {
           data.countryCode === "Other"
             ? data.customCountryCode
             : data.countryCode,
+
+        country: data.country || undefined,
       };
-      country: (data.country || undefined,
-        console.log("Payload to submit:", payload));
+
+      console.log("Payload to submit:", payload);
       await createLead(slug, payload);
 
       toast.success("Lead created successfully!");
@@ -187,8 +190,8 @@ export default function Leads() {
     }
   };
 
-const selectedOwner = owners.find((o: any) => o._id === wOwner);
-console.log(selectedOwner);
+  const selectedOwner = owners.find((o: any) => o._id === wOwner);
+  console.log(selectedOwner);
   return (
     <div className="min-h-screen bg-base-200 p-4 md:p-6 lg:p-8 font-sans">
       {/* ── Page Header ── */}
@@ -390,7 +393,9 @@ console.log(selectedOwner);
                     {...register("gender")}
                     className="select select-bordered w-full"
                   >
-                    <option disabled value="">-Select-</option>
+                    <option disabled value="">
+                      -Select-
+                    </option>
                     <option>Male</option>
                     <option>Female</option>
                     <option>Other</option>
@@ -425,7 +430,13 @@ console.log(selectedOwner);
                   )}
                   <input
                     type="tel"
-                    {...register("phoneNumber")}
+                      maxLength={10}
+  inputMode="numeric"
+                    {...register("phoneNumber", {
+    onChange: (e) => {
+      e.target.value = e.target.value.replace(/[^0-9]/g, "").slice(0, 10);
+    }
+  })}
                     className="input input-sm border-none w-full focus:outline-none"
                     placeholder="81234 56789"
                   />
@@ -492,7 +503,9 @@ console.log(selectedOwner);
                     {...register("country")}
                     className="select select-bordered w-full"
                   >
-                    <option disabled value="">-Select-</option>
+                    <option disabled value="">
+                      -Select-
+                    </option>
                     {DEFAULT_COUNTRIES.map((c) => (
                       <option key={c} value={c}>
                         {c}
@@ -581,7 +594,7 @@ console.log(selectedOwner);
                   Lead Owner
                 </span>
                 <p className="font-medium mt-1 truncate">
-                {selectedOwner ? selectedOwner.name : "—"}
+                  {selectedOwner ? selectedOwner.name : "—"}
                 </p>
               </div>
             </div>

@@ -161,8 +161,11 @@ const getAttendanceByDepartment = asyncHandler(async (req, res) => {
   }
 
   const attendance = await Attendance.find(filter)
-    .populate('markedBy', 'name email')
-    .sort({ date: -1 });
+    // .populate('markedBy', 'name email')
+    .populate(
+    "records.employee",
+    "name email designation imageUrl"
+).sort({ date: -1 });
 
   return successResponse(res, 'Department attendance retrieved successfully', attendance);
 });
@@ -703,74 +706,509 @@ const approveAttendance = asyncHandler(async (req, res) => {
 
 
 // 3. Employee can view their attendance
+// const getMyAttendance = asyncHandler(async (req, res) => {
+//   const userId = req.user.id || req.user._id;
+//   const orgId = req.organization._id || req.organization;
+//   const { startDate, endDate, date } = req.query;
+
+//   const filter = {
+//     organization: orgId,
+//     'records.employee': userId
+//   };
+
+//   if (date) {
+//     const queryDate = new Date(date);
+//     queryDate.setHours(0, 0, 0, 0);
+//     filter.date = queryDate;
+//   } else if (startDate && endDate) {
+//     filter.date = { $gte: new Date(startDate), $lte: new Date(endDate) };
+//   }
+
+//   const attendances = await Attendance.find(filter).sort({ date: -1 });
+
+// //  console.log(`Employee attendance : ${attendances}`)
+// const newAttendance=  attendances.map(doc =>
+
+//   {const myRecord = doc.records.find(r => r.employee.toString() === userId.toString());
+//   console.log(`Employee attendance Record : ${myRecord}`);}
+//   );
+
+//   // Format response to only extract the specific user's records from the document arrays
+//   const myAttendance = attendances.map(doc => {
+//     const myRecord = doc.records.find(r => r.employee.toString() === userId.toString());
+//     return {
+//       attendanceId: doc._id,
+//       date: doc.date,
+//       department: doc.department,
+//       location: doc.location,
+//       record: myRecord
+//     };
+//   });
+//   // console.log(`Employee attendance : ${attendances}`)
+//   //
+
+//   return successResponse(res, 'My attendance retrieved successfully', myAttendance);
+// });
+
 const getMyAttendance = asyncHandler(async (req, res) => {
   const userId = req.user.id || req.user._id;
   const orgId = req.organization._id || req.organization;
+
   const { startDate, endDate, date } = req.query;
+
+  if (!userId) {
+    throw new ValidationError("Employee ID is required");
+  }
 
   const filter = {
     organization: orgId,
-    'records.employee': userId
+    "records.employee": userId,
   };
+
+  // --------------------------------------------------
+  // DATE FILTER
+  // --------------------------------------------------
 
   if (date) {
     const queryDate = new Date(date);
+
     queryDate.setHours(0, 0, 0, 0);
-    filter.date = queryDate;
+
+    const nextDate = new Date(queryDate);
+    nextDate.setDate(nextDate.getDate() + 1);
+
+    filter.date = {
+      $gte: queryDate,
+      $lt: nextDate,
+    };
   } else if (startDate && endDate) {
-    filter.date = { $gte: new Date(startDate), $lte: new Date(endDate) };
+    const start = new Date(startDate);
+    start.setHours(0, 0, 0, 0);
+
+    const end = new Date(endDate);
+    end.setHours(23, 59, 59, 999);
+
+    filter.date = {
+      $gte: start,
+      $lte: end,
+    };
   }
 
-  const attendances = await Attendance.find(filter).sort({ date: -1 });
+  // --------------------------------------------------
+  // FETCH ATTENDANCE
+  // --------------------------------------------------
 
-  // Format response to only extract the specific user's records from the document arrays
-  const myAttendance = attendances.map(doc => {
-    const myRecord = doc.records.find(r => r.employee.toString() === userId.toString());
-    return {
-      attendanceId: doc._id,
-      date: doc.date,
-      department: doc.department,
-      location: doc.location,
-      record: myRecord
-    };
-  });
+  const attendances = await Attendance.find(filter)
+    .populate(
+      "records.employee",
+      "name email designation imageUrl employeeId"
+    )
+    .sort({ date: -1 })
+    .lean();
 
-  return successResponse(res, 'My attendance retrieved successfully', myAttendance);
+    console.log(`Attendance : ${attendances.map(r =>{
+       
+    })}`)
+
+  // --------------------------------------------------
+  // FORMAT EMPLOYEE ATTENDANCE
+  // --------------------------------------------------
+
+  const myAttendance = attendances
+    .map((doc) => {
+      const myRecord = doc.records.find(
+        (record) =>
+          record.employee?._id?.toString() === userId.toString()
+      );
+
+      if (!myRecord) {
+        return null;
+      }
+
+      return {
+        attendanceId: doc._id,
+        date: doc.date,
+        department: doc.department,
+
+        // Employee's attendance record
+        ...myRecord,
+
+        // Keep employee information accessible
+        employee: myRecord.employee,
+      };
+    })
+    .filter(Boolean);
+
+  logger.info(
+    `Employee ${userId} attendance records: ${myAttendance.length}`
+  );
+
+  return successResponse(
+    res,
+    "My attendance retrieved successfully",
+    myAttendance
+  );
 });
 
 // 4. Admin/Owner can view all attendance
-const getOrganizationAttendance = asyncHandler(async (req, res) => {
-  const userRole = req.user.role;
-  const orgId = req.organization._id || req.organization;
-  const { date, startDate, endDate, departmentId } = req.query;
+// const getOrganizationAttendance = asyncHandler(async (req, res) => {
+//   const userRole = req.user.role;
+//   const orgId = req.organization._id || req.organization;
+//   const { date, startDate, endDate, departmentId } = req.query;
 
-  if (!['admin', 'owner', 'manager'].includes(userRole)) {
-    throw new ForbiddenError('You do not have permission to view organization attendance');
+//   if (!['admin', 'owner', 'manager'].includes(userRole)) {
+//     throw new ForbiddenError('You do not have permission to view organization attendance');
+//   }
+
+//   const filter = { organization: orgId };
+
+//   if (date) {
+//     const queryDate = new Date(date);
+//     queryDate.setHours(0, 0, 0, 0);
+//     filter.date = queryDate;
+//   } else if (startDate && endDate) {
+//     filter.date = { $gte: new Date(startDate), $lte: new Date(endDate) };
+//   }
+
+//   if (departmentId) {
+//     filter.department = departmentId;
+//   }
+
+//   const attendances = await Attendance.find(filter)
+//     .populate('records.employee', 'name email designation imageUrl')
+//     .populate('markedBy', 'name email')
+//     .sort({ date: -1 });
+
+//   return successResponse(res, 'Organization attendance retrieved successfully', attendances);
+// });
+const getOrganizationAttendance = asyncHandler(
+  async (req, res) => {
+    const userRole = req.user.role;
+
+    const orgId =
+      req.organization._id ||
+      req.organization;
+
+    const {
+      date,
+      startDate,
+      endDate,
+      departmentId,
+      status,
+      search,
+      month,
+    } = req.query;
+
+    // --------------------------------------------------
+    // Permission
+    // --------------------------------------------------
+
+    if (
+      ![
+        "admin",
+        "owner",
+        "manager",
+      ].includes(userRole)
+    ) {
+      throw new ForbiddenError(
+        "You do not have permission to view organization attendance"
+      );
+    }
+
+    // --------------------------------------------------
+    // Base Match
+    // --------------------------------------------------
+
+    const match = {
+      organization: orgId,
+    };
+
+    // --------------------------------------------------
+    // Department
+    // --------------------------------------------------
+
+    if (
+      departmentId &&
+      departmentId !== "All"
+    ) {
+      match.department = departmentId;
+    }
+
+    // --------------------------------------------------
+    // Date
+    // --------------------------------------------------
+
+    if (date) {
+      const start = new Date(date);
+
+      start.setHours(
+        0,
+        0,
+        0,
+        0
+      );
+
+      const end = new Date(start);
+
+      end.setDate(
+        end.getDate() + 1
+      );
+
+      match.date = {
+        $gte: start,
+        $lt: end,
+      };
+    }
+
+    // --------------------------------------------------
+    // Date Range
+    // --------------------------------------------------
+
+    else if (
+      startDate &&
+      endDate
+    ) {
+      const start = new Date(
+        startDate
+      );
+
+      start.setHours(
+        0,
+        0,
+        0,
+        0
+      );
+
+      const end = new Date(
+        endDate
+      );
+
+      end.setHours(
+        23,
+        59,
+        59,
+        999
+      );
+
+      match.date = {
+        $gte: start,
+        $lte: end,
+      };
+    }
+
+    // --------------------------------------------------
+    // Month
+    // --------------------------------------------------
+
+    else if (month) {
+      const [
+        year,
+        monthNumber,
+      ] = month
+        .split("-")
+        .map(Number);
+
+      const monthStart = new Date(
+        year,
+        monthNumber - 1,
+        1
+      );
+
+      const nextMonthStart = new Date(
+        year,
+        monthNumber,
+        1
+      );
+
+      match.date = {
+        $gte: monthStart,
+        $lt: nextMonthStart,
+      };
+    }
+
+    // --------------------------------------------------
+    // Aggregation
+    // --------------------------------------------------
+
+    const pipeline = [
+      // 1. Organization/date/department
+      {
+        $match: match,
+      },
+
+      // 2. Convert each employee record
+      //    into its own document
+      {
+        $unwind: "$records",
+      },
+
+      // 3. Find employee
+      {
+        $lookup: {
+          from: "users",
+          localField:
+            "records.employee",
+          foreignField: "_id",
+          as: "employeeDetails",
+        },
+      },
+
+      // 4. Convert employee array to object
+      {
+        $unwind: {
+          path: "$employeeDetails",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+    ];
+
+    // --------------------------------------------------
+    // Search Employee Name
+    // --------------------------------------------------
+
+    if (search?.trim()) {
+      const searchRegex =
+        new RegExp(
+          search.trim(),
+          "i"
+        );
+
+      pipeline.push({
+        $match: {
+          $or: [
+            {
+              "employeeDetails.name":
+                searchRegex,
+            },
+            {
+              "employeeDetails.email":
+                searchRegex,
+            },
+            {
+              "employeeDetails.employeeId":
+                searchRegex,
+            },
+          ],
+        },
+      });
+    }
+
+    // --------------------------------------------------
+    // Status
+    // --------------------------------------------------
+
+    if (
+      status &&
+      status !== "All"
+    ) {
+      pipeline.push({
+        $match: {
+          "records.status":
+            status,
+        },
+      });
+    }
+
+    // --------------------------------------------------
+    // Sort
+    // --------------------------------------------------
+
+    pipeline.push({
+      $sort: {
+        date: -1,
+        "records.checkIn": -1,
+      },
+    });
+
+    // --------------------------------------------------
+    // Response Shape
+    // --------------------------------------------------
+
+    pipeline.push({
+      $project: {
+        attendanceDocId: "$_id",
+
+        _id: "$records._id",
+
+        date: "$date",
+
+        employee: {
+          _id:
+            "$employeeDetails._id",
+
+          name:
+            "$employeeDetails.name",
+
+          email:
+            "$employeeDetails.email",
+
+          designation:
+            "$employeeDetails.designation",
+
+          imageUrl:
+            "$employeeDetails.imageUrl",
+        },
+
+        status:
+          "$records.status",
+
+        mode:
+          "$records.mode",
+
+        checkIn:
+          "$records.checkIn",
+
+        checkOut:
+          "$records.checkOut",
+
+        remarks:
+          "$records.remarks",
+
+        workingHours:
+          "$records.workingHours",
+
+        totalBreak:
+          "$records.totalBreak",
+
+        lateBy:
+          "$records.lateBy",
+
+        overtime:
+          "$records.overtime",
+
+        location:
+          "$records.location",
+
+        approval:
+          "$records.approval",
+
+        checkInDetails:
+          "$records.checkInDetails",
+
+        isOnBreak:
+          "$records.isOnBreak",
+
+        breaks:
+          "$records.breaks",
+      },
+    });
+
+    // --------------------------------------------------
+    // Execute
+    // --------------------------------------------------
+
+    const attendance =
+      await Attendance.aggregate(
+        pipeline
+      );
+
+    return successResponse(
+      res,
+      "Organization attendance retrieved successfully",
+      attendance
+    );
   }
-
-  const filter = { organization: orgId };
-
-  if (date) {
-    const queryDate = new Date(date);
-    queryDate.setHours(0, 0, 0, 0);
-    filter.date = queryDate;
-  } else if (startDate && endDate) {
-    filter.date = { $gte: new Date(startDate), $lte: new Date(endDate) };
-  }
-
-  if (departmentId) {
-    filter.department = departmentId;
-  }
-
-  const attendances = await Attendance.find(filter)
-    .populate('records.employee', 'name email designation')
-    .populate('markedBy', 'name email')
-    .sort({ date: -1 });
-
-  return successResponse(res, 'Organization attendance retrieved successfully', attendances);
-});
-
-
+);
 // ============================================================================
 // NEW EMPLOYEE DASHBOARD & ACTIONS
 // ============================================================================
@@ -1074,7 +1512,8 @@ const getAdminDashboard = asyncHandler(async (req, res) => {
         ],
         // 5b. Get list of pending approvals
         approvals: [
-          { $match: { 'records.approval': 'Pending' } },
+          { $match: {    'records.status': 'PRESENT',
+                         'records.approval': 'Pending' } },
           { $sort: { 'records.checkIn': 1 } },
           { $limit: 10 }, // Limit to 10 for performance
           {

@@ -348,7 +348,7 @@ export default function LeaveDrawer({
           </div>
 
           {/* ================= ATTACHMENTS ================= */}
-          <div className="space-y-2">
+          {/* <div className="space-y-2">
             <p className="text-xs text-base-content/60">Attachments</p>
 
             {edited.attachments.length > 0 ? (
@@ -405,7 +405,97 @@ export default function LeaveDrawer({
                 className="file-input file-input-bordered w-full"
               />
             )}
+          </div> */}
+
+          {/* ================= ATTACHMENTS ================= */}
+<div className="space-y-2">
+  <p className="text-xs text-base-content/60">Attachments</p>
+
+  {edited.attachments.length > 0 ? (
+    <div className="space-y-3">
+      {edited.attachments.map((file: any, index: number) => {
+        const isUrl = typeof file === "string";
+
+        const fileUrl = isUrl
+          ? file
+          : file instanceof File
+          ? URL.createObjectURL(file)
+          : "";
+
+        const fileName = isUrl
+          ? "file"
+          : file.name || "file";
+
+        const isImage = isUrl
+          ? /\.(jpg|jpeg|png|gif|webp)$/i.test(fileUrl)
+          : file.type?.startsWith("image/");
+
+        return (
+          <div
+            key={index}
+            className="flex items-center justify-between border border-base-300 rounded-lg p-2"
+          >
+            <div className="flex items-center gap-3 min-w-0">
+
+              {/* PREVIEW */}
+              {isImage && fileUrl ? (
+                <img
+                  src={fileUrl}
+                  alt="attachment"
+                  className="w-12 h-12 object-cover rounded-md"
+                />
+              ) : (
+                <div className="w-12 h-12 bg-base-200 flex items-center justify-center rounded-md text-xs">
+                  FILE
+                </div>
+              )}
+
+              {/* NAME */}
+              <p className="text-sm truncate max-w-[150px]">
+                {fileName}
+              </p>
+            </div>
+
+            {/* OPEN */}
+            {fileUrl && (
+              <a
+                href={fileUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn btn-xs btn-outline"
+              >
+                Open
+              </a>
+            )}
+
+            {/* DELETE */}
+            {mode === "edit" && (
+              <button
+                onClick={() => removeFile(index)}
+                className="btn btn-xs btn-error btn-outline"
+              >
+                <MdDelete size={14} />
+              </button>
+            )}
           </div>
+        );
+      })}
+    </div>
+  ) : (
+    <p className="text-xs text-base-content/50">
+      No attachments
+    </p>
+  )}
+
+  {mode === "edit" && (
+    <input
+      type="file"
+      multiple
+      onChange={handleAddFiles}
+      className="file-input file-input-bordered w-full"
+    />
+  )}
+</div>
         </div>
 
         {/* FOOTER */}

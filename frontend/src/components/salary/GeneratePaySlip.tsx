@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { getEmployees, runMonthly } from "@/services/IT/payrollService";
+import { getEmployees, runMonthly } from "@/services/payrollService";
 // import { getMembers } from "@/services/memberService";
-import { useAuth } from "@/auth/useAuth"; 
+import { useAuth } from "@/auth/AuthContext";
 import { toast } from "react-toastify";
 import Button from "@/components/ui/Button";
 import Select from "@/components/ui/Select";
@@ -108,11 +108,11 @@ export default function GeneratePaySlip() {
       {/* <div className="flex items-center gap-3 mb-2"> */}
       <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-2">
         <div className="sm:block hidden p-3 bg-primary/10 text-primary rounded-xl">
-          <MdReceipt size={24} />
+          <MdReceipt size={20} />
         </div>
         <div>
-          <h1 className="text-2xl font-medium text-base-content">Generate Payslips</h1>
-          <p className="text-md text-base-content">Process monthly payroll for your organization</p>
+          <h1 className="text-xl font-medium text-base-content">Generate Payslips</h1>
+          <p className="text-sm text-base-content">Process monthly payroll for your organization</p>
         </div>
       </div>
 
@@ -132,9 +132,9 @@ export default function GeneratePaySlip() {
   "
 >
           {/* Box 1: Period Selection */}
-          <div className="bg-primary mt-2 text-primary-content p-6 rounded-2xl border border-primary/20 shadow-sm">
-            <h3 className="text-sm font-bold  uppercase tracking-wider mb-4 flex items-center gap-2">
-              <MdDateRange size={18} /> Payroll Period
+          <div className="bg-primary mt-2 text-primary-content p-4 rounded-2xl border border-primary/20 shadow-sm">
+            <h3 className="text-[13px] font-bold  uppercase tracking-wider mb-4 flex items-center gap-2">
+              <MdDateRange size={15} /> Payroll Period
             </h3>
             <div className="space-y-4">
               <div>
@@ -154,8 +154,8 @@ export default function GeneratePaySlip() {
 
           {/* Box 2: Manual Override */}
           <div className="bg-base-100 p-6 rounded-2xl border border-primary shadow-sm">
-            <h3 className="text-sm font-bold text-base-content/80 uppercase tracking-wider mb-2 flex items-center gap-2">
-              <MdAttachMoney size={18} /> Salary Override
+            <h3 className="text-[13px] font-bold text-base-content/80 uppercase tracking-wider mb-2 flex items-center gap-2">
+              <MdAttachMoney size={15} /> Salary Override
             </h3>
             <p className="text-xs text-base-content mb-4 leading-relaxed">
               Leave blank to automatically use each employee's configured salary structure.
@@ -204,7 +204,7 @@ export default function GeneratePaySlip() {
 >
           {/* Header & Search */}
           <div className="p-5 border-b   border-base-200 flex flex-col sm:flex-row justify-between items-center gap-4 bg-base-100 rounded-t-2xl z-10">
-            <h3 className="text-base font-bold text-base-content flex items-center gap-2">
+            <h3 className="text-sm font-bold text-base-content flex items-center gap-2">
               <MdPeople size={20} className="text-primary" /> Select Employees
             </h3>
             
@@ -216,7 +216,7 @@ export default function GeneratePaySlip() {
                   placeholder="Search by name or dept..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-9 pr-4 py-2 bg-base-200 border border-primary/10 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
+                  className="w-full pl-9 pr-4 py-1.5 bg-base-200 border border-primary/10 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
                 />
               </div>
               <div className="flex gap-2 shrink-0">
@@ -252,7 +252,7 @@ export default function GeneratePaySlip() {
             return (
               <label
                 key={emp._id}
-                      className={`relative flex items-center gap-3 p-4 rounded-2xl cursor-pointer transition-all border-2 select-none group ${
+                      className={`relative flex items-center gap-3 p-3 rounded-2xl cursor-pointer transition-all border-2 select-none group ${
                   isSelected
                           ? "bg-primary/5 border-primary shadow-sm scale-[0.98]"
                           : "bg-base-100 border-primary/20 hover:border-primary/40 hover:shadow-sm hover:bg-base-50"
@@ -274,7 +274,7 @@ export default function GeneratePaySlip() {
                 </div>
                 
                 <div className="flex flex-col pr-6">
-                  <span className="font-bold text-base-content line-clamp-1">{emp.name}</span>
+                  <span className="font-bold  text-base-content line-clamp-1">{emp.name}</span>
                         <span className="text-[10px] font-bold text-base-content/50 uppercase tracking-wider mt-0.5 line-clamp-1">
                     {emp.department || "Staff"}
                   </span>

@@ -1,8 +1,8 @@
 import React, { useState, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { getSalesRepById } from "@/services/sales/salesRepServices";
-import { useAuth } from "@/auth/useAuth"; 
+import { getSalesRepById } from "@/services/salesRepServices";
+import { useAuth } from "@/auth/AuthContext";
 import {
   MdEdit,
   MdPeople,
@@ -283,7 +283,7 @@ export default function SalesRepAdminProfile() {
                 <p className="text-xs text-base-content/50 font-bold uppercase mb-1">Mobile</p>
                 <p className="font-medium">{rep.phone}</p>
               </div>
-              <div>
+              <div className="break-all">
                 <p className="text-xs text-base-content/50 font-bold uppercase mb-1">Email</p>
                 <p className="font-medium break-all">{rep.email}</p>
               </div>

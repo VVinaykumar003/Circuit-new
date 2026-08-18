@@ -43,7 +43,7 @@ export default function LeaveCards({
     return (
       <div className="flex flex-col items-center justify-center p-12 bg-base-100 border border-base-300 rounded-2xl border-dashed">
         <div className="w-16 h-16 bg-base-200 rounded-full flex items-center justify-center mb-4 text-base-content/40">
-          <MdEventBusy size={32} />
+          <MdEventBusy size={30} />
         </div>
         <h3 className="text-lg font-medium text-base-content mb-1">
           No Leave Requests
@@ -58,18 +58,19 @@ export default function LeaveCards({
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
       {requests.map((leave) => {
-        const Icon = TYPE_ICON[leave.type];
+     const Icon =
+  TYPE_ICON[leave.type as keyof typeof TYPE_ICON] || MdCalendarToday;
 
         return (
           <div onClick={() => onView(leave)}
             key={leave.id}
-            className="cursor-pointer bg-primary/10 border border-primary rounded-xl p-4 shadow-sm hover:shadow-md transition"
+            className="cursor-pointer bg-primary/10 border border-primary rounded-xl p-3 shadow-sm hover:shadow-md transition"
           >
             {/* HEADER */}
             <div className="flex justify-between items-start">
-              <div className="flex items-center gap-2">
-                <Icon size={20} className="text-primary" />
-                <span className="font-semibold capitalize text-primary">
+              <div className="flex items-center gap-1">
+                <Icon size={15} className="text-primary" />
+                <span className="font-semibold capitalize text-sm text-primary">
                   {leave.type.replace("-", " ")} Leave
                 </span>
               </div>
@@ -78,8 +79,8 @@ export default function LeaveCards({
             </div>
 
             {/* DATE */}
-            <div className="flex items-center gap-2 mt-3 text-sm text-base-content/50 font-medium">
-              <MdCalendarToday size={16} />
+            <div className="flex items-center gap-1 mt-3 text-xs text-base-content/50 font-medium">
+              <MdCalendarToday size={15} />
               <span>
                 {formatDate(leave.fromDate)}
                 {leave.toDate && ` - ${formatDate(leave.toDate)}`}
@@ -87,7 +88,7 @@ export default function LeaveCards({
             </div>
 
             {/* REASON */}
-             <div className="flex items-center gap-2 mt-3 text-sm text-base-content/50 font-medium">
+             <div className="flex items-center gap-1 mt-3 text-sm text-base-content/50 font-medium">
              <span className="text-base-content/80">Reason : </span>
             <p className=" text-sm line-clamp-2 font-semibold">
 
@@ -96,12 +97,12 @@ export default function LeaveCards({
             </div>
 
             {/* ACTIONS */}
-            <div className="flex justify-end gap-3 mt-4">
+            <div className="flex justify-end gap-2 mt-2">
               <button
                 onClick={() => onView(leave)}
-                className="btn btn-sm btn-primary"
+                className="btn btn-xs btn-primary"
               >
-                <MdVisibility size={16} />
+                <MdVisibility size={15} />
                 View
               </button>
 
@@ -110,9 +111,9 @@ export default function LeaveCards({
                   e.stopPropagation();
                   onDelete(leave.id);
                 }}
-                className="btn btn-sm btn-error "
+                className="btn btn-xs btn-error "
               >
-                <MdDelete size={16} />
+                <MdDelete size={15} />
                 Delete
               </button>
             </div>

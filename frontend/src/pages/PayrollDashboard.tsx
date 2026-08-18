@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { getSummary, getMonthlyList, markSlipPaid } from "@/services/IT/payrollService";
-import { useAuth } from "@/auth/useAuth"; 
+import { getSummary, getMonthlyList, markSlipPaid } from "@/services/payrollService";
+import { useAuth } from "@/auth/AuthContext";
 import { toast } from "react-toastify";
 // import Button from "@/components/ui/Button";
 // import PageHeader from "@/components/ui/PageHeader";
@@ -16,7 +16,7 @@ import {
   MdAccountBalanceWallet,
 } from "react-icons/md";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
-import {  downloadSlipPdf } from "@/services/IT/payrollService";
+import {  downloadSlipPdf } from "@/services/payrollService";
 import Select from "@/components/ui/Select";
 import Input from "@/components/ui/Input";
 import StatusBadge from "@/components/ui/StatusBadge";
@@ -163,8 +163,8 @@ export default function PayrollDashboard() {
       </div>
 
       {/* Top Controls: Month/Year & Bulk Actions */}
-      <div className="flex flex-col md:flex-row justify-between gap-4 items-start md:items-center bg-primary p-4 rounded-2xl shadow-sm border border-base-300">
-        <div className="flex items-center gap-3">
+      <div className="flex flex-col md:flex-row justify-between gap-3 items-start md:items-center bg-primary p-2.5 rounded-2xl shadow-sm border border-base-300">
+        <div className="flex items-center gap-2">
           <Select value={month} onChange={(e) => setMonth(Number(e.target.value))} className="w-40 select-sm md:select-md">
             {months.map(m => <option key={m.value} value={m.value}>{m.name}</option>)}
           </Select>
@@ -240,7 +240,7 @@ export default function PayrollDashboard() {
   "
 >
   {/* TOTAL STAFF */}
-  <div className="stat py-5 px-4 sm:px-6">
+  <div className="stat py-3 px-4 sm:px-6">
     <div className="flex items-start justify-between gap-3">
       <div className="min-w-0">
         <div
@@ -264,13 +264,13 @@ export default function PayrollDashboard() {
       </div>
 
       <div className="text-info shrink-0 mt-1">
-        <MdGroup className="text-2xl sm:text-3xl" />
+        <MdGroup className="text-2xl " />
       </div>
     </div>
   </div>
 
   {/* PENDING PAYOUT */}
-  <div className="stat py-5 px-4 sm:px-6">
+  <div className="stat py-3 px-4 sm:px-6">
     <div className="flex items-start justify-between gap-3">
       <div className="min-w-0">
         <div
@@ -294,13 +294,13 @@ export default function PayrollDashboard() {
       </div>
 
       <div className="text-warning shrink-0 mt-1">
-        <MdPendingActions className="text-2xl sm:text-3xl" />
+        <MdPendingActions className="text-2xl " />
       </div>
     </div>
   </div>
 
   {/* TOTAL PAID */}
-  <div className="stat py-5 px-4 sm:px-6">
+  <div className="stat py-3 px-4 sm:px-6">
     <div className="flex items-start justify-between gap-3">
       <div className="min-w-0">
         <div
@@ -331,7 +331,7 @@ export default function PayrollDashboard() {
 </div>
 
         {/* 2. Chart Box (Spans 1 col, 2 rows) */}
-        <div className="lg:col-span-1 lg:row-span-2 bg-base-100 rounded-2xl border border-primary shadow-sm p-6 w-full flex flex-col h-full min-h-[320px]">
+        <div className="lg:col-span-1 lg:row-span-2 self-start  bg-base-100 rounded-2xl border border-primary shadow-sm p-6 w-full flex flex-col min-h-[320px]">
           <h3 className="text-sm font-bold text-base-content/80 mb-4 uppercase tracking-wider">
             Payout Distribution
           </h3>
@@ -355,8 +355,8 @@ export default function PayrollDashboard() {
         </div>
 
         {/* 3. Filters Box (Spans 2 columns) */}
-        <div className="lg:col-span-2 flex flex-col md:flex-row gap-4 justify-between items-center bg-primary/50 p-4 rounded-2xl border border-base-300 shadow-sm w-full h-full">
-          <div className="flex flex-1 w-full gap-4">
+        <div className="lg:col-span-2  md:flex-row   bg-primary/50 rounded-2xl border p-2 border-base-300 shadow-sm w-full ">
+          <div className="flex  w-full gap-2">
             <div className="relative w-full max-w-xs">
               <Input placeholder="Search employee..." value={search} onChange={(e) => setSearch(e.target.value)} className="w-full bg-base-200 border-none focus:ring-2 focus:ring-primary/50" />
             </div>

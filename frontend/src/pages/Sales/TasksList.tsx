@@ -29,9 +29,9 @@ import {
   MdEvent,
   MdCheckCircle,
 } from "react-icons/md";
-import { useAuth } from "@/auth/useAuth"; 
-import { getSalesTasks, updateSalesTask, deleteSalesTask, createSalesTask } from "@/services/sales/salesTaskServices";
-import { getSalesReps } from "@/services/sales/salesRepServices";
+import { useAuth } from "@/auth/AuthContext";
+import { getSalesTasks, updateSalesTask, deleteSalesTask, createSalesTask } from "@/services/salesTaskServices";
+import { getSalesReps } from "@/services/salesRepServices";
 import ImportExportActions from "@/components/import-export/ImportExportActions";
 import type { ColumnConfig } from "@/type/importExport.types";
 
@@ -57,6 +57,7 @@ export interface SalesTask {
   title: string;
   customer: string;
   assignedTo: string;
+  assignedToName?: string;
   type: string;
   priority: "Low" | "Medium" | "High" | "Urgent";
   status: "Pending" | "In Progress" | "Completed" | "On Hold" | "Cancelled";
@@ -78,6 +79,9 @@ export default function SalesTasksList() {
   const queryClient = useQueryClient();
   
   // State
+  const [filterType, setFilterType] = useState("All");
+const [filterStatus, setFilterStatus] = useState("All");
+const [filterAssignee, setFilterAssignee] = useState("All");
   const [view, setView] = useState<"table" | "kanban" | "calendar">("table");
   const [showFilters, setShowFilters] = useState(false);
   const [search, setSearch] = useState("");
@@ -131,28 +135,55 @@ export default function SalesTasksList() {
     });
   }, [salesReps, assigneeSearch]);
 
-  const tasks = useMemo(() => {
-    return (data?.data || []).map((t: any) => ({
-      id: t._id || t.id,
-      title: t.title,
-      customer: t.customer || "Unknown",
-      assignedTo: t.assignedTo || "Unassigned",
-      type: t.type || "Other",
-      priority: t.priority || "Medium",
-      status: t.status || "Pending",
-      dealValue: t.expectedDealValue || 0,
-      stage: t.opportunityStage || "N/A",
-      startDate: t.startDate ? new Date(t.startDate).toISOString().split("T")[0] : "",
-      dueDate: t.dueDate ? new Date(t.dueDate).toISOString().split("T")[0] : "",
-      followUpDate: t.followUpDate ? new Date(t.followUpDate).toISOString().split("T")[0] : "",
-      progress: t.progress || 0,
-      createdAt: t.createdAt,
-      updatedAt: t.updatedAt,
-      completionNotes: t.completionNotes,
-    }));
-  }, [data]);
+  // const tasks = useMemo(() => {
+  //   return (data?.data || []).map((t: any) => ({
+  //     id: t._id || t.id,
+  //     title: t.title,
+  //     customer: t.customer || "Unknown",
+  //     assignedTo: t.assignedTo || "Unassigned",
+  //     type: t.type || "Other",
+  //     priority: t.priority || "Medium",
+  //     status: t.status || "Pending",
+  //     dealValue: t.expectedDealValue || 0,
+  //     stage: t.opportunityStage || "N/A",
+  //     startDate: t.startDate ? new Date(t.startDate).toISOString().split("T")[0] : "",
+  //     dueDate: t.dueDate ? new Date(t.dueDate).toISOString().split("T")[0] : "",
+  //     followUpDate: t.followUpDate ? new Date(t.followUpDate).toISOString().split("T")[0] : "",
+  //     progress: t.progress || 0,
+  //     createdAt: t.createdAt,
+  //     updatedAt: t.updatedAt,
+  //     completionNotes: t.completionNotes,
+  //   }));
+  // }, [data]);
 
   // Mutations
+  const tasks = useMemo(() => {
+  return (data?.data || []).map((t: any) => ({
+    id: t._id || t.id,
+    title: t.title,
+    customer: t.customer || "Unknown",
+
+    // sirf id store karo
+   assignedTo: t.assignedTo?._id || "",
+assignedToName: t.assignedTo?.name || "Unassigned",
+
+    type: t.type || "Other",
+    priority: t.priority || "Medium",
+    status: t.status || "Pending",
+    dealValue: t.expectedDealValue || 0,
+    stage: t.opportunityStage || "N/A",
+    startDate: t.startDate ? new Date(t.startDate).toISOString().split("T")[0] : "",
+    dueDate: t.dueDate ? new Date(t.dueDate).toISOString().split("T")[0] : "",
+    followUpDate: t.followUpDate ? new Date(t.followUpDate).toISOString().split("T")[0] : "",
+    progress: t.progress || 0,
+    createdAt: t.createdAt,
+    updatedAt: t.updatedAt,
+    completionNotes: t.completionNotes,
+  }));
+}, [data]);
+console.log(data?.data);
+  
+  
   const updateMutation = useMutation({
     mutationFn: (vars: { id: string; payload: Partial<any> }) => updateSalesTask(vars.id, vars.payload, auth.slug || "default-tenant"),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["salesTasks"] }),
@@ -219,7 +250,9 @@ export default function SalesTasksList() {
     columnHelper.accessor("assignedTo", {
       header: "Assigned To",
       cell: (info) => {
-        const name = getRepName(info.getValue());
+        // const name = getRepName(info.getValue());
+        const name = info.row.original.assignedToName;
+        console.log("Assigned To Name: ", name);
         return (
           <div className="flex items-center gap-2">
             <div className="avatar placeholder">
@@ -285,12 +318,32 @@ export default function SalesTasksList() {
     })
   ], [navigate]);
 
-  const filteredTasks = useMemo(() => {
-    return tasks.filter(t => 
-      t.title.toLowerCase().includes(search.toLowerCase()) || 
-      t.customer.toLowerCase().includes(search.toLowerCase())
+ const filteredTasks = useMemo(() => {
+  return tasks.filter(t => {
+
+    const searchMatch =
+      t.title.toLowerCase().includes(search.toLowerCase()) ||
+      t.customer.toLowerCase().includes(search.toLowerCase());
+
+    const typeMatch =
+      filterType === "All" || t.type === filterType;
+
+    const statusMatch =
+      filterStatus === "All" || t.status === filterStatus;
+
+    const assigneeMatch =
+      filterAssignee === "All" || t.assignedTo === filterAssignee;
+
+
+    return (
+      searchMatch &&
+      typeMatch &&
+      statusMatch &&
+      assigneeMatch
     );
-  }, [tasks, search]);
+  });
+
+}, [tasks, search, filterType, filterStatus, filterAssignee]);
 
   const table = useReactTable({
     data: filteredTasks,
@@ -544,19 +597,66 @@ export default function SalesTasksList() {
         <div className="bg-base-100 border border-base-300 rounded-xl p-5 mb-4 grid grid-cols-1 md:grid-cols-4 gap-4 shadow-sm animate-fade-in-down">
           <div>
             <label className="text-xs font-semibold text-base-content/70 mb-1 block">Task Type</label>
-            <select className="select select-sm select-bordered w-full"><option>All</option><option>Proposal</option><option>Meeting</option></select>
+          <select
+ className="select select-sm select-bordered w-full"
+ value={filterType}
+ onChange={(e)=>setFilterType(e.target.value)}
+><option>All</option>
+
+{[...new Set(tasks.map(t => t.type))].map((type) => (
+  <option key={String(type)} value={String(type)}>
+    {String(type)}
+  </option>
+))}</select>
           </div>
           <div>
             <label className="text-xs font-semibold text-base-content/70 mb-1 block">Status</label>
-            <select className="select select-sm select-bordered w-full"><option>All</option><option>Pending</option><option>Completed</option></select>
+         <select
+ className="select select-sm select-bordered w-full"
+ value={filterStatus}
+ onChange={(e)=>setFilterStatus(e.target.value)}
+>
+  <option value="All">All</option>
+  <option value="Pending">Pending</option>
+  <option value="In Progress">In Progress</option>
+  <option value="Completed">Completed</option>
+  <option value="On Hold">On Hold</option>
+  <option value="Cancelled">Cancelled</option>
+</select>
           </div>
           <div>
             <label className="text-xs font-semibold text-base-content/70 mb-1 block">Assigned To</label>
-            <select className="select select-sm select-bordered w-full"><option>All</option><option>V VINAY Kumar</option></select>
+        <select
+ className="select select-sm select-bordered w-full"
+ value={filterAssignee}
+ onChange={(e)=>setFilterAssignee(e.target.value)}
+>
+  <option value="All">All</option>
+
+  {salesReps.map((rep:any)=>(
+    <option 
+      key={rep._id}
+      value={rep._id}
+    >
+      {rep.fullName || rep.memberId?.name}
+    </option>
+  ))}
+
+</select>
           </div>
           <div className="flex items-end gap-2">
-            <button className="btn btn-sm btn-primary flex-1">Apply Filters</button>
-            <button className="btn btn-sm btn-ghost flex-1">Reset</button>
+           
+      <button
+ className="btn  btn-ghost flex-1"
+ onClick={()=>{
+   setFilterType("All");
+   setFilterStatus("All");
+   setFilterAssignee("All");
+   setSearch("");
+ }}
+>
+ Reset
+</button>
           </div>
         </div>
       )}
@@ -639,8 +739,9 @@ export default function SalesTasksList() {
         {/* View 2: Kanban */}
         {view === "kanban" && (
           <div className="flex-1 flex overflow-x-auto p-4 gap-4 bg-base-200/30">
-            {(["Pending", "In Progress", "On Hold", "Completed"] as const).map(status => (
-              <div 
+            {(["Pending", "In Progress", "On Hold", "Completed"] as const).map(status =>  {
+  console.log(status, filteredTasks.filter(t => t.status === status));
+              return <div 
                 key={status} 
                 className="flex-1 min-w-[280px] bg-base-100 rounded-xl border border-base-300 flex flex-col shadow-sm"
                 onDragOver={(e) => e.preventDefault()}
@@ -668,9 +769,9 @@ export default function SalesTasksList() {
                       <h4 className="font-semibold text-sm mb-1 leading-tight">{task.title}</h4>
                       <p className="text-xs text-base-content/70 mb-3">{task.customer}</p>
                       <div className="flex justify-between items-center mt-2 border-t border-base-200 pt-2">
-                        <div className="avatar placeholder" title={getRepName(task.assignedTo)}>
+                        <div className="avatar placeholder" title={task.assignedToName}>
                           <div className="bg-neutral text-neutral-content rounded-full w-6">
-                            <span className="text-[10px]">{getRepName(task.assignedTo).charAt(0)}</span>
+                            <span className="text-[10px]">{task.assignedToName?.charAt(0)}</span>
                           </div>
                         </div>
                         <span className={`text-[10px] font-semibold ${task.dueDate < new Date().toISOString().split("T")[0] ? 'text-error' : 'text-base-content/60'}`}>
@@ -681,7 +782,7 @@ export default function SalesTasksList() {
                   ))}
                 </div>
               </div>
-            ))}
+})}
           </div>
         )}
 
@@ -759,7 +860,7 @@ export default function SalesTasksList() {
               <div className="grid grid-cols-2 gap-y-4 gap-x-6 text-sm">
                 <div><p className="text-base-content/50 mb-1">Customer</p><p className="font-semibold">{selectedTask?.customer}</p></div>
                 <div><p className="text-base-content/50 mb-1">Task Type</p><p className="font-semibold">{selectedTask?.type}</p></div>
-                <div><p className="text-base-content/50 mb-1">Assigned To</p><p className="font-semibold">{getRepName(selectedTask?.assignedTo || "")}</p></div>
+                <div><p className="text-base-content/50 mb-1">Assigned To</p><p className="font-semibold">{selectedTask?.assignedToName}</p></div>
                 <div><p className="text-base-content/50 mb-1">Priority</p>
                   <span className={`badge badge-sm font-semibold ${selectedTask?.priority === 'Urgent' ? 'badge-error' : 'badge-warning'}`}>{selectedTask?.priority}</span>
                 </div>

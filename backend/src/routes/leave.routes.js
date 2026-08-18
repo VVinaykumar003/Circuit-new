@@ -4,7 +4,7 @@ const router = express.Router();
 const auth = require("../middlewares/auth.middleware");
 const tenant = require("../middlewares/tenant.middleware");
 const leaveController = require("../controllers/Leave.controller");
-
+const { upload } = require("../middlewares/upload");
 // All leave routes require authentication and tenant context
 // The :slug param is used by the tenant middleware to set req.organization
 
@@ -13,6 +13,7 @@ router.post(
   "/:slug/leaves/apply",
   auth,
   tenant,
+  upload.array("attachments"),
   leaveController.applyLeave
 );
 

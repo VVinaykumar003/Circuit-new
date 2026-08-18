@@ -1,14 +1,15 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState,useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useNavigate } from "react-router-dom";
 import { MdSave, MdPerson } from "react-icons/md";
 import { toast } from "react-toastify";
-import { getSalesEmployees } from "@/services/IT/memberService";
-import { createContact } from "@/services/sales/salesService";
-import { useAuth } from "@/auth/useAuth"; 
-
+import { getSalesEmployees } from "@/services/memberService";
+import { createContact } from "@/services/salesService";
+import { useAuth } from "@/auth/AuthContext";
+import { useQuery } from "@tanstack/react-query";
+import { getSalesReps } from "@/services/salesRepServices";
 /* ─────────────────────────── Zod Schema ─────────────────────────── */
 // const contactSchema = z.object({
 //   // Personal Info
@@ -125,7 +126,7 @@ const FormRow = ({ label, required, error, children }: { label: string, required
 export default function NewContact() {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
- const [owners, setOwners] = useState([]);
+ 
   const { register, handleSubmit, watch, reset, formState: { errors } } = useForm<ContactFormValues>({
     resolver: zodResolver(contactSchema),
     defaultValues: {
@@ -151,19 +152,31 @@ export default function NewContact() {
     return null;
   }
  console.log("🚀 SLUG in NewContact:", slug) ;
- useEffect(() => {
-     const fetchOwners = async () => {
-       try {
-         const res = await getSalesEmployees(slug);
-         setOwners(res.data.data);
-       } catch (err) {
-         console.log(err);
-       }
-     };
+    const { data: repsData } = useQuery({
+    queryKey: ["salesReps", auth.slug],
+    queryFn: () => getSalesReps(auth.slug || "default-tenant"),
+  });
+
+  const salesReps = useMemo(() => {
+    return repsData?.data || [];
+  }, [repsData]);
+console.log("Sales Reps:", salesReps);
+//  useEffect(() => {
+//      const fetchOwners = async () => {
+//        try {
+//          const res = await getSalesEmployees(slug);
+//          setOwners(res.data.data);
+//        } catch (err) {
+//          console.log(err);
+//        }
+//      };
  
-     fetchOwners();
-   }, []);
-   const selectedOwner = owners.find((o: any) => o._id === wAssignedRep);
+//      fetchOwners();
+//    }, []);
+  //  const selectedOwner = salesReps.find((o: any) => o._id === wAssignedRep);
+  const selectedOwner = salesReps.find(
+  (rep: any) => rep.memberId?._id === wAssignedRep
+);
  const onSubmit = async (data: ContactFormValues) => {
   setIsSubmitting(true);
 
@@ -211,7 +224,7 @@ export default function NewContact() {
       },
     };
 
-   
+
 
     const response = await createContact(
       slug,
@@ -323,11 +336,31 @@ export default function NewContact() {
                         <option key={p.code} value={p.code}>{p.flag} {p.code}</option>
                       ))}
                     </select>
-                    <input type="tel" {...register("phone.number")} className="input input-sm border-none w-full focus:outline-none" placeholder="12345 67890" />
+                    <input type="tel" {...register("phone.number")} 
+                     onChange={(e) => {
+      const val = e.target.value;
+
+      if (!/^\d*$/.test(val)) {
+        e.target.value = val.replace(/\D/g, "");
+      }
+    }}
+                     maxLength={10}
+                    className="input input-sm border-none w-full focus:outline-none" placeholder="12345 67890" />
                   </div>
                 </FormRow>
                 <FormRow label="Alt. Phone Number">
-                  <input type="tel" {...register("altPhoneNumber")} className="input input-bordered w-full" placeholder="Alternate Phone" />
+                  <input
+                     
+    maxLength={10}
+ type="tel" {...register("altPhoneNumber")} 
+ onChange={(e) => {
+      const val = e.target.value;
+
+      if (!/^\d*$/.test(val)) {
+        e.target.value = val.replace(/\D/g, "");
+      }
+    }}
+ className="input input-bordered w-full" placeholder="Alternate Phone" />
                 </FormRow>
               </div>
             </div>
@@ -359,9 +392,15 @@ export default function NewContact() {
                 <FormRow label="Assigned Rep" required error={errors.assignedRep?.message}>
                   <select {...register("assignedRep")} className={`select select-bordered w-full ${errors.assignedRep ? 'select-error' : ''}`}>
                     <option value="">-Select Owner-</option>
-                   {owners.map((o: any) => (
-                    <option key={o._id} value={o._id}>{o.name}</option>
-                   ))}
+                
+  {salesReps.map((rep: any) => (
+    <option
+      key={rep.memberId?._id}
+      value={rep.memberId?._id}
+    >
+      {rep.memberId?.name}
+    </option>
+  ))}
                    </select>
                 </FormRow>
                 <FormRow label="Status">
@@ -436,7 +475,7 @@ export default function NewContact() {
 
               <div>
                 <span className="text-xs text-base-content/60 uppercase font-semibold">Assigned Rep</span>
-                <p className="font-medium mt-1 truncate">{wAssignedRep ? selectedOwner?.name || "Unassigned" : "Unassigned"}</p>
+                <p className="font-medium mt-1 truncate">  {selectedOwner?.memberId?.name || "Unassigned"}</p>
               </div>
             </div>
 

@@ -13,7 +13,7 @@ export default function StatutorySettingsCard({
 }: Props) {
   return (
     <div className="bg-primary text-primary-content border border-white/20 
-                    rounded-3xl p-6  shadow-xl space-y-5">
+                    rounded-2xl p-5  shadow-xl space-y-5">
 
       {/* Title */}
       <div className="flex items-start justify-between">

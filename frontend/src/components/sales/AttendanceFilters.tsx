@@ -1,18 +1,16 @@
 import { useState } from "react";
 import { Search, SlidersHorizontal, X, ChevronDown } from "lucide-react";
-import type { AttendanceFilters as Filters, AttendanceStatus } from "../../type/attendance";
+import type { AttendanceFilters as Filters } from "../../type/attendance";
 import { defaultAttendanceFilters } from "../../type/attendance";
 
-const STATUS_OPTIONS: (AttendanceStatus | "All")[] = [
-  "All",
-  "Present",
-  "Absent",
-  "Half Day",
-  "Leave",
-  "Holiday",
-  "WFH",
+const STATUS_OPTIONS = [
+  { label: "All", value: "All" },
+  { label: "Present", value: "PRESENT" },
+  { label: "Absent", value: "ABSENT" },
+  { label: "Half Day", value: "HALF_DAY" },
+  { label: "Leave", value: "ON_LEAVE" },
 ];
-const SHIFT_OPTIONS = ["All", "Morning (9-6)", "Evening (2-11)", "Night (10-7)"];
+
 
 interface Props {
   filters: Filters;
@@ -66,33 +64,28 @@ export default function AttendanceFilters({ filters, onChange, showAdvanced, dep
 
       <label className="form-control w-full sm:w-36">
         <span className="label-text text-xs mb-1">Status</span>
-        <select
-          className="select select-bordered select-sm w-full"
-          value={filters.status}
-          onChange={(e) => set("status", e.target.value as Filters["status"])}
-        >
-          {STATUS_OPTIONS.map((s) => (
-            <option key={s} value={s}>
-              {s}
-            </option>
-          ))}
-        </select>
+       <select
+  className="select select-bordered select-sm w-full"
+  value={filters.status}
+  onChange={(e) =>
+    set(
+      "status",
+      e.target.value as Filters["status"]
+    )
+  }
+>
+  {STATUS_OPTIONS.map((status) => (
+    <option
+      key={status.value}
+      value={status.value}
+    >
+      {status.label}
+    </option>
+  ))}
+</select>
       </label>
 
-      <label className="form-control w-full sm:w-40">
-        <span className="label-text text-xs mb-1">Shift</span>
-        <select
-          className="select select-bordered select-sm w-full"
-          value={filters.shift}
-          onChange={(e) => set("shift", e.target.value)}
-        >
-          {SHIFT_OPTIONS.map((s) => (
-            <option key={s} value={s}>
-              {s}
-            </option>
-          ))}
-        </select>
-      </label>
+     
 
       {showAdvanced && (
         <label className="form-control w-full sm:w-40">
@@ -117,9 +110,9 @@ export default function AttendanceFilters({ filters, onChange, showAdvanced, dep
           <X className="w-3.5 h-3.5" />
           Reset
         </button>
-        <button className="btn btn-sm btn-primary" type="button" onClick={() => setMobileOpen(false)}>
+        {/* <button className="btn btn-sm btn-primary" type="button" onClick={() => setMobileOpen(false)}>
           Apply Filters
-        </button>
+        </button> */}
       </div>
     </div>
   );

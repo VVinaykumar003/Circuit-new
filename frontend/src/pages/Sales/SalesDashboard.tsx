@@ -13,8 +13,8 @@ import {
 } from "recharts";
 import { MdRefresh, MdBarChart, MdShare, MdSort, MdError } from "react-icons/md";
 import { useQuery } from "@tanstack/react-query";
-import { useAuth } from "@/auth/useAuth"; 
-import { getSalesDashboardData } from "@/services/sales/salesService";
+import { useAuth } from "@/auth/AuthContext";
+import { getSalesDashboardData } from "@/services/salesService";
 
 /* ─────────────────────────── types ─────────────────────────── */
 interface StatCard {

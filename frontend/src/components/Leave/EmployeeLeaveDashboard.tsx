@@ -17,13 +17,13 @@ import {
   MdCalendarMonth,
   MdMenuBook,
 } from "react-icons/md";
-import { applyLeave, getMyLeaves, deleteLeave, updateLeave } from "@/services/IT/leaveService";
-import { getHolidays } from "@/services/IT/holidayService";
-import { getLeavePolicy } from "@/services/IT/leavePolicyService";
+import { applyLeave, getMyLeaves, deleteLeave, updateLeave } from "@/services/leaveService";
+import { getHolidays } from "@/services/holidayService";
+import { getLeavePolicy } from "@/services/leavePolicyService";
 import { toast } from "react-toastify";
 // import { getOrganizationSlug } from "@/utils/auth";
 // import { getUser } from "@/utils/getUser";
-import { useAuth } from "@/auth/useAuth"; 
+import { useAuth } from "@/auth/AuthContext";
 import { socket } from "@/socket";
 import Pagination from "@/components/ui/Pagination"
 import Swal from "sweetalert2";
@@ -90,6 +90,7 @@ export default function EmployeeLeaveDashboard() {
           toDate: leave.endDate ? leave.endDate.split("T")[0] : "",
           reason: leave.reason,
           status: leave.status,
+          attachments: leave.attachments || [],
         }));
 
         
@@ -107,7 +108,7 @@ export default function EmployeeLeaveDashboard() {
 
     fetchData();
   }, [refreshTrigger, auth.slug, user]);
-
+ console.log("leave requests:", requests);
   // Real-time socket listener to refresh dashboard
   useEffect(() => {
     if (auth?.user) {
@@ -138,10 +139,26 @@ export default function EmployeeLeaveDashboard() {
 
      
 
-      const payload = { ...leave, name: auth.user?.name };
+     const formData = new FormData();
 
-      // 2. Call the backend API via leaveService
-      const response = await applyLeave(auth.slug, payload);
+formData.append("name", auth.user?.name || "");
+formData.append("type", leave.type);
+formData.append("fromDate", leave.fromDate);
+formData.append("toDate", leave.toDate);
+formData.append("reason", leave.reason);
+formData.append("session", leave.session);
+formData.append("emergency", String(leave.emergency));
+
+leave.attachments.forEach((file: File) => {
+  formData.append("attachments", file);
+});
+console.log("Selected attachments:", leave.attachments);
+
+for (const [key, value] of formData.entries()) {
+  console.log("FORM DATA:", key, value);
+}
+
+const response = await applyLeave(auth.slug, formData);
       const savedLeave = response.data.leave;
 
       // 3. Update local state with the new response from DB
@@ -153,6 +170,7 @@ export default function EmployeeLeaveDashboard() {
         toDate: savedLeave.endDate ? savedLeave.endDate.split("T")[0] : leave.toDate,
         reason: savedLeave.reason,
         status: savedLeave.status,
+        attachments: savedLeave.attachments || [],
       };
 
       setRequests((prev) => [newLeave, ...prev]);
@@ -272,13 +290,13 @@ if (!confirmDelete.isConfirmed) return;
    
 
 <div className="hidden md:flex mb-5 mt-2">
-  <div className="bg-base-200 p-1 rounded-lg inline-flex gap-1 flex-wrap">
+  <div className="tab tab-sm bg-base-200 p-1 rounded-lg inline-flex gap-1 flex-wrap">
 
     {/* OVERVIEW */}
     <button
       onClick={() => setActive("overview")}
       className={`
-        flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium
+        flex items-center gap-1 px-2 py-1 rounded-md text-[13px] font-medium
         transition-all duration-200
         ${
           active === "overview"
@@ -287,7 +305,7 @@ if (!confirmDelete.isConfirmed) return;
         }
       `}
     >
-      <MdDashboard size={16} />
+      <MdDashboard size={15} />
       Overview
     </button>
 
@@ -295,7 +313,7 @@ if (!confirmDelete.isConfirmed) return;
     <button
       onClick={() => setActive("my-leaves")}
       className={`
-        flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium
+        flex items-center gap-1 px-2 py-1 rounded-md text-[13px] font-medium
         transition-all duration-200
         ${
           active === "my-leaves"
@@ -304,7 +322,7 @@ if (!confirmDelete.isConfirmed) return;
         }
       `}
     >
-      <MdAssignment size={16} />
+      <MdAssignment size={15} />
       My Leaves
     </button>
 
@@ -312,7 +330,7 @@ if (!confirmDelete.isConfirmed) return;
     <button
       onClick={() => setActive("balance")}
       className={`
-        flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium
+        flex items-center gap-1 px-2 py-1 rounded-md text-[13px]  font-medium
         transition-all duration-200
         ${
           active === "balance"
@@ -321,7 +339,7 @@ if (!confirmDelete.isConfirmed) return;
         }
       `}
     >
-      <MdAccountBalanceWallet size={16} />
+      <MdAccountBalanceWallet size={15} />
       Leave Balance
     </button>
 
@@ -329,7 +347,7 @@ if (!confirmDelete.isConfirmed) return;
     <button
       onClick={() => setActive("calendar")}
       className={`
-        flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium
+        flex items-center gap-1 px-2 py-1 rounded-md text-[13px] font-medium
         transition-all duration-200
         ${
           active === "calendar"
@@ -338,7 +356,7 @@ if (!confirmDelete.isConfirmed) return;
         }
       `}
     >
-      <MdCalendarMonth size={16} />
+      <MdCalendarMonth size={15} />
       Leave Calendar
     </button>
 
@@ -346,7 +364,7 @@ if (!confirmDelete.isConfirmed) return;
     <button
       onClick={() => setActive("policy")}
       className={`
-        flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium
+        flex items-center gap-1 px-2 py-1 rounded-md text-[13px] font-medium
         transition-all duration-200
         ${
           active === "policy"
@@ -355,7 +373,7 @@ if (!confirmDelete.isConfirmed) return;
         }
       `}
     >
-      <MdMenuBook size={16} />
+      <MdMenuBook size={15} />
       Leave Policy
     </button>
 

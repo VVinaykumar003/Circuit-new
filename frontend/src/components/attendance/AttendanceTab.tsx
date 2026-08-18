@@ -72,7 +72,7 @@ export default function AttendanceTabs({ value, onChange }: Props) {
         <button
           onClick={() => onChange("mark")}
           className={`
-            flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium
+            flex items-center gap-2 px-3 py-1.5 rounded-md text-[13px] font-medium
             transition-all duration-200
             ${
               value === "mark"
@@ -89,7 +89,7 @@ export default function AttendanceTabs({ value, onChange }: Props) {
         <button
           onClick={() => onChange("records")}
           className={`
-            flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium
+            flex items-center gap-2 px-3 py-1.5 rounded-md text-[13px] font-medium
             transition-all duration-200
             ${
               value === "records"

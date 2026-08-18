@@ -27,7 +27,7 @@ import type { Attendance, AttendanceFilters as Filters } from "../../type/attend
 
 const DEPARTMENTS = ["Engineering", "Sales", "HR", "Finance", "Support"];
 
-export default function AdminAttendanceHistory() {
+export default function AdminAttendanceHistory() { 
   const [filters, setFilters] = useState<Filters>(defaultAttendanceFilters);
   const [page, setPage] = useState(1);
   const [selected, setSelected] = useState<Attendance | null>(null);
@@ -41,14 +41,9 @@ export default function AdminAttendanceHistory() {
 
   const totalPages = data ? Math.max(1, Math.ceil(data.total / pageSize)) : 1;
   // Flatten the nested records array from the API response
-  const records: Attendance[] =
-    data?.data.data?.flatMap((dailyDoc: any) =>
-      dailyDoc.records.map((rec: any) => ({
-        ...rec,
-        date: dailyDoc.date, // Add parent date to each record
-        attendanceDocId: dailyDoc._id, // Add parent doc ID for mutations
-      }))
-    ) ?? [];
+
+    const records: Attendance[] =
+  data?.data?.data ?? [];
   const allSelected = records.length > 0 && records.every((r) => selectedIds.has(r._id));
 
   function handleFiltersChange(next: Filters) {
@@ -101,7 +96,7 @@ export default function AdminAttendanceHistory() {
             <p className="text-sm text-base-content/60 mt-0.5">Organization-wide attendance records</p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <button className="btn btn-sm btn-primary gap-2">
+            {/* <button className="btn btn-sm btn-primary gap-2">
               <Plus className="w-3.5 h-3.5" /> Add Attendance
             </button>
             <button className="btn btn-sm btn-outline gap-2">
@@ -118,7 +113,7 @@ export default function AdminAttendanceHistory() {
             </button>
             <button className="btn btn-sm btn-ghost gap-2" onClick={() => window.print()}>
               <Printer className="w-3.5 h-3.5" /> Print
-            </button>
+            </button> */}
           </div>
         </div>
 

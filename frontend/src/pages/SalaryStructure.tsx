@@ -4,17 +4,17 @@ import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
 import StatutorySettingsCard from "@/components/salary/StatutorySettingsCard";
 import SalarySlipPreview from "@/components/salary/SalarySlipPreview";
-import { useAuth } from "@/auth/useAuth"; 
+import { useAuth } from "@/auth/AuthContext";
 // import { getAllEmployees } from "@/services/attendanceService";
 import {
   getPayrollConfig,
   setStructure,
   updatePayrollConfig,
-} from "@/services/IT/payrollService";
+} from "@/services/payrollService";
 // import api from "@/services/api";
 import { toast } from "react-toastify";
 import { MdCurrencyRupee } from "react-icons/md";
-import { getMembers } from "@/services/IT/memberService";
+import { getMembers } from "@/services/memberService";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
 import GlobalPayoutConfig from "@/components/salary/GlobalPayoutConfiguration";
 
@@ -311,15 +311,17 @@ export default function SalaryStructureDashboard() {
         {/* LEFT SIDE - CONFIGURATION */}
         <div className="w-full md:w-1/3 lg:w-1/4 space-y-6">
           {/* <div className="bg-base-100 border border-base-300 rounded-2xl p-6 shadow-sm space-y-4 h-fit"> */}
-          <div className="bg-base-100 border border-primary rounded-2xl p-6 shadow-sm space-y-4 h-fit">
-            <h3 className="text-lg font-semibold text-base-content">
+          <div className="bg-base-100 border border-primary rounded-xl p-3 shadow-sm space-y-4 h-fit">
+            <h3 className="text-md font-semibold text-base-content">
               Configure Salary
             </h3>
 
             <Select
+            size="sm"
               value={selectedEmployeeId}
               onChange={(e) => setSelectedEmployeeId(e.target.value)}
-              className={`w-full transition-all duration-200 text-base-content ${
+              className={`text-sm w-full transition-all duration-200 
+                 text-base-content ${
                 selectedEmployeeId
                   ? "bg-primary/10 border-primary"
                   : "border-primary/30"
@@ -339,11 +341,12 @@ export default function SalaryStructureDashboard() {
             <div className="relative">
               <MdCurrencyRupee className="absolute left-3 top-1/2 -translate-y-1/2 text-base-content/60" />
               <Input
+              size="sm"
                 type="number"
                 placeholder="Enter Monthly Gross"
                 value={monthlyGross || ""}
                 onChange={(e) => setMonthlyGross(Number(e.target.value))}
-                className="w-full placeholder:text-base-content/60 text-base-content border-primary/30 focus:ring-primary/50 "
+                className="text-sm w-full placeholder:text-base-content/60 text-base-content border-primary/30 focus:ring-primary/50 "
               />
             </div>
           </div>

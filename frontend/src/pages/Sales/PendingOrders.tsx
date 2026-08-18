@@ -29,9 +29,9 @@ import {
   MdDelete,
 } from "react-icons/md";
 import { toast } from "react-toastify";
-import { useAuth } from "@/auth/useAuth"; 
-import { getOrders, updateOrder, deleteOrder, emailCustomerOrder, createOrder, type Order } from "@/services/sales/orderServices";
-import { getSalesReps } from "@/services/sales/salesRepServices";
+import { useAuth } from "@/auth/AuthContext";
+import { getOrders, updateOrder, deleteOrder, emailCustomerOrder, createOrder, type Order } from "@/services/orderServices";
+import { getSalesReps } from "@/services/salesRepServices";
 import ImportExportActions from "@/components/import-export/ImportExportActions";
 import type { ColumnConfig } from "@/type/importExport.types";
 
@@ -82,7 +82,7 @@ export default function PendingOrders() {
     queryKey: ["orders", auth.slug],
     queryFn: () => getOrders(auth.slug || "default-tenant"),
   });
-
+ console.log("Fetched Orders Data:", data);
   const { data: repsData } = useQuery({
     queryKey: ["salesReps", auth.slug],
     queryFn: () => getSalesReps(auth.slug || "default-tenant"),
@@ -267,12 +267,12 @@ export default function PendingOrders() {
     }),
     columnHelper.accessor("orderDate", {
       header: "Order Date",
-      cell: (info) => <span className="text-base-content/70">{info.getValue() ? new Date(info.getValue()).toLocaleDateString() : ""}</span>,
+      cell: (info) => <span className="text-base-content/70">{info.getValue() ? new Date(info.getValue()).toLocaleDateString("en-GB") : ""}</span>,
     }),
     columnHelper.accessor("deliveryDate", {
       header: "Delivery Date",
       cell: (info) => {
-        const date = info.getValue() ? new Date(info.getValue()).toLocaleDateString() : "";
+        const date = info.getValue() ? new Date(info.getValue()).toLocaleDateString("en-GB") : "";
         const today = new Date().toISOString().split("T")[0];
         const isOverdue = info.getValue() && info.getValue() < today;
         const isToday = info.getValue() && info.getValue().startsWith(today);
@@ -667,7 +667,7 @@ export default function PendingOrders() {
                             </div>
                           </div>
                           <span className={`text-[10px] font-semibold ${isOverdue ? 'text-error' : 'text-base-content/60'}`}>
-                            Due: {order.deliveryDate ? new Date(order.deliveryDate).toLocaleDateString() : ""}
+                            Due: {order.deliveryDate ? new Date(order.deliveryDate).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) : ""}
                           </span>
                         </div>
                       </div>
@@ -716,6 +716,7 @@ export default function PendingOrders() {
         )}
       </div>
       )}
+    
 
       {/* ── Order Details Drawer ── */}
       <div className={`fixed inset-0 bg-black/40 z-[100] transition-opacity ${selectedOrder ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}>
@@ -772,11 +773,11 @@ export default function PendingOrders() {
                 <div><p className="text-base-content/50 mb-1">Priority</p>
                   <span className={`badge badge-sm ${selectedOrder?.priority === 'Urgent' ? 'badge-error' : 'badge-ghost'}`}>{selectedOrder?.priority}</span>
                 </div>
-                <div><p className="text-base-content/50 mb-1">Order Date</p><p className="font-medium">{selectedOrder?.orderDate ? new Date(selectedOrder.orderDate).toLocaleDateString() : ""}</p></div>
+                <div><p className="text-base-content/50 mb-1">Order Date</p><p className="font-medium">{selectedOrder?.orderDate ? new Date(selectedOrder.orderDate).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) : ""}</p></div>
                 <div>
                   <p className="text-base-content/50 mb-1">Delivery Date</p>
                   <p className={`font-bold ${selectedOrder && selectedOrder.deliveryDate && new Date(selectedOrder.deliveryDate) < new Date() ? 'text-error' : 'text-base-content'}`}>
-                    {selectedOrder?.deliveryDate ? new Date(selectedOrder.deliveryDate).toLocaleDateString() : ""} {selectedOrder && selectedOrder.deliveryDate && new Date(selectedOrder.deliveryDate) < new Date() && '(Overdue)'}
+                    {selectedOrder?.deliveryDate ? new Date(selectedOrder.deliveryDate).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) : ""} {selectedOrder && selectedOrder.deliveryDate && new Date(selectedOrder.deliveryDate) < new Date() && '(Overdue)'}
                   </p>
                 </div>
               </div>
@@ -784,7 +785,7 @@ export default function PendingOrders() {
 
             {/* Products Table */}
             <section>
-              <h3 className="text-sm font-bold uppercase tracking-wider text-base-content/50 mb-4">Order Items ({selectedOrder?.products?.length || 0})</h3>
+              <h3 className="text-sm font-bold uppercase tracking-wider text-base-content/50 mb-4">Order Items ({selectedOrder?.items?.length || 0})</h3>
               <div className="overflow-x-auto border border-base-200 rounded-lg">
                 <table className="table table-sm w-full">
                   <thead className="bg-base-200">
@@ -795,19 +796,82 @@ export default function PendingOrders() {
                       <th className="text-right">Total</th>
                     </tr>
                   </thead>
-                  <tbody>
-                    {selectedOrder?.products?.map((p, idx) => (
-                      <tr key={idx}>
-                        <td>
-                          <div className="font-semibold">{p.productName}</div>
-                          <div className="text-[10px] font-mono text-base-content/60">{p.sku}</div>
-                        </td>
-                        <td>{p.quantity}</td>
-                        <td>₹{p.price.toLocaleString()}</td>
-                        <td className="text-right font-bold text-success">₹{p.total.toLocaleString()}</td>
-                      </tr>
-                    ))}
-                  </tbody>
+                <tbody>
+  <section>
+  <h3 className="font-bold uppercase tracking-wider text-base-content/50 mb-3 text-xs">
+    Order Items
+  </h3>
+
+  <div className="bg-base-200/30 rounded-xl border border-base-200 overflow-hidden">
+    <table className="table table-sm w-full table-fixed">
+      
+      {/* FIXED COLUMN WIDTHS */}
+      <colgroup>
+        <col className="w-[50%]" />
+        <col className="w-[18%]" />
+        <col className="w-[12%]" />
+        <col className="w-[20%]" />
+      </colgroup>
+
+      <thead className="bg-base-200/50">
+        <tr>
+          <th className="text-left">Item</th>
+          <th className="text-right">Price</th>
+          <th className="text-center">Qty</th>
+          <th className="text-right">Total</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {selectedOrder?.items?.map((p, idx) => (
+          <tr key={idx}>
+
+            {/* ITEM */}
+            <td>
+              <p className="font-semibold">
+                {p.productName}
+              </p>
+
+              <p className="text-[10px] text-base-content/50 font-mono">
+                {p.sku}
+              </p>
+            </td>
+
+            {/* PRICE */}
+            <td className="text-right whitespace-nowrap">
+              ₹{p.sellingPrice?.toLocaleString("en-IN")}
+            </td>
+
+            {/* QTY */}
+            <td className="text-center">
+              {p.quantity}
+            </td>
+
+            {/* LINE TOTAL */}
+            <td className="text-right font-medium whitespace-nowrap">
+              ₹{p.lineTotal?.toLocaleString("en-IN")}
+            </td>
+
+          </tr>
+        ))}
+      </tbody>
+
+      <tfoot>
+        <tr className="bg-base-200/30">
+          <td colSpan={3} className="text-right font-bold text-base-content/70">
+            Grand Total
+          </td>
+
+          <td className="text-right font-bold text-lg text-success">
+            ₹{selectedOrder?.grandTotal?.toLocaleString("en-IN")}
+          </td>
+        </tr>
+      </tfoot>
+
+    </table>
+  </div>
+</section>
+</tbody>
                   <tfoot>
                     <tr className="bg-base-100 font-bold text-base">
                       <td colSpan={3} className="text-right">Grand Total:</td>
@@ -853,7 +917,7 @@ export default function PendingOrders() {
                   <hr className="bg-base-300" />
                   <div className="timeline-middle text-base-300"><MdCheckCircle /></div>
                   <div className="timeline-end timeline-box border-none shadow-none bg-transparent px-2 py-1">
-                    <div className="text-xs text-base-content/50">{selectedOrder?.orderDate ? new Date(selectedOrder.orderDate).toLocaleString() : ""}</div>
+                    <div className="text-xs text-base-content/50">{selectedOrder?.orderDate ? new Date(selectedOrder.orderDate).toLocaleString("en-GB") : ""}</div>
                     <div className="text-sm font-medium">Order Created by {selectedOrder?.salesRep}</div>
                   </div>
                 </li>
@@ -933,11 +997,11 @@ export default function PendingOrders() {
                 </div>
                 <div className="form-control">
                   <label className="label"><span className="label-text font-semibold">Order Date</span></label>
-                  <input type="date" className="input input-bordered w-full" value={orderToEdit.orderDate ? new Date(orderToEdit.orderDate).toISOString().split('T')[0] : ""} onChange={(e) => setOrderToEdit({...orderToEdit, orderDate: e.target.value})} />
+                  <input type="date" className="input input-bordered w-full" value={orderToEdit.orderDate ? new Date(orderToEdit.orderDate).toLocaleDateString("en-GB") : ""} onChange={(e) => setOrderToEdit({...orderToEdit, orderDate: e.target.value})} />
                 </div>
                 <div className="form-control">
                   <label className="label"><span className="label-text font-semibold">Delivery Date</span></label>
-                  <input type="date" className="input input-bordered w-full" value={orderToEdit.deliveryDate ? new Date(orderToEdit.deliveryDate).toISOString().split('T')[0] : ""} onChange={(e) => setOrderToEdit({...orderToEdit, deliveryDate: e.target.value})} />
+                  <input type="date" className="input input-bordered w-full" value={orderToEdit.deliveryDate ? new Date(orderToEdit.deliveryDate).toLocaleDateString("en-GB") : ""} onChange={(e) => setOrderToEdit({...orderToEdit, deliveryDate: e.target.value})} />
                 </div>
                 <div className="form-control">
                   <label className="label"><span className="label-text font-semibold">Order Status</span></label>

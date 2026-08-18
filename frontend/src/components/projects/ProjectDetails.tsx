@@ -103,8 +103,8 @@ import StatusBadge from "../ui/StatusBadge";
 import type { Project, Participant } from "../../type/project";
 import { useState } from "react";
 import EditProjectModal from "./EditProjectModal";
-import { useAuth } from "@/auth/useAuth"; 
-import { updateProject } from "@/services/IT/projectServices";
+import { useAuth } from "@/auth/AuthContext";
+import { updateProject } from "@/services/projectServices";
 
 interface Props {
   project: Project;

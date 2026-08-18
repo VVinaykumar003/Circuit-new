@@ -22,7 +22,7 @@ import {
   MdSupportAgent,
 } from "react-icons/md";
 import { FolderKanban, UserPlus, Target, PhoneCall } from "lucide-react";
-import { useAuth } from  "@/auth/useAuth"; ;
+import { useAuth } from "../../auth/AuthContext";
 import { useActivities } from "@/hooks/useActivities";
 
 /* ─────────────────────────── types ─────────────────────────── */
@@ -40,6 +40,7 @@ type Activity = {
   action: string;
   createdAt: string;
 };
+
 
 interface Props {
   isOpen: boolean;
@@ -59,6 +60,14 @@ const coreMenu: MenuItem[] = [
     label: "Attendance",
     path: "/attendance",
     icon: <MdEventAvailable size={20} />,
+  },
+];
+const salesAttendanceMenu: MenuItem[] = [
+  {
+    id: "sales-attendance",
+    label: "Attendance",
+    path: "/sales/attendance",
+    icon: <MdDashboard size={20} />,
   },
 ];
 
@@ -147,14 +156,6 @@ const salesCoreMenu: MenuItem[] = [
     id: "sales-dashboard",
     label: "Dashboard",
     path: "/sales",
-    icon: <MdDashboard size={20} />,
-  },
-];
-const salesAttendanceMenu: MenuItem[] = [
-  {
-    id: "sales-attendance",
-    label: "Attendance",
-    path: "/sales/attendance",
     icon: <MdDashboard size={20} />,
   },
 ];
@@ -300,20 +301,7 @@ const salesForecastSubMenu: MenuItem[] = [
   },
 ];
 
-// const salesAdminSubMenu: MenuItem[] = [
-//   {
-//     id: "sales-admin-panel",
-//     label: "Panel",
-//     path: "/sales/admin",
-//     icon: <MdAdminPanelSettings size={18} />,
-//   },
-//   {
-//     id: "sales-admin-settings",
-//     label: "Settings",
-//     path: "/sales/admin/settings",
-//     icon: <MdAdminPanelSettings size={18} />,
-//   },
-// ];
+
 
 /* ─────────────────────────── component ─────────────────────── */
 export default function ERPSidebar({ isOpen, onClose }: Props) {
@@ -341,7 +329,7 @@ export default function ERPSidebar({ isOpen, onClose }: Props) {
   const [salesTaskOpen, setSalesTaskOpen] = useState(false);
   const [salesCaseOpen, setSalesCaseOpen] = useState(false);
   const [salesForecastOpen, setSalesForecastOpen] = useState(false);
-  const [salesAttendanceOpen, setSalesAttendanceOpen] = useState(false);
+  const [salesAttendanceOpen ,setsalesAttendanceOpen] = useState(false);
 
   const { activities } = useActivities();
 
@@ -352,28 +340,28 @@ export default function ERPSidebar({ isOpen, onClose }: Props) {
   const lastVisitedLeaves = localStorage.getItem("lastVisited_leaves");
   const lastVisitedMembers = localStorage.getItem("lastVisited_members");
 
-  const projectCreatedDot = (activities as Activity [] || []).some(
+  const projectCreatedDot = (activities as Activity[] || []).some(
     (a) =>
       a.referenceModel === "Project" &&
       a.action === "Project Created" &&
       (!lastVisitedProjects || new Date(a.createdAt) > new Date(lastVisitedProjects))
   );
-  const workUpdateDot = (activities as Activity [] || []).some(
+  const workUpdateDot = (activities as Activity[] || []).some(
     (a) =>
       a.referenceModel === "WorkUpdateModel" &&
       (!lastVisitedWorkUpdates || new Date(a.createdAt) > new Date(lastVisitedWorkUpdates))
   );
-  const taskDot = (activities as Activity [] || []).some(
+  const taskDot = (activities as Activity[] || []).some(
     (a) =>
       a.referenceModel === "Task" &&
       (!lastVisitedTasks || new Date(a.createdAt) > new Date(lastVisitedTasks))
   );
-  const leaveDot = (activities as Activity [] || []).some(
+  const leaveDot = (activities as Activity[] || []).some(
     (a) =>
       a.referenceModel === "Leave" &&
       (!lastVisitedLeaves || new Date(a.createdAt) > new Date(lastVisitedLeaves))
   );
-  const memberDot = (activities as Activity []  || []).some(
+  const memberDot = (activities as Activity[] || []).some(
     (a) =>
       a.referenceModel === "User" &&
       a.action?.toLowerCase().includes("add") &&
@@ -399,7 +387,7 @@ export default function ERPSidebar({ isOpen, onClose }: Props) {
   /* ── nav link class helper ── */
   const linkClass = ({ isActive }: { isActive: boolean }) =>
     [
-      "group flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-all",
+      "group flex items-center gap-3 rounded-md px-3 py-2 text-xs transition-all",
       isActive
         ? "bg-base-300 font-semibold text-base-content"
         : "text-primary-content hover:bg-base-300 hover:text-base-content",
@@ -429,7 +417,7 @@ export default function ERPSidebar({ isOpen, onClose }: Props) {
       setSalesTaskOpen(false);
       setSalesCaseOpen(false);
       setSalesForecastOpen(false);
-      setSalesAttendanceOpen(false);
+      setsalesAttendanceOpen(false);
     }
   }, [isOpen]);
 
@@ -443,7 +431,7 @@ export default function ERPSidebar({ isOpen, onClose }: Props) {
 
   /* ── shared submenu button styles ── */
   const dropdownBtnClass = (isActive: boolean) =>
-    `relative flex items-center gap-3 w-full px-3 py-2 rounded-md text-sm transition-all ${
+    `relative flex items-center gap-3 w-full px-3 py-2 rounded-md text-xs transition-all ${
       isActive
         ? "bg-base-300 font-semibold text-base-content"
         : "text-primary-content hover:bg-base-300 hover:text-base-content"
@@ -469,6 +457,7 @@ export default function ERPSidebar({ isOpen, onClose }: Props) {
           <NavLink
             key={item.id}
             to={item.path}
+            end
             className={(props) => `${linkClass(props)} relative`}
             onClick={() => {
               onItemClick?.(item.id);
@@ -499,13 +488,13 @@ export default function ERPSidebar({ isOpen, onClose }: Props) {
           fixed lg:static top-0 left-0 z-50
           h-screen bg-primary border-r border-base-300 flex flex-col
           transition-all duration-300 ease-in-out overflow-hidden
-          ${collapsed ? "w-20" : "w-64"}
+          ${collapsed ? "w-20" : "w-54"}
           ${isOpen ? "translate-x-0" : "-translate-x-full"}
           lg:translate-x-0
         `}
       >
         {/* ── HEADER ── */}
-        <div className="flex items-center w-full px-1.5 py-3 border-b border-base-300">
+        <div className="flex items-center w-full px-1.5 py-2 border-b border-base-300">
           <div className="flex items-center w-full">
             <div className="flex items-center gap-2">
               <div className="w-9 h-9 rounded-lg bg-base-100 text-primary flex items-center justify-center font-bold">
@@ -513,20 +502,20 @@ export default function ERPSidebar({ isOpen, onClose }: Props) {
               </div>
               {!collapsed && (
                 <div className="text-base-100">
-                  <p className="font-semibold">Circuit</p>
-                  <p className="text-xs">Office ERP</p>
+                  <p className="font-[16px]">Circuit</p>
+                  <p className="text-[8px]">Office ERP</p>
                 </div>
               )}
             </div>
             <div className="ml-auto flex items-center gap-2">
               <button
-                className="btn btn-ghost btn-xs lg:hidden text-base-100"
+                className="btn btn-ghost btn-xs lg:hidden text-base-100 hover:text-black hover:bg-transparent"
                 onClick={onClose}
               >
                 <MdClose />
               </button>
               <button
-                className="btn btn-ghost btn-xs border border-primary-content/40 rounded-md p-1 hidden lg:flex text-primary-content hover:bg-primary-content/10"
+                className="btn btn-ghost btn-xs   p-1 hidden lg:flex text-primary-content hover:bg-primary-content/10"
                 onClick={() => setCollapsed(!collapsed)}
               >
                 <MdChevronLeft
@@ -844,8 +833,9 @@ export default function ERPSidebar({ isOpen, onClose }: Props) {
                       ))}
                     </div>
                   </div>
+                  
 
-                  {/* ATTENDANCE */}
+                   {/* ATTENDANCE */}
                   <div>
                     {!collapsed && (
                       <p className="px-3 mb-2 text-xs font-semibold uppercase text-primary-content">
@@ -872,7 +862,6 @@ export default function ERPSidebar({ isOpen, onClose }: Props) {
                     </div>
                   </div>
 
-                  
                   {/* CATALOG */}
                   <div>
                     {!collapsed && (
@@ -1013,6 +1002,7 @@ export default function ERPSidebar({ isOpen, onClose }: Props) {
                       </p>
                     )}
                     <div className="space-y-1">
+                      
                       {/* Task */}
                       <button
                         onClick={() => setSalesTaskOpen(!salesTaskOpen)}
@@ -1066,31 +1056,7 @@ export default function ERPSidebar({ isOpen, onClose }: Props) {
                     </div>
                   </div>
 
-                  {/* SETTINGS 
-                  <div>
-                    {!collapsed && (
-                      <p className="px-3 mb-2 text-xs font-semibold uppercase text-primary-content">
-                        Settings
-                      </p>
-                    )}
-                    <div className="space-y-1">
-                      <button
-                        onClick={() => setSalesAdminOpen(!salesAdminOpen)}
-                        className={dropdownBtnClass(location.pathname.startsWith("/sales/admin"))}
-                      >
-                        <MdAdminPanelSettings size={20} />
-                        {!collapsed && (
-                          <>
-                            <span className="flex-1 text-left">Admin</span>
-                            <MdExpandMore
-                              className={`transition-transform duration-300 ${salesAdminOpen ? "rotate-180" : ""}`}
-                          />
-                        </>
-                      )}
-                      </button>
-                      {renderSubMenu(salesAdminSubMenu, salesAdminOpen)}
-                    </div>
-                  </div>*/}
+                 
                 </>
               ) : (
                 /* EMPLOYEE SALES MENU */
@@ -1101,30 +1067,49 @@ export default function ERPSidebar({ isOpen, onClose }: Props) {
                     </p>
                   )}
                   <div className="space-y-1">
-                    <NavLink to="/sales" onClick={onClose} className={linkClass}>
+                    <NavLink end to="/sales" onClick={onClose} className={linkClass}>
                       <MdDashboard size={20} />
                       {!collapsed && <span>Dashboard</span>}
                     </NavLink>
-                    <NavLink to="/sales/attendance" onClick={onClose} className={linkClass}>
-                      <MdEventAvailable size={20} />
+                    <NavLink end to="/sales/attendance" onClick={onClose} className={linkClass}>
+                      <MdDashboard size={20} />
                       {!collapsed && <span>Attendance</span>}
                     </NavLink>
-                    <NavLink to="/sales/employee-leads" onClick={onClose} className={linkClass}>
+                    <NavLink end to="/sales/employee-leads" onClick={onClose} className={linkClass}>
                       <Target size={20} />
                       {!collapsed && <span>My Leads</span>}
                     </NavLink>
-                    <NavLink to={`/sales/profile/${user?.userId || ""}`} onClick={onClose} className={linkClass}>
+                    <NavLink end to={`/sales/profile/${user?.userId || ""}`} onClick={onClose} className={linkClass}>
                       <MdPeople size={20} />
                       {!collapsed && <span>My Profile</span>}
                     </NavLink>
-                    <NavLink to="/sales/contacts" onClick={onClose} className={linkClass}>
+                    <NavLink end to="/sales/contacts" onClick={onClose} className={linkClass}>
                       <MdContactPage size={20} />
                       {!collapsed && <span>Contacts</span>}
                     </NavLink>
-                  <NavLink to="/sales/employee/tasks" onClick={onClose} className={linkClass}>
+                  <NavLink end to="/sales/employee/tasks" onClick={onClose} className={linkClass}>
                     <MdTask size={20} />
                     {!collapsed && <span>Tasks</span>}
                   </NavLink>
+                  <NavLink
+                          end
+                          to="/leaves"
+                          onClick={onClose}
+                          className={linkClass}
+                        >
+                          <MdEventAvailable size={20} />
+                          {!collapsed && <span>Leaves</span>}
+                        </NavLink>
+
+                        <NavLink
+                          end
+                          to="/notifications"
+                          onClick={onClose}
+                          className={linkClass}
+                        >
+                          <MdNotifications size={20} />
+                          {!collapsed && <span>Notifications</span>}
+                        </NavLink>
                   </div>
                 </div>
               )}

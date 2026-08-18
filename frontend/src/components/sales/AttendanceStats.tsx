@@ -52,17 +52,19 @@ export default function AttendanceStats({
         return (
           <div
             key={card.key}
-            className="group rounded-2xl border border-base-300 bg-base-100 p-5 shadow-sm transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5"
+            className="group rounded-2xl border border-base-300 bg-base-100 p-3 shadow-sm transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5"
           >
-            <div className={`inline-flex items-center justify-center w-10 h-10 rounded-xl ${accent} mb-4 transition-transform duration-300 group-hover:scale-110`}>
-              <Icon className="w-5 h-5" />
+            <div className="flex flex-row items-center justify-between gap-2 rounded-lg transition-transform duration-300 group-hover:scale-110">
+            <div className={`inline-flex items-center justify-center w-7 h-7 rounded-lg ${accent} transition-transform duration-300 group-hover:scale-110 border border-base-300 `}>
+              <Icon className="w-3 h-3" />
             </div>
-            <p className="text-2xl font-bold text-base-content leading-none">{card.value}</p>
+            <p className="text-sm font-bold text-base-content text-center leading-none">{card.value}</p>
+            </div>
             <div className="flex items-center justify-between mt-2">
-              <p className="text-xs text-base-content/60">{card.label}</p>
+              <p className="text-[10px] text-base-content/60">{card.label}</p>
               {card.trend && (
                 <span
-                  className={`text-[11px] font-semibold ${
+                  className={`text-[10px] font-semibold ${
                     card.trend.positive ? "text-success" : "text-error"
                   }`}
                 >

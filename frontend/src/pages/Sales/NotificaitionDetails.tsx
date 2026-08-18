@@ -12,13 +12,13 @@ import {
   MdPriorityHigh,
   MdOpenInNew,
 } from "react-icons/md";
-import { useAuth } from "@/auth/useAuth"; 
+import { useAuth } from "@/auth/AuthContext";
 import {
   getNotificationById,
   markAsRead,
   deleteNotification,
   type Notification,
-} from "@/services/IT/notificationServices";
+} from "@/services/notificationServices";
 import { toast } from "react-toastify";
 
 /* ─────────────────────────── helpers ─────────────────────────── */

@@ -31,12 +31,12 @@ interface Props {
 
 export default function ProjectFilters({ value, onChange }: Props) {
   return (
-    <div className="tabs tabs-boxed bg-base-200 p-1 rounded-lg w-fit mb-4">
+    <div className="tabs tabs-sm tabs-boxed bg-base-200 p-1 rounded-lg w-fit mb-4">
       {(["all", "active", "completed", "on hold"] as Filter[]).map((f) => (
         <button
           key={f}
           onClick={() => onChange(f)}
-          className={`tab px-3 py-1.5 rounded-md text-sm font-medium transition-all duration-200
+          className={`tab px-2.5  rounded-md text-[13px] font-medium transition-all duration-200
             ${
               value === f
                 ? "bg-primary text-primary-content shadow-sm"

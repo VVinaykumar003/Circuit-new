@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import AdminRightSection from '@/components/admin/AdminRightSection';
 import ProfileSidebar from '@/components/members/ProfileSidebar'
-import { useAuth } from "@/auth/useAuth"; ;
-import { getMemberById } from '@/services/IT/memberService';
+import { useAuth } from '@/auth/AuthContext';
+import { getMemberById } from '@/services/memberService';
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
 import type { Member } from "@/type/member";
 import MemberRightSection from '@/components/members/MemberRightSection';

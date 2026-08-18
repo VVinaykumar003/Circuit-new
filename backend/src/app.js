@@ -34,6 +34,7 @@ const salesDashboard = require("./routes/salesRoutes.js")
 const forecastRoutes = require("./routes/forecastRoutes.js")
 // Add this to the top where you require other routes
 const salesNotificationRoutes = require('./routes/salesNotification.routes');
+const saleAttendance = require('./routes/attendance.routes');
 
 
 
@@ -48,25 +49,15 @@ const app = express();
 // Security Headers
 app.use(helmet());
 
-// CORS Configuration
-const allowedOrigins = [
-  "https://circuit-new.vercel.app", // Production frontend
-  "http://localhost:5713",
-  process.env.CORS_ORIGIN, // From .env for local development
-].filter(Boolean); // Filter out undefined/null values
+// const URI = process.env.CORS_ORIGIN_PROD || process.env.CORS_ORIGIN_LOCAL || "http://localhost:5174";
+const URI = process.env.CORS_ORIGIN || "http://localhost:5173";
 
-const corsOptions = {
-  origin: (origin, callback) => {
-    // Allow requests with no origin (like mobile apps or curl requests) or from whitelisted origins
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error("Not allowed by CORS"));
-    }
-  },
-  credentials: true,
-};
-app.use(cors(corsOptions));
+// CORS Configuration
+app.use(cors({
+  origin: URI,
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+  credentials: true
+}));
 
 // HTTP Request Logger
 app.use(morgan("dev"));
@@ -89,7 +80,7 @@ app.use("/api", memberRoutes);
 app.use("/api", leavesRoutes);
 app.use("/api", leavepolicyRoutes);
 app.use("/api", holidayRoutes);
-app.use("/api", attendanceRoutes);
+app.use("/api/attendance", attendanceRoutes);
 app.use("/api/payroll", payrollRoutes);
 app.use("/api/salary-slip", salarySlipRoutes);
 app.use("/api/tasks", taskRoutes);
@@ -109,6 +100,7 @@ app.use('/api/cases', caseRoutes);
 app.use('/api/tasks', salesTaskRoutes);
 app.use('/api/sales/' ,salesDashboard )
 app.use('/api/forecast' ,forecastRoutes )
+app.use('/api',saleAttendance);
 
 
 

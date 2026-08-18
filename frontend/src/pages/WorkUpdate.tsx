@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useAuth } from "@/auth/useAuth"; 
+import { useAuth } from "@/auth/AuthContext";
 import WorkUpdateForm from "@/components/workUpdate/WorkUpdateForm";
 import WorkUpdate from "@/components/workUpdate/WorkUpdates";
 import { MdViewList, MdAddChart, MdUpdate, MdWorkspaces } from "react-icons/md";
@@ -20,13 +20,13 @@ const WorkUpdates = ({ projectId }: { projectId: string }) => {
       <div className="flex flex-col gap-2 mb-2">
         <div className="flex items-center gap-3">
           <div className="p-2.5 bg-primary/10 text-primary rounded-xl shadow-sm border border-primary/20">
-            <MdUpdate size={24} />
+            <MdUpdate size={18} />
           </div>
           <div>
-            <h1 className="text-2xl sm:text-3xl font-bold text-base-content tracking-tight">
+            <h1 className="text-xl sm:text-lg font-bold text-base-content tracking-tight">
               Project Updates
             </h1>
-            <p className="text-base-content/60 text-sm sm:text-base mt-1 max-w-2xl">
+            <p className="text-base-content/60 text-xs sm:text-sm mt-1 max-w-2xl">
               Track project progress, team activity, and daily work updates to ensure alignment.
             </p>
           </div>
@@ -38,25 +38,25 @@ const WorkUpdates = ({ projectId }: { projectId: string }) => {
         <div className="bg-base-200/80 p-1.5 rounded-xl inline-flex gap-1 overflow-x-auto border border-base-200 shadow-inner w-full sm:w-auto">
           <button
             onClick={() => setActiveTab("list")}
-            className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 whitespace-nowrap ${
+            className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 rounded-md text-xs font-semibold transition-all duration-200 whitespace-nowrap ${
               activeTab === "list"
                 ? "bg-base-100 text-primary shadow-sm border border-base-200"
                 : "text-base-content/60 hover:text-base-content hover:bg-base-200"
             }`}
           >
-            <MdViewList size={18} />
+            <MdViewList size={15} />
             View Updates
           </button>
           {!projectId && (
             <button
               onClick={() => setActiveTab("form")}
-              className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 whitespace-nowrap ${
+              className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 rounded-md text-xs font-semibold transition-all duration-200 whitespace-nowrap ${
                 activeTab === "form"
                   ? "bg-base-100 text-primary shadow-sm border border-base-200"
                   : "text-base-content/60 hover:text-base-content hover:bg-base-200"
               }`}
             >
-              <MdAddChart size={18} />
+              <MdAddChart size={15} />
               Add Update
             </button>
           )}
@@ -64,9 +64,9 @@ const WorkUpdates = ({ projectId }: { projectId: string }) => {
 
         {/* Context Badge */}
         {projectId && (
-          <div className="hidden sm:flex items-center gap-2 px-4 py-2 bg-info/10 text-info rounded-lg border border-info/20">
-            <MdWorkspaces size={18} />
-            <span className="text-sm font-medium">Workspace Active</span>
+          <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-info/10 text-info rounded-md border border-info/20">
+            <MdWorkspaces size={15} />
+            <span className="text-xs font-medium">Workspace Active</span>
           </div>
         )}
       </div>

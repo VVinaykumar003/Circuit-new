@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
-import { useAuth } from "@/auth/useAuth"; 
+import { useAuth } from "@/auth/AuthContext";
 import { toast } from "react-toastify";
-import { updateProject } from "@/services/IT/projectServices";
-import { getMembers } from "@/services/IT/memberService";
+import { updateProject } from "@/services/projectServices";
+import { getMembers } from "@/services/memberService";
 
 interface Props {
   project: any;
@@ -129,9 +129,9 @@ export default function ProjectMembers({ project, onUpdateProject }: Props) {
   };
 
   return (
-    <div className="bg-white/70 border border-base-300 rounded-lg p-6">
-      <div className="flex justify-between mb-4 border-b border-base-300 pb-2">
-        <h3 className="font-semibold text-black">
+    <div className="bg-white/70 border border-base-300 rounded-lg p-5">
+      <div className="flex justify-between mb-4 border-base-300 pb-2">
+        <h3 className="text-[15px] font-semibold text-black">
           Team Members
         </h3>
 
@@ -146,13 +146,13 @@ export default function ProjectMembers({ project, onUpdateProject }: Props) {
           return (
             <li
               key={userId || index}
-              className="py-3 flex justify-between items-center"
+              className="py-2.5 flex justify-between items-center"
             >
               <div>
-                <p className="font-medium text-black">
+                <p className="text-[14px] font-medium text-black">
                   {participant.user?.name || "Unknown User"}
                 </p>
-                <p className="text-sm text-black/50">
+                <p className="text-xs text-black/50">
                   {participant.role} {participant.responsibility ? `- ${participant.responsibility}` : ""}
                 </p>
               </div>

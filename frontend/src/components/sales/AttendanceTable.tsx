@@ -4,6 +4,7 @@ import type { Attendance } from "@/type/attendance";
 import AttendanceStatusBadge from "./AttendanceStatusBadge";
 import AttendanceCard from "./AttendanceCard";
 
+
 type SortKey = keyof Pick<Attendance, "date" | "totalHours" | "lateMinutes" | "overtimeHours">;
 
 interface Props {
@@ -17,6 +18,7 @@ interface Props {
   /** Admin-only extra columns */
   showAdminColumns?: boolean;
   onResetFilters?: () => void;
+ 
 }
 
 function SortableHeader({
@@ -64,6 +66,8 @@ export default function AttendanceTable({
   showEmployeeColumn,
   showAdminColumns,
   onResetFilters,
+
+
 }: Props) {
   const [sort, setSort] = useState<{ key: SortKey; dir: "asc" | "desc" } | null>(null);
 
@@ -82,6 +86,7 @@ export default function AttendanceTable({
         return sort.dir === "asc" ? diff : -diff;
       })
     : safeRecords;
+
 
   if (loading) return <TableSkeleton />;
 
@@ -115,13 +120,15 @@ export default function AttendanceTable({
     );
   }
 
+
   return (
     <>
       {/* Desktop table */}
       <div className="hidden md:block overflow-x-auto rounded-2xl border border-base-300">
         <table className="table table-sm">
-          <thead className="sticky top-0 bg-base-200 z-[1]">
+          <thead className="sticky top-0 bg-base-200 z-[1] text-sm">
             <tr>
+              {/* <th onToggle={toggleSelected}><MdCheckBox/></th> */}
               {showEmployeeColumn && <th>Employee</th>}
               {showAdminColumns && <th>Department</th>}
               <SortableHeader label="Date" sortKey="date" currentSort={sort} onSort={handleSort} />
@@ -136,30 +143,73 @@ export default function AttendanceTable({
               <th>Status</th>
               {showAdminColumns && <th>Location</th>}
               <th>Remarks</th>
-              <th className="text-right">Actions</th>
+              <th className="text-right ">Actions</th>
             </tr>
           </thead>
           <tbody>
             {sorted.map((r) => (
-              <tr key={r.id} className="hover">
-                {showEmployeeColumn && (
-                  <td>
-                    <div className="flex items-center gap-2">
-                      <img src={r.employee.profileImage || `https://i.pravatar.cc/40?u=${r.employee._id}`} alt={r.employee.name} className="w-7 h-7 rounded-full object-cover" />
-                      <div>
-                        <p className="font-medium leading-tight">{r.employee.name}</p>
-                        <p className="text-[11px] text-base-content/50">{r.employee.designation}</p>
-                      </div>
-                    </div>
-                  </td>
-                )}
+              <tr key={r._id} className="hover">
+               {showEmployeeColumn && (
+  <td>
+    <div className="flex items-center gap-2">
+      {r.employee ? (
+        <>
+          <img
+            src={
+              r.employee.imageUrl ||
+              `https://i.pravatar.cc/40?u=${r.employee._id}`
+            }
+            alt={r.employee.name || "Employee"}
+            className="w-7 h-7 rounded-full object-cover"
+          />
+
+          <div>
+            <p className="font-medium leading-tight">
+              {r.employee.name || "Unknown Employee"}
+            </p>
+
+            <p className="text-[11px] text-base-content/50">
+              {r.employee.designation || "--"}
+            </p>
+          </div>
+        </>
+      ) : (
+        <>
+          <div className="w-7 h-7 rounded-full bg-base-300 flex items-center justify-center">
+            <span className="text-[10px] text-base-content/50">
+              N/A
+            </span>
+          </div>
+
+          <div>
+            <p className="font-medium leading-tight">
+              Unknown Employee
+            </p>
+
+            <p className="text-[11px] text-base-content/50">
+              --
+            </p>
+          </div>
+        </>
+      )}
+    </div>
+  </td>
+)}
                 {showAdminColumns && <td className="text-base-content/70">{r.department ?? "--"}</td>}
                 <td className="font-medium">{new Date(r.date).toLocaleDateString("en-GB", { day: "2-digit", month: "short" })}</td>
                 <td className="text-base-content/60">{new Date(r.date).toLocaleDateString("en-US", { weekday: "short" })}</td>
-                <td>{r.checkIn}</td>
-                <td>{r.checkOut}</td>
-                <td>{r.totalHours}h</td>
-                <td className="text-base-content/60">{r.breakHours}h</td>
+                <td>
+                  {r.checkIn
+                    ? new Date(r.checkIn).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
+                    : '--:--'}
+                </td>
+                <td>
+                  {r.checkOut
+                    ? new Date(r.checkOut).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })
+                    : '--:--'}
+                </td>
+                <td>{r.totalHours || '00:00' }h</td>
+                <td className="text-base-content/60">{r.breakHours || '00:00' }h</td>
                 <td className={r.lateMinutes > 0 ? "text-warning font-medium" : "text-base-content/40"}>
                   {r.lateMinutes > 0 ? `${r.lateMinutes}m` : "--"}
                 </td>
@@ -168,7 +218,7 @@ export default function AttendanceTable({
                 </td>
                 <td className="text-base-content/60 whitespace-nowrap">{r.shift}</td>
                 <td>
-                  <AttendanceStatusBadge status={r.status} />
+                  <AttendanceStatusBadge status={r.status?.toUpperCase()} />
                 </td>
                 {showAdminColumns && <td className="text-base-content/60">{r.location ?? "--"}</td>}
                 <td className="text-base-content/60 max-w-[140px] truncate">{r.remarks ?? "--"}</td>

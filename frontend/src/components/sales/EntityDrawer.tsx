@@ -1,5 +1,5 @@
-import { useAuth } from "@/auth/useAuth"; 
-import { updateAccount, updateContact } from "@/services/sales/salesService";
+import { useAuth } from "@/auth/AuthContext";
+import { updateAccount, updateContact } from "@/services/salesService";
 import { useEffect, useState } from "react";
 
 import { entitySchemas } from "./schema/entitySchemas";
@@ -236,17 +236,24 @@ function FieldEdit({ label, value, editable, onChange }: any) {
     <div className="bg-base-200 p-3 rounded-lg">
       <div className="text-xs text-gray-500">{label}</div>
 
-      {editable ? (
-        <input
-          className="w-full bg-transparent outline-none font-medium"
-          value={value || ""}
-          onChange={(e) => onChange?.(e.target.value)}
-        />
-      ) : (
-        <div className="font-medium break-words">
-          {displayValue || "-"}
-        </div>
-      )}
+     {editable ? (
+  <input
+    className="w-full bg-transparent outline-none font-medium"
+    value={value || ""}
+    maxLength={10}
+    onChange={(e) => {
+      const val = e.target.value;
+
+      if (/^\d*$/.test(val)) {
+        onChange?.(val);
+      }
+    }}
+  />
+) : (
+  <div className="font-medium break-words">
+    {displayValue || "-"}
+  </div>
+)}
     </div>
   );
 }

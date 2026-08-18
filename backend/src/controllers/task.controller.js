@@ -219,20 +219,37 @@ const updateTask = async (req, res) => {
     let uploadedAttachments = [];
 
     if (req.files && req.files.length > 0) {
-      uploadedAttachments = await Promise.all(
-        req.files.map((file) => {
-          return new Promise((resolve, reject) => {
-            const stream = cloudinary.uploader.upload_stream(
-              { folder: "tasks" },
-              (error, result) => {
-                if (error) reject(error);
-                else resolve(result.secure_url);
-              },
-            );
-            streamifier.createReadStream(file.buffer).pipe(stream);
-          });
-        }),
-      );
+    uploadedAttachments = await Promise.all(
+  req.files.map((file) => {
+    return new Promise((resolve, reject) => {
+      let resourceType = "raw";
+
+if(file.mimetype.startsWith("image/")){
+  resourceType = "image";
+}
+console.log({
+  name: file.originalname,
+  type: file.mimetype
+});
+const stream = cloudinary.uploader.upload_stream(
+{
+  folder: "tasks",
+  resource_type: resourceType,
+   public_id: file.originalname,
+  use_filename: true,
+  unique_filename: true,
+},
+(error, result) => {
+  if (error) reject(error);
+  else resolve(result.secure_url);
+});
+
+      streamifier
+        .createReadStream(file.buffer)
+        .pipe(stream);
+    });
+  }),
+);
     }
     console.log(req.files);
     const updateQuery = { ...updateFields };

@@ -1,11 +1,23 @@
 import API from "@/api/axios";
-import { createContext, useEffect, useState, type ReactNode } from "react";
-import type {User, AuthState, AuthContextType } from '@/type/UserAuth'
+import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+// import { useNavigate } from "react-router-dom";
+import type  { OrganizationMember } from "@/type/User";
 
 
+type AuthState = {
+  user: OrganizationMember | null;
+  slug: string | null;
+};
 
-// eslint-disable-next-line react-refresh/only-export-components
-export const AuthContext = createContext<AuthContextType | null>(null);
+type AuthContextType = {
+  auth: AuthState;
+  login: (data: { user: OrganizationMember; slug: string }) => void;
+  logout: () => void;
+  loading: boolean;
+};
+
+
+const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [auth, setAuth] = useState<AuthState>({
@@ -14,28 +26,28 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   });
 
   const [loading, setLoading] = useState(true);
-
+  // const navigate = useNavigate();
 
   //  Check login on refresh using cookie
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const res = await API.get("/auth/me");
+       const res = await API.get("/auth/me");
+
+        //  console.log("User from /me:", res.data);
+        //  console.log("User's slug:", res.data.slug);
 
         // Update AuthContext
         setAuth({
           user: res.data.user,
           slug: res.data.slug,
         });
-      } catch (err: unknown) {
+      } catch (err) {
+        console.error("Failed to fetch user data:", err);
         setAuth({
           user: null,
           slug: null,
         });
-
-        if (err instanceof Error) {
-          console.log(err.message);
-        }
       } finally {
         setLoading(false);
       }
@@ -44,7 +56,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     checkAuth();
   }, []);
 
-  const login = (data: { user: User; slug: string }) => {
+  const login = (data: { user: OrganizationMember; slug: string }) => {
     const newAuth = {
       user: data.user,
       slug: data.slug,
@@ -76,4 +88,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       {!loading && children}
     </AuthContext.Provider>
   );
+};
+
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) throw new Error("useAuth must be used inside AuthProvider");
+  return context;
 };

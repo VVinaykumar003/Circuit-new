@@ -8,8 +8,9 @@ const productSchema = new mongoose.Schema(
       required: true,
     },
     // Basic Info
-    productGroup: {
+    productType: {
       type: String,
+      enum: ["ERP", "CRM", "SaaS", "POS", "HRMS", "Other"],
       required: [true, "Product Group is required"],
       trim: true,
     },
@@ -40,6 +41,32 @@ const productSchema = new mongoose.Schema(
     description: {
       type: String,
     },
+    version: {
+      type: String,
+      trim: true,
+    },
+    releaseChannel: {
+      type: String,
+      enum: ["Stable", "Beta", "Alpha"],
+      default: "Stable",
+    },
+
+    // Licensing
+    licenseType: {
+      type: String,
+      enum: ["One Time", "Monthly", "Yearly", "Lifetime"],
+    },
+    activationType: {
+      type: String,
+      enum: ["License Key", "Email", "Domain", "Device", "API Key"],
+    },
+    validityDays: {
+      type: Number,
+      min: 0,
+    },
+    maxUsers: { type: Number, min: 0 },
+    maxDevices: { type: Number, min: 0 },
+
 
     // Pricing
     costPrice: {
@@ -65,30 +92,53 @@ const productSchema = new mongoose.Schema(
       max: 100,
     },
 
-    // Inventory
-    stockTracking: { type: Boolean, default: true },
-    stockQuantity: { type: Number, default: 0, min: 0 },
-    reorderLevel: { type: Number, default: 0, min: 0 },
-    uom: { type: String }, // Unit of Measure
-    warehouse: { type: String },
-    stockStatus: {
+    // Platform Support
+    platformSupport: [{
       type: String,
-      enum: ["In Stock", "Low Stock", "Out Of Stock"],
-      default: "In Stock",
-    },
+      enum: ["windows", "macos", "linux", "android", "ios", "web"],
+    }],
 
-    // Categorization
-    brand: { type: String },
-    category: { type: String },
-    subCategory: { type: String },
+    // Downloads
+    softwareDownloadUrl: { type: String },
+    documentationUrl: { type: String },
+    demoUrl: { type: String },
+    releaseNotesUrl: { type: String },
+
+    // Media
+    logoUrl: { type: String },
+    bannerUrl: { type: String },
+    screenshotUrls: [{ type: String }],
+    videoUrl: { type: String },
+
+    // Features
+    features: [{
+      name: { type: String, required: true },
+    }],
+
+    // Plans
+    plans: [{
+      name: { type: String, required: true },
+      price: { type: Number, required: true, min: 0 },
+      billingCycle: {
+        type: String,
+        enum: ["Monthly", "Yearly", "One Time"],
+        default: "Monthly",
+      },
+      features: [{ type: String }], // List of feature names included in this plan
+    }],
+
+    // Categorization (renamed from category)
+    softwareCategory: { type: String },
     tags: [{ type: String }],
 
-    // Sales Config
-    availableForSale: { type: Boolean, default: true },
-    allowDiscount: { type: Boolean, default: true },
-    minQty: { type: Number, default: 0, min: 0 },
-    maxQty: { type: Number },
-    commission: { type: Number, default: 0, min: 0, max: 100 },
+    showOnWebsite: { type: Boolean, default: true },
+    allowTrial: { type: Boolean, default: false },
+    allowDemo: { type: Boolean, default: false },
+    publishStatus: {
+      type: String,
+      enum: ["Published", "Draft", "Archived"],
+      default: "Draft",
+    },
 
     // SEO
     metaTitle: { type: String },
@@ -101,6 +151,20 @@ const productSchema = new mongoose.Schema(
       name: String, 
       url: String 
     }],
+    // Removed fields:
+    // barcode
+    // stockTracking
+    // stockQuantity
+    // reorderLevel
+    // uom
+    // warehouse
+    // stockStatus
+    // brand
+    // allowDiscount
+    // minQty
+    // maxQty
+    // commission
+    // documents (replaced by specific URL fields)
   },
   {
     timestamps: true,

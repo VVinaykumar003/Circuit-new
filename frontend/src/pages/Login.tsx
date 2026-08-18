@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Lottie from "lottie-react";
-import loginAnimation from "../assets/LoginAnimation.json";
+import loginAnimation from "../assets/loginAnimation.json";
 import { LockIcon, User2Icon } from "lucide-react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { login as loginService } from "../services/authService";
-import { useAuth } from  "@/auth/useAuth"; ;
+import { useAuth } from "../auth/AuthContext";
 import { toast } from "react-toastify";
 import Button from "@/components/ui/Button";
 import { socket } from "@/services/socket";

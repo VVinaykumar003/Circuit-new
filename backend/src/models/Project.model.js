@@ -29,9 +29,14 @@ const participantSchema = new mongoose.Schema(
 
         "Testing",
         "Deployment",
+        "Other"
       ],
       required: true,
     },
+    customResponsibility: {
+  type: String,
+  default: "",
+},
   },
   { _id: false },
 );

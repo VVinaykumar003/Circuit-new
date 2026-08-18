@@ -4,8 +4,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { MdSend, MdHistory, MdRefresh } from 'react-icons/md';
 import { toast } from 'react-toastify';
-import {getNotificationStats,   getNotifications , sendNotification, } from '@/services/IT/notificationServices';
-import { useAuth } from "@/auth/useAuth"; ;
+import {getNotificationStats,   getNotifications , sendNotification, } from '@/services/notificationServices';
+import {useAuth} from '@/auth/AuthContext';
 import { useQuery } from '@tanstack/react-query';
 
 const notifSchema = z.object({

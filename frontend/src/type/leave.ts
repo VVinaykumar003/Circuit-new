@@ -18,6 +18,7 @@ export type LeaveStatus =
   toDate?: string;
   reason: string;
   status: "pending" | "approved" | "rejected";
+    attachments?: string[];
 };
 
 import {

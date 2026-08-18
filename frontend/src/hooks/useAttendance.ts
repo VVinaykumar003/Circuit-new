@@ -5,9 +5,9 @@ import {
   getEmployeeAttendanceSummary,
   approveAttendance,
   getAdminDashboard,
-} from "../services/sales/attendanceService";
+} from "../services/attendanceService";
 import type { AttendanceFilters } from "../type/attendance";
-import { useAuth } from "@/auth/useAuth"; 
+import { useAuth } from "@/auth/AuthContext";
 
 export function useMyAttendance(filters: Partial<AttendanceFilters>, page: number, pageSize = 10) {
   const { auth } = useAuth();
@@ -68,11 +68,13 @@ export function useApproveAttendance() {
   const slug = auth?.slug || "";
   return useMutation({
     mutationFn: ({ attendanceId, employeeId }: { attendanceId: string, employeeId: string }) =>
-      approveAttendance(slug, attendanceId, { employeeId, status: 'PRESENT' }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["attendance"] }),
+      approveAttendance(slug, attendanceId, { employeeId, status: 'PRESENT' }), // Assuming approveAttendance returns a Promise
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["attendance", "all"] }); // Invalidate specific attendance queries
+      queryClient.invalidateQueries({ queryKey: ["dashboard", "admin"] }); // Invalidate admin dashboard stats
+    },
   });
 }
-
 export function useRejectAttendance() {
   const queryClient = useQueryClient();
   const { auth } = useAuth();
@@ -80,6 +82,9 @@ export function useRejectAttendance() {
   return useMutation({
     mutationFn: ({ attendanceId, employeeId }: { attendanceId: string, employeeId: string }) =>
       approveAttendance(slug, attendanceId, { employeeId, status: 'ABSENT' }),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["attendance"] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["attendance", "all"] }); // Invalidate specific attendance queries
+      queryClient.invalidateQueries({ queryKey: ["dashboard", "admin"] }); // Invalidate admin dashboard stats
+    },
   });
 }

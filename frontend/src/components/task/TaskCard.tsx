@@ -21,7 +21,7 @@ export function KanbanTaskCard({ task, index, onClick }: Props) {
           className="bg-base-100 border border-base-300 rounded-lg p-3 
                      cursor-pointer hover:shadow transition"
         >
-          <h4 className="text-sm font-medium">{task.title}</h4>
+          <h4 className="text-[13px] font-medium">{task.title}</h4>
 
           <div className="flex justify-between items-center mt-2 text-xs">
             <span>{task.assignee}</span>

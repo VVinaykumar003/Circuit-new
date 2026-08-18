@@ -41,12 +41,6 @@ export interface AttendanceRecord {
   remarks: string | null;
 }
 
-export interface Break {
-  startTime: string;
-  endTime: string | null;
-  duration: string;
-}
-
 export interface TodayAttendance {
   status: AttendanceStatus;
   checkIn: string | null;
@@ -64,11 +58,25 @@ export interface TodayAttendance {
   breaks:Break[];
 }
 
+export interface Break {
+  start: string; // HH:mm AM/PM
+  end: string | null; // HH:mm AM/PM
+  duration: string; // HH:mm
+  location: string | null;
+  device: string | null;
+  ipAddress: string | null;
+  gps: {
+    lat: number;
+    lng: number;
+  } | null;
+}
+
+
 export interface TodaySummaryData {
-  workingHours: string;
-  lateBy: string | null;
-  overtime: string;
-  totalBreak: string;
+  workingHours: number;
+  lateBy: number | null;
+  overtime: number;
+  totalBreak: number;
   status: AttendanceStatus;
 }
 
@@ -90,15 +98,15 @@ export interface EmployeeDashboardData {
 // For Admin Approval Tab
 export interface AdminApprovalRecord {
   _id: string;
+  attendanceDocId: string; // Added this property to resolve the TypeScript error
   employeeId: string;
   employeeName: string;
-  profileImageUrl: string;
-  department: string;
-  checkIn: string | null;
-  checkOut: string | null;
-  workingHours: string;
-  late: string | null;
-  location: string | null;
+  profileImageUrl?: string;
+  checkIn?: string;
+  checkOut?: string;
+  workingHours: number; // Assuming number based on usage and sample data
+  late?: number; // Assuming number based on sample data
+  location?: string;
   status: AttendanceStatus;
   approval: ApprovalStatus;
 }

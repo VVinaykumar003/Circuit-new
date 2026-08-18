@@ -26,8 +26,8 @@ import {
   MdNotes,
   MdPerson,
 } from "react-icons/md";
-import { deleteLead, getLeads, updateLead, convertLeadToCustomer } from "@/services/sales/leadServices";
-import { useAuth } from "@/auth/useAuth"; 
+import { deleteLead, getLeads, updateLead, convertLeadToCustomer } from "@/services/leadServices";
+import { useAuth } from "@/auth/AuthContext";
 import { toast } from "react-toastify";
 
 /* ─────────────────────────── types ─────────────────────────── */
@@ -61,79 +61,16 @@ export interface Lead {
   value?: number;
 }
 
-/* ─────────────────────────── mock data ──────────────────────── */
-// const SAMPLE: Lead[] = [
-//   {
-//     id: "LD-1001",
-//     firstName: "Sarah",
-//     lastName: "Connor",
-//     companyName: "Cyberdyne Systems",
-//     email: "sarah.connor@cyberdyne.com",
-//     phoneNumber: "+1 555-0198",
-//     leadOwner: "V VINAY Kumar",
-//     leadSource: "Website",
-//     industry: "Technology",
-//     leadStatus: "New",
-//     priority: "High",
-//     createdDate: "2026-06-01",
-//     lastContacted: "2026-06-02",
-//     value: 15000,
-//   },
-//   {
-//     id: "LD-1002",
-//     firstName: "Bruce",
-//     lastName: "Wayne",
-//     companyName: "Wayne Enterprises",
-//     email: "bruce@wayne.com",
-//     phoneNumber: "+1 555-0199",
-//     leadOwner: "Riya Sharma",
-//     source: "Referral",
-//     industry: "Manufacturing",
-//     status: "Qualified",
-//     priority: "Urgent",
-//     createdDate: "2026-05-15",
-//     lastContacted: "2026-06-01",
-//     value: 120000,
-//   },
-//   {
-//     id: "LD-1003",
-//     firstName: "Clark",
-//     lastName: "Kent",
-//     companyName: "Daily Planet",
-//     email: "ckent@dailyplanet.com",
-//     phoneNumber: "+1 555-0200",
-//     leadOwner: "V VINAY Kumar",
-//     source: "Trade Show",
-//     industry: "Media",
-//     status: "Negotiation",
-//     priority: "Medium",
-//     createdDate: "2026-05-20",
-//     lastContacted: "2026-05-28",
-//     value: 8500,
-//   },
-//   {
-//     id: "LD-1004",
-//     firstName: "Tony",
-//     lastName: "Stark",
-//     companyName: "Stark Industries",
-//     email: "tony@stark.com",
-//     phoneNumber: "+1 555-0201",
-//     leadOwner: "Arjun Mehta",
-//     source: "Cold Call",
-//     industry: "Defense",
-//     status: "Won",
-//     priority: "High",
-//     createdDate: "2026-04-10",
-//     lastContacted: "2026-05-10",
-//     value: 250000,
-//   },
-// ];
+
 
 /* ─────────────────────────── component ─────────────────────── */
 export default function AllLeads() {
   const navigate = useNavigate();
 
   // State
+  const [statusFilter, setStatusFilter] = useState("All");
+const [sourceFilter, setSourceFilter] = useState("All");
+const [ownerFilter, setOwnerFilter] = useState("All");
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState<Partial<Lead>>({});
   const [leads, setLeads] = useState<Lead[]>([]);
@@ -337,13 +274,28 @@ export default function AllLeads() {
           );
         },
       }),
-      columnHelper.accessor("leadOwner", {
-        header: "Owner",
+      // columnHelper.accessor("leadOwner", {
+      //   header: "Owner",
 
-        cell: (info) => (
-          <span className="text-sm">{info.getValue()?.name || "N/A"}</span>
-        ),
-      }),
+      //   cell: (info) => (
+      //     <span className="text-sm">{info.getValue()?.name || "N/A"}</span>
+      //   ),
+      // }),
+      
+      
+      columnHelper.accessor("leadOwner", {
+  header: "Owner",
+  cell: (info) => {
+    const owner = info.getValue();
+
+    return (
+      <span className="text-sm">
+        {typeof owner === "string" ? owner : owner?.name || "N/A"}
+      </span>
+    );
+  },
+}),
+      
       columnHelper.accessor("createdAt", {
         header: "Created",
         cell: (info) => (
@@ -404,15 +356,51 @@ export default function AllLeads() {
     [navigate],
   );
 
+  // const filteredLeads = useMemo(() => {
+  //   return leads.filter(
+  //     (l) =>
+  //       l.firstName.toLowerCase().includes(search.toLowerCase()) ||
+  //       l.lastName.toLowerCase().includes(search.toLowerCase()) ||
+  //       l.companyName.toLowerCase().includes(search.toLowerCase()) ||
+  //       l.email.toLowerCase().includes(search.toLowerCase()),
+  //   );
+  // }, [leads, search]);
   const filteredLeads = useMemo(() => {
-    return leads.filter(
-      (l) =>
-        l.firstName.toLowerCase().includes(search.toLowerCase()) ||
-        l.lastName.toLowerCase().includes(search.toLowerCase()) ||
-        l.companyName.toLowerCase().includes(search.toLowerCase()) ||
-        l.email.toLowerCase().includes(search.toLowerCase()),
+  const searchValue = search.toLowerCase();
+
+  return leads.filter((lead) => {
+    // Search filter
+    const matchesSearch =
+      lead.firstName?.toLowerCase().includes(searchValue) ||
+      lead.lastName?.toLowerCase().includes(searchValue) ||
+      lead.companyName?.toLowerCase().includes(searchValue) ||
+      lead.email?.toLowerCase().includes(searchValue);
+
+    // Status filter
+    const matchesStatus =
+      statusFilter === "All" || lead.leadStatus === statusFilter;
+
+    // Source filter
+    const matchesSource =
+      sourceFilter === "All" || lead.leadSource === sourceFilter;
+
+    // Owner filter
+    const ownerId =
+      typeof lead.leadOwner === "string"
+        ? lead.leadOwner
+        : lead.leadOwner?._id;
+
+    const matchesOwner =
+      ownerFilter === "All" || ownerId === ownerFilter;
+
+    return (
+      matchesSearch &&
+      matchesStatus &&
+      matchesSource &&
+      matchesOwner
     );
-  }, [leads, search]);
+  });
+}, [leads, search, statusFilter, sourceFilter, ownerFilter]);
 
   const table = useReactTable({
     data: filteredLeads,
@@ -532,34 +520,80 @@ export default function AllLeads() {
             <label className="text-xs font-bold text-base-content/70 mb-1 block uppercase">
               Lead Status
             </label>
-            <select className="select select-sm select-bordered w-full">
-              <option>All</option>
-              <option>New</option>
-              <option>Qualified</option>
-            </select>
+        <select
+  className="select select-sm select-bordered w-full"
+  value={statusFilter}
+  onChange={(e) => setStatusFilter(e.target.value)}
+>
+  <option value="All">All</option>
+  <option value="New">New</option>
+  <option value="Contacted">Contacted</option>
+  <option value="Qualified">Qualified</option>
+  <option value="Proposal Sent">Proposal Sent</option>
+  <option value="Negotiation">Negotiation</option>
+  <option value="Won">Won</option>
+  <option value="Lost">Lost</option>
+</select>
           </div>
           <div>
             <label className="text-xs font-bold text-base-content/70 mb-1 block uppercase">
               Lead Source
             </label>
-            <select className="select select-sm select-bordered w-full">
-              <option>All</option>
-              <option>Website</option>
-              <option>Referral</option>
-            </select>
+           <select
+  className="select select-sm select-bordered w-full"
+  value={sourceFilter}
+  onChange={(e) => setSourceFilter(e.target.value)}
+>
+  <option value="All">All</option>
+  <option value="Website">Website</option>
+  <option value="Referral">Referral</option>
+  <option value="Cold Call">Cold Call</option>
+  <option value="Trade Show">Trade Show</option>
+</select>
           </div>
           <div>
             <label className="text-xs font-bold text-base-content/70 mb-1 block uppercase">
               Lead Owner
             </label>
-            <select className="select select-sm select-bordered w-full">
-              <option>All</option>
-              <option>V VINAY Kumar</option>
-            </select>
+          <select
+  className="select select-sm select-bordered w-full"
+  value={ownerFilter}
+  onChange={(e) => setOwnerFilter(e.target.value)}
+>
+  <option value="All">All</option>
+
+  {Array.from(
+    new Map(
+      leads
+        .filter(
+          (lead) =>
+            typeof lead.leadOwner !== "string" && lead.leadOwner?._id
+        )
+        .map((lead) => [
+          lead.leadOwner._id,
+          lead.leadOwner.name,
+        ])
+    ).entries()
+  ).map(([id, name]) => (
+    <option key={id} value={id}>
+      {name}
+    </option>
+  ))}
+</select>
           </div>
           <div className="flex items-end gap-2">
-            <button className="btn btn-sm btn-primary flex-1">Apply</button>
-            <button className="btn btn-sm btn-ghost flex-1">Reset</button>
+          
+          <button
+  className="btn btn-sm flex-1 "
+  onClick={() => {
+    setStatusFilter("All");
+    setSourceFilter("All");
+    setOwnerFilter("All");
+    setSearch("");
+  }}
+>
+  Reset
+</button>
           </div>
         </div>
       )}
@@ -885,15 +919,23 @@ export default function AllLeads() {
                     <p className="text-base-content/50 mb-1">Phone</p>
                     {isEditing ? (
                       <input
-                        type="text"
+                       type="tel"
+  maxLength={10}
+  inputMode="numeric"
+  pattern="[0-9]{10}"
+                        
                         className="input input-bordered input-sm w-full"
                         value={editData.phoneNumber || ""}
-                        onChange={(e) =>
-                          setEditData((prev) => ({
-                            ...prev,
-                            phoneNumber: e.target.value,
-                          }))
-                        }
+                         onChange={(e) => {
+    const value = e.target.value.replace(/[^0-9]/g, "");
+
+    if (value.length <= 10) {
+      setEditData((prev) => ({
+        ...prev,
+        phoneNumber: value,
+      }));
+    }
+  }}
                       />
                     ) : (
                       <p className="font-medium">{selectedLead?.phoneNumber}</p>
@@ -1032,15 +1074,21 @@ export default function AllLeads() {
       <p className="text-base-content/50 mb-1">Phone Number</p>
       {isEditing ? (
         <input
-          type="text"
+          type="tel"
+    maxLength={10}
+    inputMode="numeric"
           className="input input-bordered input-sm w-full"
           value={editData.phoneNumber || ""}
-          onChange={(e) =>
-            setEditData((prev) => ({
-              ...prev,
-              phoneNumber: e.target.value,
-            }))
-          }
+          onChange={(e) => {
+    const value = e.target.value.replace(/[^0-9]/g, "");
+
+    if (value.length <= 10) {
+      setEditData((prev) => ({
+        ...prev,
+        phoneNumber: value,
+      }));
+    }
+  }}
         />
       ) : (
         <div className="flex items-center gap-3">

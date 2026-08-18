@@ -18,8 +18,8 @@ import type {
   AttendanceStatus,
   UserRole,
 } from "../../type/attendance";
-import { useAuth } from "@/auth/useAuth"; 
-import { getMyAttendance } from "@/services/sales/attendanceService";
+import { useAuth } from "@/auth/AuthContext";
+import { getMyAttendance } from "@/services/attendanceService";
 import { useNotificationSocket } from "@/hooks/notifiaction";
 import { usePagination } from "@/hooks/usePagination";
 
@@ -189,12 +189,12 @@ const EmployeeAttendance = () => {
         (
           <>
             {/* FILTER BAR */}
-            <div className="flex flex-col gap-4 bg-primary/10 border border-primary/50 shadow-sm rounded-xl p-5">
-              <h3 className="text-sm font-semibold text-base-content/80 uppercase tracking-wider">
+            <div className="flex flex-col gap-3 bg-primary/10 border border-primary/50 shadow-sm rounded-xl p-4">
+              <h3 className="text-xs font-semibold text-base-content/80 uppercase tracking-wider">
                 Filter Records
               </h3>
 
-              <div className="flex flex-col xl:flex-row gap-6 items-start xl:items-end w-full">
+              <div className="flex flex-col xl:flex-row gap-5 items-start xl:items-end w-full">
                 <div className="flex-1 w-full">
                   <AttendanceFilters
                     isAdmin={false}

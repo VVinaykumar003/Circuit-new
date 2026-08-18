@@ -386,12 +386,12 @@ export default function LeaveCalendar({
 
   return (
     // <div className="bg-base-100 border border-primary/60 rounded-xl p-3 sm:p-5 lg:p-6 text-base-content overflow-hidden">
-    <div className="bg-base-100 border border-primary/40 rounded-2xl p-2 sm:p-5 lg:p-6 text-base-content overflow-hidden">
+    <div className="bg-base-100 border border-primary/40 rounded-xl p-2 text-base-content overflow-hidden">
       
       {/* HEADER */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-5">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
         
-        <h3 className="text-base sm:text-lg font-semibold">
+        <h3 className="text-sm font-semibold">
           Leave Calendar
         </h3>
 
@@ -400,10 +400,10 @@ export default function LeaveCalendar({
           className="
             flex flex-col
             sm:flex-row
-            gap-2
+            gap-1
             bg-primary
-            p-2
-            rounded-lg
+            p-1
+            rounded-xl
             w-full
             sm:w-auto
           "
@@ -415,13 +415,13 @@ export default function LeaveCalendar({
               setSelectedMonth(Number(e.target.value))
             }
             className="
-              select
+              select select-sm
               select-bordered
               border
               border-primary
               w-full
               sm:w-auto
-              text-sm
+            
             "
           >
             {months.map((month, index) => (
@@ -438,13 +438,13 @@ export default function LeaveCalendar({
               setSelectedYear(Number(e.target.value))
             }
             className="
-              select
+              select select-sm
               select-bordered
               border
               border-primary
               w-full
               sm:w-auto
-              text-sm
+             
             "
           >
             {Array.from({ length: 10 }, (_, i) => {
@@ -462,7 +462,7 @@ export default function LeaveCalendar({
       </div>
 
       {/* WEEK DAYS */}
-      <div className="grid grid-cols-7 gap-1 sm:gap-2 mb-2 text-[10px] sm:text-sm font-medium text-base-content">
+      <div className="grid grid-cols-7 gap-1 sm:gap-2 mb-2 text-[8px] sm:text-sm font-medium text-base-content">
         {[
           "Sun",
           "Mon",
@@ -524,12 +524,12 @@ export default function LeaveCalendar({
               }
               className={`
                 min-h-[70px]
-                sm:h-20
+                sm:h-16
                 rounded-lg
                 border
-                p-1.5
-                sm:p-2
-                text-[10px]
+                p-2
+                sm:p-1
+                text-[9px]
                 sm:text-sm
                 relative
                 overflow-hidden

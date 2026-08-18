@@ -117,7 +117,7 @@ export default function AttendanceFilters({
           })
         }
         placeholder="Search name"
-        className="w-full px-3 py-2 rounded-lg border border-base-300 bg-base-100 text-base-content focus:outline-none focus:ring-1 focus:ring-primary/50"
+        className="w-full px-2.5 py-1.5 rounded-md border border-base-300 bg-base-100 text-base-content focus:outline-none focus:ring-1 focus:ring-primary/50"
       />
     </div>
   )}
@@ -137,7 +137,7 @@ export default function AttendanceFilters({
           toDate,
         })
       }
-      className="w-full px-3 py-2 rounded-lg border border-base-300 bg-base-100 text-base-content focus:outline-none focus:ring-1 focus:ring-primary/50"
+      className="input-sm w-full px-2.5 py-1.5 rounded-lg border border-base-300 bg-base-100 text-base-content focus:outline-none focus:ring-1 focus:ring-primary/50"
     />
   </div>
 
@@ -156,15 +156,16 @@ export default function AttendanceFilters({
           toDate: e.target.value,
         })
       }
-      className="w-full px-3 py-2 rounded-lg border border-base-300 bg-base-100 text-base-content focus:outline-none focus:ring-1 focus:ring-primary/50"
+      className="input-sm w-full px-2.5 py-1.5 rounded-lg border border-base-300 bg-base-100 text-base-content focus:outline-none focus:ring-1 focus:ring-primary/50"
     />
   </div>
 
   {/* Reset */}
   <div className="w-full md:w-auto flex justify-end">
     <Button
+    
       variant="outline"
-      className="w-full md:w-auto h-9 px-3 text-sm rounded-lg bg-base-100"
+      className="w-full md:w-auto h-9 px-2.5  rounded-lg bg-base-100"
       onClick={() => onChange({})}
     >
       Reset

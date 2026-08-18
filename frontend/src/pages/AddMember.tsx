@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { toast } from "react-toastify";
 import { FaEye, FaEyeSlash, FaPen, FaUser, FaUserFriends, FaShieldAlt, FaBriefcase, FaUniversity } from "react-icons/fa";
-import { createMember } from "../services/IT/memberService";
-import { useAuth } from "@/auth/useAuth"; 
+import { createMember } from "../services/memberService";
+import { useAuth } from "@/auth/AuthContext";
 import { uploadImage } from "@/services/uploadService";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
 
@@ -108,6 +108,9 @@ const AddMember = () => {
     if (!formData.designation) {
       newErrors.designation = "Designation is required";
     }
+    if (!formData.department) {
+  newErrors.department = "Department is required";
+}
      if (
   formData.department === "other" &&
   !formData.customDepartment.trim()
@@ -127,11 +130,6 @@ const AddMember = () => {
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-
-    // Clear the error for the field being edited
-    if (errors[name as keyof Errors]) {
-      setErrors((prev) => ({ ...prev, [name]: undefined }));
-    }
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -160,11 +158,6 @@ const AddMember = () => {
 
       const finalData = {
         ...formData,
-        // If department is 'other', use the custom department value instead.
-        department:
-          formData.department === "other"
-            ? formData.customDepartment
-            : formData.department,
         imageUrl: imgUrl,
       };
 
@@ -203,19 +196,9 @@ const AddMember = () => {
       setSelectedFile(null);
       setErrors({});
     } catch (error: any) {
-      const backendError = error.response?.data;
-
-      // Default error message
-      let errorMessage = "An unexpected error occurred. Please try again.";
-
-      if (backendError && backendError.message) {
-        errorMessage = backendError.message;
-        // If the backend provides a specific field, set the inline error
-        if (backendError.field) {
-          setErrors((prev) => ({ ...prev, [backendError.field]: backendError.message }));
-        }
-      }
-      toast.error(errorMessage); // Always show a toast
+      const errorMessage =
+        error.response?.data?.message || "Failed to register employee";
+      toast.error(errorMessage);
     } finally {
       setAdding(false);
     }
@@ -228,10 +211,10 @@ const AddMember = () => {
 
         {/* Page Header */}
         <div className="flex flex-col gap-1 mb-8">
-          <h1 className="text-2xl md:text-3xl font-bold text-base-content tracking-tight">
+          <h1 className="text-xl md:text-lg font-bold text-base-content tracking-tight">
             Employee Onboarding
           </h1>
-          <p className="text-base-content/60 text-sm md:text-base">
+          <p className="text-base-content/60 text-sm">
             Register a new team member and set up their profile, employment, and financial details.
           </p>
         </div>
@@ -241,9 +224,9 @@ const AddMember = () => {
           {/* PERSONAL INFORMATION CARD */}
           <div className="card bg-base-100 border border-base-200 shadow-sm hover:shadow-md transition-shadow duration-200">
             <div className="card-body p-5 md:p-7">
-              <h2 className="card-title text-lg font-semibold text-base-content mb-4 flex items-center gap-2 border-b border-base-200 pb-3">
+              <h2 className="card-title text-md font-semibold text-base-content mb-4 flex items-center gap-2 border-b border-base-200 pb-3">
                 <div className="p-2 bg-primary/10 text-primary rounded-lg">
-                  <FaUser size={16} />
+                  <FaUser size={14} />
                 </div>
                 Personal Information
               </h2>
@@ -346,9 +329,9 @@ const AddMember = () => {
           {/* EMERGENCY CONTACT */}
           <div className="card bg-base-100 border border-base-200 shadow-sm hover:shadow-md transition-shadow duration-200">
             <div className="card-body p-5 md:p-7">
-              <h2 className="card-title text-lg font-semibold text-base-content mb-4 flex items-center gap-2 border-b border-base-200 pb-3">
+              <h2 className="card-title text-md font-semibold text-base-content mb-4 flex items-center gap-2 border-b border-base-200 pb-3">
                 <div className="p-2 bg-error/10 text-error rounded-lg">
-                  <FaUserFriends size={16} />
+                  <FaUserFriends size={14} />
                 </div>
                 Emergency Contact
               </h2>
@@ -378,9 +361,9 @@ const AddMember = () => {
           {/* IDENTITY & LEGAL DETAILS */}
           <div className="card bg-base-100 border border-base-200 shadow-sm hover:shadow-md transition-shadow duration-200">
             <div className="card-body p-5 md:p-7">
-              <h2 className="card-title text-lg font-semibold text-base-content mb-4 flex items-center gap-2 border-b border-base-200 pb-3">
+              <h2 className="card-title text-md font-semibold text-base-content mb-4 flex items-center gap-2 border-b border-base-200 pb-3">
                 <div className="p-2 bg-info/10 text-info rounded-lg">
-                  <FaShieldAlt size={16} />
+                  <FaShieldAlt size={14} />
                 </div>
                 Identity & Legal Details
               </h2>
@@ -414,9 +397,9 @@ const AddMember = () => {
           {/* EMPLOYMENT DETAILS */}
           <div className="card bg-base-100 border border-base-200 shadow-sm hover:shadow-md transition-shadow duration-200">
             <div className="card-body p-5 md:p-7">
-              <h2 className="card-title text-lg font-semibold text-base-content mb-4 flex items-center gap-2 border-b border-base-200 pb-3">
+              <h2 className="card-title text-md font-semibold text-base-content mb-4 flex items-center gap-2 border-b border-base-200 pb-3">
                 <div className="p-2 bg-success/10 text-success rounded-lg">
-                  <FaBriefcase size={16} />
+                  <FaBriefcase size={14} />
                 </div>
                 Employment Details
               </h2>
@@ -448,7 +431,11 @@ const AddMember = () => {
                 </div>
 
                 <div className="form-control w-full">
-                  <label className="label"><span className="label-text font-medium">Department</span></label>
+                 <label className="label">
+  <span className="label-text font-medium">
+    Department <span className="text-error">*</span>
+  </span>
+</label>
                   <select name="department" value={formData.department} onChange={handleChange} className={`select select-bordered w-full ${errors.department ? 'select-error' : ''}`}>
                     <option value="">Select Department</option>
                     <option value="sales">Sales</option>
@@ -484,9 +471,9 @@ const AddMember = () => {
           {/* FINANCIAL DETAILS */}
           <div className="card bg-base-100 border border-base-200 shadow-sm hover:shadow-md transition-shadow duration-200">
             <div className="card-body p-5 md:p-7">
-              <h2 className="card-title text-lg font-semibold text-base-content mb-4 flex items-center gap-2 border-b border-base-200 pb-3">
+              <h2 className="card-title text-md font-semibold text-base-content mb-4 flex items-center gap-2 border-b border-base-200 pb-3">
                 <div className="p-2 bg-warning/10 text-warning rounded-lg">
-                  <FaUniversity size={16} />
+                  <FaUniversity size={14} />
                 </div>
                 Bank Account Details
               </h2>
@@ -516,7 +503,14 @@ const AddMember = () => {
               disabled={adding}
               className="btn btn-primary w-full sm:w-auto min-w-[200px] shadow-sm hover:shadow-md transition-all"
             >
-               {adding ? "Registering..." : "Register Employee ✓"}
+              {adding ? (
+                <>
+                  <span className="loading loading-spinner loading-sm"></span>
+                  Registering...
+                </>
+              ) : (
+                "Register Employee"
+              )}
             </button>
           </div>
         </form>

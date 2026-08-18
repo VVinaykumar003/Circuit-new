@@ -33,9 +33,9 @@ import {
   MdReceipt,
 } from "react-icons/md";
 import { toast } from "react-toastify";
-import { useAuth } from "@/auth/useAuth"; 
-import { getOrders, updateOrder, deleteOrder, emailCustomerOrder, createOrder, type Order } from "@/services/sales/orderServices";
-import { getSalesReps } from "@/services/sales/salesRepServices";
+import { useAuth } from "@/auth/AuthContext";
+import { getOrders, updateOrder, deleteOrder, emailCustomerOrder, createOrder, type Order } from "@/services/orderServices";
+import { getSalesReps } from "@/services/salesRepServices";
 import ImportExportActions from "@/components/import-export/ImportExportActions";
 import type { ColumnConfig } from "@/type/importExport.types";
 
@@ -81,7 +81,8 @@ export default function AllOrders() {
     queryFn: () => getOrders(auth.slug || "default-tenant"),
   });
 
-  console.log("data : ", data);
+
+
 
   const { data: repsData } = useQuery({
     queryKey: ["salesReps", auth.slug],
@@ -94,7 +95,7 @@ export default function AllOrders() {
   }, [repsData]);
   
   const orders = data?.data || [];
-
+  // console.log(orders);
   // Mutations
   const updateMutation = useMutation({
     mutationFn: (vars: { id: string; payload: Partial<Order> }) => updateOrder(vars.id, vars.payload, auth.slug || "default-tenant"),
@@ -171,6 +172,7 @@ export default function AllOrders() {
       setSuccessMessage("Order updated successfully!");
       setSuccessModalOpen(true);
     } catch (error: unknown) {
+      console.error("Error updating order:", error);
       toast.error("Failed to update order.");
     }
   };
@@ -184,6 +186,7 @@ export default function AllOrders() {
       setSuccessMessage(`Status updated to ${newStatus} for selected orders!`);
       setSuccessModalOpen(true);
     } catch (error: unknown) {
+      console.error("Error updating order status:", error);
       toast.error("Failed to update status for some orders.");
     }
   };
@@ -200,6 +203,7 @@ export default function AllOrders() {
       setSuccessMessage(`${selected.length} orders deleted successfully!`);
       setSuccessModalOpen(true);
     } catch (error: unknown) {
+      console.error("Error deleting orders:", error);
       toast.error("Failed to delete some orders.");
     }
   };
@@ -284,7 +288,7 @@ export default function AllOrders() {
     }),
     columnHelper.accessor("orderDate", {
       header: "Order Date",
-      cell: (info) => new Date(info.getValue()).toLocaleDateString(),
+      cell: (info) => new Date(info.getValue()).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }),
     }),
     columnHelper.accessor("orderValue", {
       header: "Total",
@@ -496,7 +500,7 @@ export default function AllOrders() {
                   <span className={`badge badge-sm ${order.orderStatus === 'Processing' ? 'badge-info' : 'badge-ghost'}`}>{order.orderStatus}</span>
                 </div>
                 <p className="text-sm font-semibold mb-1">{order.customerName}</p>
-                <p className="text-xs text-base-content/60 mb-4">{new Date(order.orderDate).toLocaleDateString()}</p>
+                <p className="text-xs text-base-content/60 mb-4">{new Date(order.orderDate).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}</p>
                 <div className="flex justify-between items-end border-t border-base-200 pt-3">
                   <div className="flex items-center gap-2">
                     <img src={order.salesRepAvatar || `https://ui-avatars.com/api/?name=${order.salesRep}`} alt="rep" className="w-6 h-6 rounded-full" />
@@ -538,7 +542,7 @@ export default function AllOrders() {
                       </div>
                       <p className="text-sm font-semibold truncate">{order.customerName}</p>
                       <div className="mt-3 flex justify-between items-center text-xs text-base-content/60">
-                        <span>{new Date(order.orderDate).toLocaleDateString()}</span>
+                        <span>{new Date(order.orderDate).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}</span>
                         <span className="font-bold text-success">₹{order.orderValue.toLocaleString()}</span>
                       </div>
                     </div>
@@ -582,7 +586,7 @@ export default function AllOrders() {
                 <span className="font-mono text-lg font-bold text-primary">{selectedOrder?.orderNumber}</span>
                 <span className={`badge badge-sm ${selectedOrder?.orderStatus === 'Completed' ? 'badge-primary' : 'badge-ghost'}`}>{selectedOrder?.orderStatus}</span>
               </div>
-              <p className="text-sm text-base-content/60">Placed on {selectedOrder && new Date(selectedOrder.orderDate).toLocaleString()}</p>
+              <p className="text-sm text-base-content/60">  Placed on{" "} {selectedOrder &&new Date(selectedOrder.orderDate).toLocaleDateString("en-GB")}</p>
             </div>
             <div className="flex gap-2">
               <button className="btn btn-ghost btn-sm btn-square"><MdPrint size={18} /></button>
@@ -617,7 +621,9 @@ export default function AllOrders() {
               <section>
                 <h3 className="font-bold uppercase tracking-wider text-base-content/50 mb-3 text-xs">Delivery & Rep</h3>
                 <div className="space-y-2">
-                  <p><span className="text-base-content/50">Est. Delivery:</span> <span className="font-medium">{selectedOrder?.deliveryDate}</span></p>
+                  <p><span className="text-base-content/50">Est. Delivery:</span> <span className="font-medium"> {selectedOrder?.deliveryDate
+    ? new Date(selectedOrder.deliveryDate).toLocaleDateString("en-GB")
+    : "N/A"}</span></p>
                   <p><span className="text-base-content/50">Delivery Status:</span> <span className="font-medium">{selectedOrder?.deliveryStatus}</span></p>
                   <p><span className="text-base-content/50">Sales Rep:</span> <span className="font-medium">{selectedOrder?.salesRep}</span></p>
                   <p><span className="text-base-content/50">Payment:</span> <span className="font-medium text-success">{selectedOrder?.paymentStatus}</span></p>
@@ -626,7 +632,7 @@ export default function AllOrders() {
             </div>
 
             {/* Ordered Products Table */}
-            <section>
+            {/* <section>
               <h3 className="font-bold uppercase tracking-wider text-base-content/50 mb-3 text-xs">Order Items</h3>
               <div className="bg-base-200/30 rounded-xl border border-base-200 overflow-hidden">
                 <table className="table table-sm w-full">
@@ -639,17 +645,35 @@ export default function AllOrders() {
                     </tr>
                   </thead>
                   <tbody>
-                    {selectedOrder?.products?.map((p, idx) => (
-                      <tr key={idx}>
-                        <td>
-                          <p className="font-semibold">{p.productName || (p as any).name}</p>
-                          <p className="text-[10px] text-base-content/50 font-mono">{p.sku}</p>
-                        </td>
-                        <td>₹{p.price?.toLocaleString()}</td>
-                        <td>{p.quantity || (p as any).qty}</td>
-                        <td className="text-right font-medium">₹{p.total?.toLocaleString()}</td>
-                      </tr>
-                    ))}
+                <tbody>
+ {selectedOrder?.items?.map((item, idx) => (
+  <tr key={idx}>
+    <td>
+      <p className="font-semibold">
+        {typeof item.productId === "object"
+          ? item.productId?.productName
+          : item.productName}
+      </p>
+
+      <p className="text-[10px] text-base-content/50 font-mono">
+        {typeof item.productId === "object"
+          ? item.productId?.sku
+          : item.sku}
+      </p>
+    </td>
+
+    <td>
+      ₹{(item.retailPrice ?? item.sellingPrice ?? 0).toLocaleString()}
+    </td>
+
+    <td>{item.quantity}</td>
+
+    <td className="text-right font-medium">
+      ₹{(item.lineTotal ?? 0).toLocaleString()}
+    </td>
+  </tr>
+))}
+</tbody>
                   </tbody>
                   <tfoot>
                     <tr className="bg-base-200/30">
@@ -659,8 +683,81 @@ export default function AllOrders() {
                   </tfoot>
                 </table>
               </div>
-            </section>
+            </section> */}
+<section>
+  <h3 className="font-bold uppercase tracking-wider text-base-content/50 mb-3 text-xs">
+    Order Items
+  </h3>
 
+  <div className="bg-base-200/30 rounded-xl border border-base-200 overflow-hidden">
+    <table className="table table-sm w-full table-fixed">
+      
+      {/* FIXED COLUMN WIDTHS */}
+      <colgroup>
+        <col className="w-[50%]" />
+        <col className="w-[18%]" />
+        <col className="w-[12%]" />
+        <col className="w-[20%]" />
+      </colgroup>
+
+      <thead className="bg-base-200/50">
+        <tr>
+          <th className="text-left">Item</th>
+          <th className="text-right">Price</th>
+          <th className="text-center">Qty</th>
+          <th className="text-right">Total</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {selectedOrder?.items?.map((p, idx) => (
+          <tr key={idx}>
+
+            {/* ITEM */}
+            <td>
+              <p className="font-semibold">
+                {p.productName}
+              </p>
+
+              <p className="text-[10px] text-base-content/50 font-mono">
+                {p.sku}
+              </p>
+            </td>
+
+            {/* PRICE */}
+            <td className="text-right whitespace-nowrap">
+              ₹{p.sellingPrice?.toLocaleString("en-IN")}
+            </td>
+
+            {/* QTY */}
+            <td className="text-center">
+              {p.quantity}
+            </td>
+
+            {/* LINE TOTAL */}
+            <td className="text-right font-medium whitespace-nowrap">
+              ₹{p.lineTotal?.toLocaleString("en-IN")}
+            </td>
+
+          </tr>
+        ))}
+      </tbody>
+
+      <tfoot>
+        <tr className="bg-base-200/30">
+          <td colSpan={3} className="text-right font-bold text-base-content/70">
+            Grand Total
+          </td>
+
+          <td className="text-right font-bold text-lg text-success">
+            ₹{selectedOrder?.grandTotal?.toLocaleString("en-IN")}
+          </td>
+        </tr>
+      </tfoot>
+
+    </table>
+  </div>
+</section>
             {/* Notes */}
             <section className="grid grid-cols-2 gap-4">
               <div className="bg-warning/10 p-3 rounded-lg border border-warning/20">
@@ -681,7 +778,8 @@ export default function AllOrders() {
                   <div className="timeline-middle"><MdCheckCircle className="text-primary" /></div>
                   <div className="timeline-end timeline-box bg-base-200 border-none shadow-sm text-sm">
                     <span className="font-semibold">Order Created</span>
-                    <p className="text-xs text-base-content/50">{selectedOrder && new Date(selectedOrder.orderDate).toLocaleString()}</p>
+                    <p className="text-xs text-base-content/50">  {selectedOrder &&
+    new Date(selectedOrder.orderDate).toLocaleDateString("en-GB")}</p>
                   </div>
                   <hr className="bg-primary" />
                 </li>
@@ -760,11 +858,11 @@ export default function AllOrders() {
                 </div>
                 <div className="form-control">
                   <label className="label"><span className="label-text">Order Date</span></label>
-                  <input type="date" className="input input-bordered w-full" value={orderToEdit.orderDate ? new Date(orderToEdit.orderDate).toISOString().split('T')[0] : ""} onChange={(e) => setOrderToEdit({...orderToEdit, orderDate: e.target.value})} />
+                  <input type="date" className="input input-bordered w-full" value={orderToEdit.orderDate ? new Date(orderToEdit.orderDate).toLocaleDateString("en-GB") : ""} onChange={(e) => setOrderToEdit({...orderToEdit, orderDate: e.target.value})} />
                 </div>
                 <div className="form-control">
                   <label className="label"><span className="label-text">Delivery Date</span></label>
-                  <input type="date" className="input input-bordered w-full" value={orderToEdit.deliveryDate ? new Date(orderToEdit.deliveryDate).toISOString().split('T')[0] : ""} onChange={(e) => setOrderToEdit({...orderToEdit, deliveryDate: e.target.value})} />
+                  <input type="date" className="input input-bordered w-full" value={orderToEdit.deliveryDate ? new Date(orderToEdit.deliveryDate).toLocaleDateString("en-GB") : ""} onChange={(e) => setOrderToEdit({...orderToEdit, deliveryDate: e.target.value})} />
                 </div>
                 <div className="form-control">
                   <label className="label"><span className="label-text">Order Status</span></label>

@@ -1,8 +1,8 @@
 import API from "@/api/axios";
-import { useAuth } from "@/auth/useAuth"; 
+import { useAuth } from "@/auth/AuthContext";
 import { AddParticipant } from "@/components/projects/AddParticipant";
 import CreateProjectForm from "@/components/projects/CreateProjectForm";
-import { createProject } from "@/services/IT/projectServices";
+import { createProject } from "@/services/projectServices";
 import { useState } from "react";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
 import { toast } from "react-toastify";
@@ -23,6 +23,7 @@ interface Participant {
   userId: string;
   role: string;
   responsibility: string;
+   customResponsibility?: string;
 }
 
 const initialProjectState: ProjectData = {
@@ -112,6 +113,7 @@ const handleCreateProject = async () => {
     user: p.userId,
     role: p.role,
     responsibility: p.responsibility,
+      customResponsibility: p.customResponsibility || "",
   })),
 };
 
@@ -156,11 +158,11 @@ const handleCreateProject = async () => {
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div className="flex items-center gap-4">
             <div className="p-3 bg-primary/10 text-primary rounded-2xl shadow-sm border border-primary/20 hidden sm:block">
-              <MdOutlineWorkspaces size={32} />
+              <MdOutlineWorkspaces size={18} />
             </div>
             <div>
-              <h1 className="text-2xl sm:text-3xl font-bold text-base-content tracking-tight">Create New Project</h1>
-              <p className="text-base-content/60 text-sm sm:text-base mt-1">Configure project details, assign members, and set tracking parameters.</p>
+              <h1 className="text-xl sm:text-lg font-bold text-base-content tracking-tight">Create New Project</h1>
+              <p className="text-base-content/60 text-xs sm:text-sm mt-1">Configure project details, assign members, and set tracking parameters.</p>
             </div>
           </div>
         </div>
@@ -171,19 +173,19 @@ const handleCreateProject = async () => {
             
             {/* Progress Steps Card */}
             <div className="card bg-base-100 border border-base-200 shadow-sm">
-              <div className="card-body p-4 sm:p-6 overflow-x-auto">
+              <div className="card-body p-3 overflow-x-auto">
                 <ul className="steps w-full min-w-[300px]">
                   <li 
                     onClick={() => handleTabClick("Project Info")}
                     className={`step cursor-pointer ${activeTab === "Project Info" || activeTab === "Participants" ? "step-primary text-primary" : "text-base-content/50"}`}
                   >
-                    <span className="text-sm font-medium mt-2">Project Information</span>
+                    <span className="text-[14px] font-medium mt-2">Project Information</span>
                   </li>
                   <li 
                     onClick={() => handleTabClick("Participants")}
                     className={`step cursor-pointer ${activeTab === "Participants" ? "step-primary text-primary" : "text-base-content/50"}`}
                   >
-                    <span className="text-sm font-medium mt-2">Team Participants</span>
+                    <span className="text-[14px]  font-medium mt-2">Team Participants</span>
                   </li>
                 </ul>
               </div>
@@ -222,8 +224,8 @@ const handleCreateProject = async () => {
           <div className="w-full lg:w-80 shrink-0 sticky top-6">
             <div className="card bg-base-100 border border-base-200 shadow-sm hover:shadow-md transition-shadow duration-200">
               <div className="card-body p-5">
-                <h3 className="font-bold text-lg text-base-content border-b border-base-200 pb-3 mb-3 flex items-center gap-2">
-                  <MdInfoOutline className="text-primary" size={20} />
+                <h3 className="font-bold text-[16px] text-base-content border-b border-base-200 pb-3 mb-3 flex items-center gap-2">
+                  <MdInfoOutline className="text-primary" size={18} />
                   Project Summary
                 </h3>
 
@@ -291,7 +293,7 @@ const handleCreateProject = async () => {
 
             {/* Tips / Help Card (Desktop Only) */}
             <div className="card bg-info/5 border border-info/20 shadow-sm mt-4 hidden lg:flex">
-              <div className="card-body p-4 text-sm text-info-content/80">
+              <div className="card-body p-4 text-xs text-info-content/80">
                 <div className="flex items-start gap-2">
                   <MdInfoOutline size={18} className="text-info shrink-0 mt-0.5" />
                   <p>Assign clear roles and responsibilities to your team to ensure a smooth project workflow.</p>

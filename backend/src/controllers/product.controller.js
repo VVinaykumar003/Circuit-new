@@ -9,15 +9,6 @@ const streamifier = require("streamifier");
 exports.createProduct = async (req, res) => {
   try {
     const { openingStock, ...productData } = req.body;
-    
-    // Evaluate initial stock status
-    let stockStatus = "Out Of Stock";
-    const currentStock = openingStock || 0;
-    if (currentStock > (productData.reorderLevel || 0)) {
-      stockStatus = "In Stock";
-    } else if (currentStock > 0) {
-      stockStatus = "Low Stock";
-    }
 
     // Handle Cloudinary File Uploads
     const imageUrls = [];
@@ -47,17 +38,14 @@ exports.createProduct = async (req, res) => {
       });
 
       if (isImage) imageUrls.push(result.secure_url);
-      else documentUrls.push(result.secure_url);
+      else documentUrls.push({ name: file.originalname, url: result.secure_url });
     }
     console.log(imageUrls);
 
     const newProduct = new Product({
       ...productData,
       images: imageUrls,
-      imageUrl: imageUrls.length > 0 ? imageUrls[0] : (productData.imageUrl || undefined),
-      documents: documentUrls,
-      stockQuantity: currentStock,
-      stockStatus,
+      documents: documentUrls, // documents now stores objects { name, url }
       organization: req.organization._id,
     });
 
@@ -84,8 +72,8 @@ exports.getAllProducts = async (req, res) => {
     
     // Build query based on tenant and optional filters
     const query = { organization: req.organization._id };
-    if (status) query.status = status;
-    if (category) query.category = category;
+    if (status) query.status = status; // Keep status filter as is
+    if (category) query.softwareCategory = category; // Changed from 'category' to 'softwareCategory'
     if (brand) query.brand = brand;
     
     if (search) {
@@ -172,7 +160,7 @@ exports.updateProduct = async (req, res) => {
         });
 
         if (isImage) imageUrls.push(result.secure_url);
-        else documentUrls.push(result.secure_url);
+      else documentUrls.push({ name: file.originalname, url: result.secure_url });
       }
     }
 
@@ -183,7 +171,6 @@ exports.updateProduct = async (req, res) => {
       updateQuery.$push = updateQuery.$push || {};
       if (imageUrls.length > 0) {
         updateQuery.$push.images = { $each: imageUrls };
-        updateQuery.$set.imageUrl = imageUrls[0]; // Set the first new image as the main imageUrl
       }
       if (documentUrls.length > 0) {
         updateQuery.$push.documents = { $each: documentUrls };

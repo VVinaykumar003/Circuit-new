@@ -1,6 +1,8 @@
 import React from 'react';
 import { FaCheck, FaTimes, FaEdit } from 'react-icons/fa';
-import type { AdminApprovalRecord, ApprovalStatus, AttendanceStatus } from '@/type/index';
+import type { ApprovalStatus, AttendanceStatus,AdminApprovalRecord } from '@/type/index';
+
+
 
 interface Props {
   records: AdminApprovalRecord[];
@@ -13,6 +15,10 @@ const approvalBadge: { [key in ApprovalStatus]: string } = {
   Pending: "badge-warning",
   Approved: "badge-success",
   Rejected: "badge-error",
+  all: "badge-ghost",
+  approved: "badge-success",
+  absent: "badge-error",
+  pending: "badge-warning",
 };
 
 const statusBadge: { [key in AttendanceStatus]?: string } = {
@@ -22,6 +28,8 @@ const statusBadge: { [key in AttendanceStatus]?: string } = {
 };
 
 const ApprovalTable: React.FC<Props> = ({ records, onApprove, onReject, actionLoading }) => {
+
+
   return (
     <div className="card bg-base-100 border border-base-300 shadow-lg rounded-2xl">
       <div className="card-body p-0">
@@ -46,30 +54,36 @@ const ApprovalTable: React.FC<Props> = ({ records, onApprove, onReject, actionLo
                   <td>
                     <div className="flex items-center gap-3">
                       <div className="avatar">
-                        <div className="mask mask-squircle w-12 h-12">
+                        <div className="mask mask-squircle w-9 h-9">
                           <img src={record.profileImageUrl || `https://i.pravatar.cc/80?u=${record.employeeId}`} alt={record.employeeName} />
                         </div>
                       </div>
                       <div>
-                        <div className="font-bold">{record.employeeName}</div>
-                        <div className="text-sm opacity-50">{record.employeeId}</div>
+                        <div className="font-bold text-sm">{record.employeeName}</div>
+                        <div className="text-xs opacity-50">{record.employeeId}</div>
                       </div>
                     </div>
                   </td>
-                  <td>
-                    {record.checkIn || '--:--'}
+                  <td className="text-xs">
+                    {record.checkIn ? 
+                      new Date(record.checkIn).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }) 
+                      : '--:--'}
                     <br />
-                    <span className="text-xs opacity-60">{record.checkOut || '--:--'}</span>
+                    <span className="text-xs opacity-60">
+                      {record.checkOut ? 
+                        new Date(record.checkOut).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }) 
+                        : '--:--'}
+                    </span>
                   </td>
                   <td>
                     <span className="font-semibold">{record.workingHours}</span>
                     {record.late && <div className="text-xs text-warning">Late: {record.late}</div>}
                   </td>
                   <td>
-                    <span className={`badge badge-sm ${statusBadge[record.status] || 'badge-ghost'}`}>{record.status}</span>
+                    <span className={`badge badge-sm text-xs ${statusBadge[record.status] || 'badge-ghost'}`}>{record.status}</span>
                   </td>
                   <td>
-                    <span className={`badge ${approvalBadge[record.approval]}`}>{record.approval}</span>
+                    <span className={`badge text-xs ${approvalBadge[record.approval]}`}>{record.approval}</span>
                   </td>
                   <td className="text-center">
                     {record.approval === 'Pending' ? (
@@ -84,7 +98,7 @@ const ApprovalTable: React.FC<Props> = ({ records, onApprove, onReject, actionLo
                         <button 
                           className="btn btn-xs btn-error join-item" 
                           onClick={() => onReject(record.attendanceDocId, record.employeeId)}
-                          disabled={actionLoading[record.attendanceDocId]}
+                          disabled={actionLoading[record.attendanceDocId]} // Changed from record._id to record.attendanceDocId for consistency
                         >
                           {actionLoading[record._id] ? <span className="loading loading-spinner loading-xs"></span> : <FaTimes />}
                         </button>

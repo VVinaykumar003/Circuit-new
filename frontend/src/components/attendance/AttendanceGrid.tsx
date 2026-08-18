@@ -404,14 +404,14 @@ export default function AttendanceGrid({
 
 
 return (
-  <div className="w-full p-2 sm:p-4">
+  <div className="w-full space-y-2">
     {/* TOP SECTION */}
-    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-3">
-      <h2 className="text-lg font-semibold">Attendance Sheet</h2>
+    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-2">
+      <h2 className="text-md font-semibold">Attendance Sheet</h2>
 
       <button
         onClick={exportToExcel}
-        className="btn btn-primary btn-sm sm:btn-md w-full sm:w-auto"
+        className="btn btn-primary btn-xs sm:btn-sm w-full sm:w-auto"
       >
         Export Excel
       </button>
@@ -421,7 +421,7 @@ return (
    <div
   className="
     w-full overflow-x-auto
-    rounded-xl border border-primary/50
+    rounded-lg border border-primary/50
     bg-base-100
     [-webkit-overflow-scrolling:touch]
   "
@@ -439,7 +439,7 @@ return (
               "
             >
               <div className="flex items-center h-full">
-       <span className="font-semibold text-[10px] sm:text-base whitespace-nowrap">
+       <span className="font-semibold text-sm whitespace-nowrap">
                   STAFF MEMBER
                 </span>
               </div>
@@ -485,14 +485,17 @@ return (
                   bg-base-100
                   border border-base-200
                   px-2 sm:px-4 py-3
-                 w-[220px] min-w-[220px]
+                 w-[150px]
+min-w-[150px]
+sm:w-[180px]
+sm:min-w-[180px]
                   shadow-sm
                 "
               >
-                <div className="flex items-center gap-2 ">
+                <div className="flex items-center gap-1.5 ">
                   <div
                     className="
-                      w-8 h-8 sm:w-10 sm:h-10
+                      w-6 h-6 sm:w-7 sm:h-7
                       rounded-full
                       bg-primary/10 text-primary
                       flex items-center justify-center
@@ -503,7 +506,7 @@ return (
                   </div>
 
                   <div className="min-w-0">
-                    <p className="font-semibold text-primary text-xs sm:text-base truncate">
+                    <p className="font-semibold text-primary text-[13px] truncate">
                       {emp.name}
                     </p>
 
@@ -524,8 +527,8 @@ return (
                   <td
                     key={d.date}
                     className={`
-                   w-8 h-8 sm:w-12 sm:h-12
-                      text-center text-xs sm:text-sm
+                   w-7 h-7 sm:w-8 sm:h-8
+                      text-center text-[11px] sm:text-sm
                       border border-base-300
                       ${isToday ? "border-2 border-red-400 font-semibold" : ""}
                       ${getStatusStyle(status)}

@@ -4,6 +4,7 @@ import type { LeaveRequest } from "@/type/leave";
 import { leaveTypeIcon } from "@/type/leave";
 import { useState } from "react";
 import Pagination from "@/components/ui/Pagination";
+import { MdEventBusy } from "react-icons/md";
 
 interface Props {
   requests: LeaveRequest[];
@@ -96,7 +97,7 @@ export default function LeaveRequestTable({
       )} */}
 
       {mode === "action" && selectedIds.length > 0 && (
-  <div className="mb-4 flex flex-col gap-3 rounded-lg bg-base-200 p-3 sm:flex-row sm:items-center sm:justify-between">
+  <div className="mb-4 flex flex-col gap-2 rounded-lg bg-base-200 p-2 sm:flex-row sm:items-center sm:justify-between">
     
     <span className="text-sm font-medium text-center sm:text-left">
       {selectedIds.length} selected
@@ -126,9 +127,9 @@ export default function LeaveRequestTable({
 
       {/* ================= DESKTOP TABLE ================= */}
       <div className="hidden md:block bg-base-100 border border-primary/35 rounded-lg overflow-hidden">
-        <table className="table table-zebra w-full text-base-content ">
+        <table className="table table-sm table-zebra w-full text-base-content ">
           <thead>
-            <tr className="bg-primary text-primary-content text-md">
+            <tr className="bg-primary text-primary-content text-sm">
               <th>Employee</th>
               <th>Leave Type</th>
               <th>Dates</th>
@@ -162,14 +163,14 @@ export default function LeaveRequestTable({
               </tr>
             ) : (
               currentRequests.map((r) => {
-                const Icon = leaveTypeIcon[r.type];
+             const Icon = leaveTypeIcon[r.type] || MdEventBusy;
                 return (
                   <tr
                     key={r.id}
                     onClick={() => onRowClick?.(r)}
-                    className="hover:bg-base-200 cursor-pointer text-sm"
+                    className="hover:bg-base-200 cursor-pointer text-[13px]"
                   >
-                    <td className="font-medium">{r.employee}</td>
+                    <td className="">{r.employee}</td>
 
                     <td className="flex items-center gap-2">
                       <Icon />
@@ -177,11 +178,11 @@ export default function LeaveRequestTable({
                     </td>
 
                     <td className="whitespace-nowrap">
-                      <span className="font-medium">
+                      <span className="">
                         {formatDate(r.fromDate)}
                       </span>
                       {r.toDate && (
-                        <span className="font-medium">
+                        <span className="">
                           {" "}
                           - {formatDate(r.toDate)}
                         </span>
@@ -265,8 +266,7 @@ export default function LeaveRequestTable({
     </div>
   ) : (
     currentRequests.map((r) => {
-      const Icon = leaveTypeIcon[r.type];
-
+    const Icon = leaveTypeIcon[r.type] || MdEventBusy;
       return (
         <div
           key={r.id}

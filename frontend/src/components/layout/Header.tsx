@@ -2,64 +2,33 @@ import { useState, useRef, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useTheme } from "../../context/use-theme";
 import { MdNotifications, MdMenu, MdSearch, MdClose, MdLightMode, MdDarkMode } from "react-icons/md";
-import type { Notification } from "@/type/notification";
-import { useAuth } from  "@/auth/useAuth"; ;
-import { toast } from "react-toastify";
+import { useAuth } from "../../auth/AuthContext";
+import { toast } from "react-toastify"; // Keep toast for avatar upload
 import { uploadImage } from "@/services/uploadService";
-import { getNotifications , markAsRead, markAllAsRead } from "@/services/IT/notificationService";
-import { socket } from "@/socket";
-import api from "@/services/IT/api";
-
+import {type OrganizationMember} from '@/type/User';
+import { useNotifications } from "@/hooks/useNotification"; // Corrected import path and plural
 
 interface HeaderProps {
   onMenuClick: () => void;
 }
 
-const getNotificationLink = (notification: any) => {
-  const combined = `${notification.title || ""} ${notification.message || ""}`.toLowerCase();
-  if (combined.includes("leave")) return "/leaves";
-  if (combined.includes("task")) return "/tasks";
-  if (combined.includes("project")) return "/projects";
-  if (combined.includes("member") || combined.includes("user")) return "/members";
-  if (combined.includes("attendance")) return "/attendance";
-  return "/notifications"; // Fallback to main notifications page
-};
-
-export default function Header({ onMenuClick }: HeaderProps)  {
+export default function Header({ onMenuClick }: HeaderProps) {
   const { theme, setTheme } = useTheme();
-  const [notifications, setNotifications] =
-    useState<Notification[]>([]);
   const { auth, logout } = useAuth();
-  const user = auth?.user;
+  const user = auth?.user as OrganizationMember | undefined;
+  const currentUserId = user?.userId  || ""; // Define currentUserId before calling the hook
+  const {
+    visibleNotifications,
+    unreadCount,
+    handleMarkAsRead,
+    handleMarkAllAsRead,
+    getNotificationLink,
+  } = useNotifications({ authSlug: auth?.slug || null, currentUserId }); // Call the hook with props
+  // console.log("Header user:", user);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  useEffect(() => {
-    const audio = new Audio("/notification.mp3");
-    audioRef.current = audio;
-
-    // 🟢 Unlock audio context on first user interaction to prevent Autoplay blocks
-    const unlockAudio = () => {
-      audio.play().then(() => {
-        audio.pause();
-        audio.currentTime = 0;
-      }).catch(() => {}); // Ignore silent failure
-      
-      document.removeEventListener("click", unlockAudio);
-      document.removeEventListener("keydown", unlockAudio);
-    };
-
-    document.addEventListener("click", unlockAudio);
-    document.addEventListener("keydown", unlockAudio);
-
-    return () => {
-      document.removeEventListener("click", unlockAudio);
-      document.removeEventListener("keydown", unlockAudio);
-    };
-  }, []);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -72,7 +41,6 @@ export default function Header({ onMenuClick }: HeaderProps)  {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  const currentUserId = user?.userId || user?._id || "1";
  const location = useLocation();
 
 const isSales =
@@ -84,132 +52,6 @@ const isSales =
     setTheme(isDark ? "corporate" : "dark");
   };
 
-  // Fetch initial notifications & listen for real-time updates
-  useEffect(() => {
-    if (!auth?.slug) return;
-    
-    // 1. Emit the join room event as soon as the header mounts (user logs in)
-    socket.emit("joinUserRoom", currentUserId);
-
-    const fetchNotifs = async () => {
-      try {
-        const res = await getNotifications(auth.slug);
-        const formatted = (res.data?.data || []).map((n: any) => ({
-          id: n._id,
-          title: n.title,
-          message: n.message,
-          priority: n.priority,
-          targetUserIds: n.recipients || [],
-          createdBy: n.createdBy?._id,
-          createdAt: n.createdAt,
-          readBy: n.readBy?.map((r: any) => typeof r === 'string' ? r : (r.user?._id || r.user || r.userId || r._id)) || [],
-          attachments: n.attachments || [],
-          sendTo: n.sendTo,
-        }));
-
-        // console.log("formatted : ",formatted)
-     
-        setNotifications(formatted);
-      } catch (err) {
-        console.error("Failed to fetch notifications", err);
-      }
-    };
-
-    fetchNotifs();
-
-    const handleNewNotification = (data: any) => {
-      // Play the notification sound
-      if (audioRef.current) {
-        audioRef.current.currentTime = 0;
-        audioRef.current.play().catch(() => {
-          // 🔇 Silently ignore if autoplay is still blocked
-        });
-      }
-
-      // Support both Task Assigned emits and standard Notification emits
-      const newNotif: Notification = {
-        id: data._id || Math.random().toString(),
-        title: data.title || data.action || "New Notification",
-        message: data.message,
-        priority: data.priority || "normal",
-        targetUserIds: data.recipients || [],
-        createdBy: data.createdBy?._id || "system",
-        createdAt: data.createdAt || new Date().toISOString(),
-        readBy: data.readBy?.map((r: any) => typeof r === 'string' ? r : (r.user?._id || r.user || r.userId || r._id)) || [],
-        attachments: data.attachments || [],
-        sendTo: data.sendTo || "all",
-      };
-
-      // console.log("newNotif : ",newNotif)
-      
-      setNotifications((prev) => [newNotif, ...prev]);
-    };
-
-    socket.on("new_notification", handleNewNotification);
-
-    return () => {
-      socket.off("new_notification", handleNewNotification);
-    };
-  }, [auth?.slug]);
-
-  const visibleNotifications = notifications.filter(
-    (n) => (n.sendTo === "all" || 
-         (n.targetUserIds && n.targetUserIds.includes(currentUserId))) &&
-         !n.readBy.includes(currentUserId)
-  );
-
-  const unreadCount = visibleNotifications.length;
-
-  const handleMarkAsRead = async (id: string) => {
-    // Optimistic UI update for instant feedback
-    setNotifications((prev) =>
-      prev.map((n) =>
-        n.id === id && !n.readBy.includes(currentUserId)
-          ? {
-              ...n,
-              readBy: [...n.readBy, currentUserId],
-            }
-          : n
-      )
-    );
-
-    // Backend call to persist the read status
-    try {
-      if (auth?.slug) {
-        await markAsRead(auth.slug, id);
-      }
-    } catch (error) {
-      console.error("Failed to mark notification as read", error);
-    }
-  };
-
-  const handleMarkAllAsRead = async () => {
-    const unreadIds = visibleNotifications
-      .filter((n) => !n.readBy.includes(currentUserId))
-      .map((n) => n.id);
-
-    if (unreadIds.length === 0) return;
-
-    // Optimistically mark as read in the UI instead of clearing to match backend state on refresh
-    setNotifications((prev) =>
-      prev.map((n) =>
-        !n.readBy.includes(currentUserId)
-          ? { ...n, readBy: [...n.readBy, currentUserId] }
-          : n
-      )
-    );
-
-    try {
-      if (auth?.slug) {
-        // Fallback to individual markAsRead calls to guarantee the backend updates properly
-        await Promise.all(unreadIds.map((id) => markAsRead(auth.slug, id)));
-        try { await markAllAsRead(auth.slug); } catch (e) {}
-      }
-    } catch (error) {
-      console.error("Failed to mark all notifications as read", error);
-    }
-  };
-
   const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -217,6 +59,7 @@ const isSales =
     try {
       setIsUploading(true);
       const imgUrl = await uploadImage(file);
+
 
       toast.success("Avatar uploaded successfully!");
       // TODO: Here you can update your auth context or user profile with data.imageUrl
@@ -239,12 +82,10 @@ const isSales =
   }
   return (
     <>
-    {/* <header className="navbar bg-primary/95 backdrop-blur-md border-b border-base-300 px-4 sm:px-6 lg:pr-8 py-2 sm:py-3 sticky top-0 z-40 transition-colors"> */}
-    <header className="navbar bg-primary/95 backdrop-blur-md border-b border-base-300 
-px-3 sm:px-5 lg:px-4 py-2 sticky top-0 z-40 flex items-center justify-between">
+    <header className=" bg-primary/95 backdrop-blur-md border-b border-base-300 px-1.5 py-2 sticky top-0 z-40 flex items-center justify-between ">
 
       {/* ================= LEFT ================= */}
-      <div className="flex items-center gap-3 min-w-0 shrink-0 lg:hidden ">
+      <div className="flex items-center gap-3 min-w-0 shrink-0 lg:hidden">
         {/* Hamburger - Mobile Only */}
             <button
               onClick={onMenuClick}
@@ -253,15 +94,7 @@ px-3 sm:px-5 lg:px-4 py-2 sticky top-0 z-40 flex items-center justify-between">
               <MdMenu size={22} />
             </button>
 
-        {/* Logo */}
-        <div className="w-8 h-8 md:w-9 md:h-9 rounded-lg bg-base-100 text-primary flex items-center justify-center font-bold shrink-0 shadow-sm">
-          C
-        </div>
-
-        {/* Hide text on very small screens */}
-        <span className="hidden sm:block text-lg font-semibold truncate text-primary-content tracking-tight">
-          Circuit 
-        </span>
+      
       </div>
 
       {/* ================= MIDDLE (SEARCH) ================= */}
@@ -312,14 +145,14 @@ px-3 sm:px-5 lg:px-4 py-2 sticky top-0 z-40 flex items-center justify-between">
 </div>
 
       {/* ================= RIGHT ================= */}
-      <div className="flex items-center gap-1 sm:gap-3 ">
+      <div className="flex items-center gap-1 sm:gap-3">
 
         {/* ========== NOTIFICATIONS ========== */}
         <div className="dropdown dropdown-end">
         <label tabIndex={0} className="btn btn-ghost btn-circle relative text-primary-content hover:bg-black/10 dark:hover:bg-white/10 transition-colors">
 
     {/* ICON */}
-    <MdNotifications size={18} />
+    <MdNotifications size={24} />
 
     {/* BADGE */}
     {unreadCount > 0 && (
@@ -360,7 +193,7 @@ px-3 sm:px-5 lg:px-4 py-2 sticky top-0 z-40 flex items-center justify-between">
             text-base-content
           ">
             <div className="flex justify-between items-center px-1 pb-2 border-b border-base-200">
-              <span className="font-semibold text-sm">Notifications</span>
+              <span className="font-semibold text-base">Notifications</span>
               {unreadCount > 0 && (
                 <button 
                   onClick={handleMarkAllAsRead} 
@@ -393,10 +226,10 @@ px-3 sm:px-5 lg:px-4 py-2 sticky top-0 z-40 flex items-center justify-between">
                       : "bg-base-200"
                   }`}
               >
-                <p className="text-sm font-semibold truncate">
+                <p className="font-semibold text-sm truncate">
                   {n.title}
                 </p>
-                <p className="text-xs text-base-content/60 line-clamp-2">
+                <p className="text-xs text-base-content/60 line-clamp-2 leading-tight">
                   {n.message}
                 </p>
               </div>
@@ -423,7 +256,8 @@ px-3 sm:px-5 lg:px-4 py-2 sticky top-0 z-40 flex items-center justify-between">
           >
             <div className="w-8 md:w-9 rounded-full">
               <img
-                src={user?.imageUrl || "https://i.pravatar.cc/100?img=12"}
+                src={user?.imageUrl 
+                   || "https://i.pravatar.cc/100?img=12"}
                 alt="User avatar"
                 className={isUploading ? "opacity-50" : ""}
               />
@@ -453,7 +287,7 @@ px-3 sm:px-5 lg:px-4 py-2 sticky top-0 z-40 flex items-center justify-between">
             "
           >
             <li className="menu-title">
-              <span>Admin</span>
+              <span className="text-base">Admin</span>
             </li>
             <li onClick={() =>
     navigate(
@@ -461,8 +295,8 @@ px-3 sm:px-5 lg:px-4 py-2 sticky top-0 z-40 flex items-center justify-between">
         ? `/sales/profile/${user?.userId}`
         : `/profile/${user?.userId}`
     )
-  }>
-              <a>Profile</a>
+  } className="text-sm">
+              <a className="text-sm">Profile</a>
             </li>
             {/* <li onClick={() => fileInputRef.current?.click()}>
               <a>{isUploading ? "Uploading..." : "Change Avatar"}</a>
@@ -470,10 +304,10 @@ px-3 sm:px-5 lg:px-4 py-2 sticky top-0 z-40 flex items-center justify-between">
             {/* <li onClick={()=>navigate("/settings")}>
               <a>Settings</a>
             </li> */}
-            <li onClick={()=>{
+            <li className="text-sm" onClick={()=>{
               handleLogout()
             }}>
-              <a className="text-error">Logout</a>
+              <a className="text-sm text-error">Logout</a>
             </li>
           </ul>
         </div>
@@ -503,7 +337,7 @@ px-3 sm:px-5 lg:px-4 py-2 sticky top-0 z-40 flex items-center justify-between">
               autoFocus
               type="text"
               placeholder="Search employees, tasks, projects..."
-              className="w-full bg-transparent outline-none text-lg text-base-content placeholder:text-base-content/40"
+              className="w-full bg-transparent outline-none text-base text-base-content placeholder:text-base-content/40"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyDown={(e) => {

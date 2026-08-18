@@ -9,7 +9,7 @@
 // import AttachmentInput from "../ui/AttachmentInput";
 // import Checklist from "../ui/CheckList";
 
-// import { useAuth } from "@/auth/useAuth"; 
+// import { useAuth } from "@/auth/AuthContext";
 // import API from "@/api/axios";
 // import type { Tag } from "../../type/tag";
 // import type { Task } from "../../type/task";
@@ -387,7 +387,7 @@ import AssigneeSelect from "../ui/AssigneeSelect";
 import AttachmentInput from "../ui/AttachmentInput";
 import Checklist from "../ui/CheckList";
 
-import { useAuth } from "@/auth/useAuth"; 
+import { useAuth } from "@/auth/AuthContext";
 import API from "@/api/axios";
 import type { Tag } from "../../type/tag";
 import type { Task } from "../../type/task";
@@ -461,7 +461,6 @@ export default function TaskDrawer({
   onClose,
   onUpdate,
 }: Props) {
-  console.log("Rendering TaskDrawer with task:", task, "and mode:", mode);
   const { auth } = useAuth();
   const isEdit = mode === "edit";
 

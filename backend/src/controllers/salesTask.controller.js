@@ -17,16 +17,21 @@ exports.createSalesTask = async (req, res) => {
   }
 };
 
+
 exports.getSalesTasks = async (req, res) => {
   try {
     const tenantId = req.organization._id;
-    const tasks = await SalesTask.find({ organization: tenantId }).sort({ createdAt: -1 });
+    // const tasks = await SalesTask.find({ organization: tenantId }).sort({ createdAt: -1 });
+    const tasks = await SalesTask.find({ organization: tenantId })
+  .populate("assignedTo", "_id name email phone")
+  .sort({ createdAt: -1 });
     res.status(200).json({ success: true, data: tasks });
   } catch (error) {
     console.error("Get Sales Tasks Error:", error);
     res.status(500).json({ success: false, message: "Failed to fetch sales tasks" });
   }
 };
+
 
 exports.getSalesTaskById = async (req, res) => {
   try {
@@ -45,7 +50,8 @@ exports.getSalesTaskById = async (req, res) => {
   }
 };
 
-exports.updateSalesTask = async (req, res) => {
+
+exports.updateSalesTask = async (req, res) => { 
   try {
     const tenantId = req.organization._id;
     if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
@@ -66,6 +72,7 @@ exports.updateSalesTask = async (req, res) => {
   }
 };
 
+
 exports.deleteSalesTask = async (req, res) => {
   try {
     const tenantId = req.organization._id;
@@ -83,6 +90,7 @@ exports.deleteSalesTask = async (req, res) => {
   }
 };
 
+
 // exports.getSalesTaskByEmpId=async(req,res)=>{
 //   try{
 //    const tenantId=req.organization._id;
@@ -99,6 +107,7 @@ exports.deleteSalesTask = async (req, res) => {
 //        })
 //   }
 // }
+
 
 
 exports.getSalesTaskByEmpId = async (req, res) => {

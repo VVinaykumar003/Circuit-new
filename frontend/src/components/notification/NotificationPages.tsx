@@ -64,7 +64,7 @@ export default function NotificationPage({
             <button
               key={n.id}
               onClick={() => setSelectedId(n.id)}
-              className={`text-left p-4 rounded-xl border transition-all ${
+              className={`text-left p-2.5 rounded-lg border transition-all ${
                 isSelected
                   ? "border-primary bg-primary/20 ring-1 ring-primary/20 shadow-md"
                   : "border-primary/30 bg-base-100 hover:bg-base-200/50  shadow-md hover:border-base-content/20"
@@ -72,16 +72,16 @@ export default function NotificationPage({
                 n.priority === "urgent" && !isSelected ? "border-l-4 border-l-error" : ""
               }`}
             >
-              <div className="flex justify-between items-start mb-1 gap-2">
-                <h4 className={`font-bold text-lg truncate ${isUnread ? "text-base-content" : "text-base-content"}`}>
+              <div className="flex justify-between items-start mb-1 gap-1">
+                <h4 className={`font-bold text-md truncate ${isUnread ? "text-base-content" : "text-base-content"}`}>
                   {n.title}
                 </h4>
                 {isUnread && <span className="w-2 h-2 rounded-full bg-primary shrink-0 mt-1.5" />}
               </div>
-              <p className="text-md text-base-content line-clamp-2 leading-relaxed">
+              <p className="text-sm text-base-content line-clamp-2 leading-relaxed">
                 {n.message}
               </p>
-              <p className="text-[13px] text-base-content mt-3 font-medium uppercase tracking-wider">
+              <p className="text-[12px] text-base-content mt-3 font-medium uppercase tracking-wider">
                 {new Date(n.createdAt).toLocaleDateString("en-IN", {
                   day: "numeric", month: "short", year: "numeric"
                 })}
@@ -92,20 +92,20 @@ export default function NotificationPage({
       </div>
 
       {/* RIGHT COLUMN: PREVIEW PANE */}
-      <div className="lg:col-span-7 xl:col-span-8    bg-primary border border-primary/20 rounded-2xl p-6 shadow-md min-h-[50vh] flex flex-col lg:sticky lg:top-6">
+      <div className="lg:col-span-6 xl:col-span-7    bg-primary border border-primary/20 rounded-xl p-6 shadow-md min-h-[50vh] flex flex-col lg:sticky lg:top-6">
         {selectedNotif ? (
           <>
-            <div className="flex justify-between items-start border-b border-base-300 pb-4 mb-4 gap-4">
+            <div className="flex justify-between items-start border-b border-base-300 pb-3 mb-3 gap-3">
               <div>
                 <div className="flex items-center gap-3 mb-2 flex-wrap">
-                  <h2 className="text-xl font-bold text-primary-content leading-tight">{selectedNotif.title}</h2>
+                  <h2 className="text-lg font-bold text-primary-content leading-tight">{selectedNotif.title}</h2>
                   {selectedNotif.priority === "urgent" && (
-                    <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-error/10 text-error border border-error/20 shrink-0">
+                    <span className="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-error/10 text-error border border-error/20 shrink-0">
                       Urgent
                     </span>
                   )}
                   </div>
-                <p className="text-sm text-primary-content/70 font-medium">
+                <p className="text-[12px] text-primary-content/70 font-medium">
                   {new Date(selectedNotif.createdAt).toLocaleString("en-IN", {
                     weekday: "long", day: "numeric", month: "short", year: "numeric",
                     hour: "2-digit", minute: "2-digit"
@@ -120,7 +120,7 @@ export default function NotificationPage({
                     className="p-2 rounded-lg bg-base-100 hover:bg-base-200 text-base-content/70 hover:text-base-content transition"
                     title="Edit"
                   >
-                    <MdEdit size={18} />
+                    <MdEdit size={15} />
                   </button>
                   <button
                     onClick={() => {
@@ -130,20 +130,20 @@ export default function NotificationPage({
                     className="p-2 rounded-lg bg-error/70 hover:bg-error/80 text-white transition"
                     title="Delete"
                   >
-                    <Trash2 size={18} />
+                    <Trash2 size={15} />
                   </button>
                 </div>
               )}
             </div>
 
             <div className="flex-1">
-              <p className="text-[15px] text-primary-content/70 leading-relaxed whitespace-pre-wrap">
+              <p className="text-[14px] text-primary-content/70 leading-relaxed whitespace-pre-wrap">
                 {selectedNotif.message}
               </p>
             </div>
 
             {selectedNotif.attachments?.length > 0 && (
-              <div className="mt-8 pt-6 border-t border-base-200">
+              <div className="mt-7 pt-5 border-t border-base-200">
                 <h4 className="text-xs font-semibold text-primary-content/50 uppercase tracking-wider mb-3">Attachments</h4>
                 <a
                   href={selectedNotif.attachments[0].fileUrl}

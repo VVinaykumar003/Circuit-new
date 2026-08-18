@@ -17,8 +17,8 @@ interface Props {
   onTaskClick,
 }: Props) {
   return (
-    <div className="bg-base-200 rounded-xl p-3 w-full min-w-70 text-base-content">
-      <h3 className="text-sm font-semibold mb-3">
+    <div className="bg-base-200 rounded-lg p-2.5 w-full min-w-70 text-base-content">
+      <h3 className="text-xs font-semibold mb-3">
         {title} · {tasks.length}
       </h3>
 
@@ -27,7 +27,7 @@ interface Props {
           <div
             ref={provided.innerRef}
             {...provided.droppableProps}
-            className="space-y-3 min-h-50"
+            className="space-y-2 min-h-50"
           >
             {tasks.map((task, index) => (
               <KanbanTaskCard

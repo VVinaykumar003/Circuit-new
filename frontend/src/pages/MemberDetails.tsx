@@ -3,9 +3,9 @@ import { useEffect, useState } from "react";
 import ProfileSidebar from "@/components/members/ProfileSidebar";
 import MemberRightSection from "@/components/members/MemberRightSection";
 import type { Member } from "@/type/member";
-import { getMemberById } from "@/services/IT/memberService";
+import { getMemberById } from "@/services/memberService";
 
-import { useAuth } from "@/auth/useAuth"; 
+import { useAuth } from "@/auth/AuthContext";
 import { ArrowLeft } from "lucide-react";
 
 const MemberDetails = () => {

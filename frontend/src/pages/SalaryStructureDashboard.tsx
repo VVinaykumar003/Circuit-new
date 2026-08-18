@@ -10,8 +10,8 @@ import SalarySlipPreview from "../components/salary/SalarySlipPreview";
 import GlobalPayoutConfiguration from "../components/salary/GlobalPayoutConfiguration";
 import StatutorySettingsCard from "../components/salary/StatutorySettingsCard";
 
-import { useAuth } from "@/auth/useAuth"; 
-import { getMembers } from "@/services/IT/memberService";
+import { useAuth } from "@/auth/AuthContext";
+import { getMembers } from "@/services/memberService";
 
 import { MdCurrencyRupee } from "react-icons/md";
 
@@ -19,7 +19,7 @@ import type  { Employee } from "../type/payroll.types";
 import {
   fetchSalaryStructure,
   saveSalaryStructure,
-} from "../services/IT/payrollAPI";
+} from "../services/payrollAPI";
 
 import { validateSalaryStructure } from "../validators/payrollValidator";
 

@@ -33,11 +33,11 @@ const CreateProjectForm: React.FC<Props> = ({
     <form
       onSubmit={handleSubmit}
       // className="bg-gray-50 rounded-2xl p-6 space-y-6  text-gray-700"
-      className="space-y-5 sm:space-y-6"
+      className="space-y-5 sm:space-y-5"
     >
       {/* Project Name */}
       <div>
-        <label className="block mb-1 text-base-content/70 font-medium text-sm ">
+        <label className="block mb-1 text-base-content/70 font-medium text-[13px]">
           Project Name
         </label>
         <input
@@ -53,7 +53,7 @@ const CreateProjectForm: React.FC<Props> = ({
 
       {/* Project State */}
       <div>
-        <label className="block mb-1 text-base-content/70 font-medium text-sm ">
+        <label className="block mb-1 text-base-content/70 font-medium text-[13px] ">
           Project State
         </label>
         <select
@@ -62,7 +62,7 @@ const CreateProjectForm: React.FC<Props> = ({
           value={projectData.projectState}
           onChange={handleChange}
           //  className="w-full p-3 rounded-xl border border-gray-300 bg-white outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-          className=" select w-full text-sm
+          className=" select w-full text-[13px]
     bg-base-100 border border-base-300
     focus:outline-none focus:ring-2 focus:ring-primary/40
 
@@ -79,7 +79,7 @@ const CreateProjectForm: React.FC<Props> = ({
       {/* Dates */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label className="block mb-1 text-base-content/70 font-medium text-sm ">
+          <label className="block mb-1 text-base-content/70 font-medium text-[13px] ">
             Start Date
           </label>
           <input
@@ -94,7 +94,7 @@ const CreateProjectForm: React.FC<Props> = ({
         </div>
 
         <div>
-          <label className="block mb-1 text-base-content/70 font-medium text-sm ">
+          <label className="block mb-1 text-base-content/70 font-medium text-[13px] ">
             End Date
           </label>
           <input
@@ -111,7 +111,7 @@ const CreateProjectForm: React.FC<Props> = ({
 
       {/* Domain */}
       <div>
-        <label className="block mb-1 text-base-content/70 font-medium text-sm ">
+        <label className="block mb-1 text-base-content/70 font-medium text-[13px]">
           Project Domain
         </label>
         {/* <select
@@ -152,7 +152,7 @@ const CreateProjectForm: React.FC<Props> = ({
               customDomain: value === "Other" ? "" : prev.customDomain,
             }));
           }}
-          className=" select w-full text-sm
+          className=" select w-full text-[13px]
    
     focus:outline-none focus:ring-2 focus:ring-primary/40
 
@@ -190,7 +190,7 @@ const CreateProjectForm: React.FC<Props> = ({
 
       {/* Description */}
       <div>
-        <label className="block mb-1 text-base-content/70 font-medium text-sm ">
+        <label className="block mb-1 text-base-content/70 font-medium text-[13px]">
           Description
         </label>
         <textarea
@@ -215,7 +215,7 @@ const CreateProjectForm: React.FC<Props> = ({
       <div className="pt-4 sm:pt-6">
         <button
           type="submit"
-          className="w-full py-2.5 rounded-xl bg-primary text-primary-content font-semibold hover:opacity-90 transition-all shadow-md"
+          className="w-full py-2 rounded-lg bg-primary text-primary-content font-semibold hover:opacity-90 transition-all shadow-md"
         >
           Add Participants
         </button>

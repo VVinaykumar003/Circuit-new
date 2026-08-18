@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { useForm, useFieldArray } from "react-hook-form";
+import { useForm, useFieldArray, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { 
@@ -9,11 +9,11 @@ import {
 } from "react-icons/md";
 import { toast } from "react-toastify";
 import { useNavigate, useParams } from "react-router-dom";
-import { useAuth } from "@/auth/useAuth"; 
-import { createOrder, getOrderById, updateOrder } from "@/services/sales/orderServices";
-import { getSalesReps } from "@/services/sales/salesRepServices";
-import { getAllProducts } from "@/services/sales/productServices";
-import { getAllAccounts } from "@/services/sales/salesService";
+import { useAuth } from "@/auth/AuthContext";
+import { createOrder, getOrderById, updateOrder } from "@/services/orderServices";
+import { getSalesReps } from "@/services/salesRepServices";
+import { getAllProducts } from "@/services/productServices";
+import { getAllAccounts } from "@/services/salesService";
 import { useQuery } from "@tanstack/react-query";
 
 // const productsData = [
@@ -109,7 +109,7 @@ const orderSchema = z.object({
     ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Advance cannot exceed Grand Total", path: ["advancePayment"] });
   }
 });
-
+ 
 type OrderFormValues = z.infer<typeof orderSchema>;
 
 /* ── FormRow Helper ── */
@@ -122,7 +122,7 @@ const FormRow = ({ label, required, error, children }: { label: string, required
       {children}
       {error && <p className="text-error text-xs mt-1">{error}</p>}
     </div>
-  </div>
+  </div>  
 );
 
 /* ─────────────────────────── Component ─────────────────────────── */
@@ -191,24 +191,87 @@ export default function NewOrderForm() {
 
   const { register, control, handleSubmit, watch, setValue, reset, formState: { errors } } = useForm<OrderFormValues>({
     resolver: zodResolver(orderSchema),
+    // defaultValues: {
+    //   orderNumber: `SO-${new Date().getFullYear()}-${Math.floor(Math.random() * 10000).toString().padStart(5, '0')}`,
+    //   salesOwner: "",
+    //   orderDate: new Date().toISOString().split("T")[0],
+    //   status: "Draft",
+    //   priority: "Medium",
+    //   sameAsBilling: true,
+    //   items: [{ productId: "", sku: "", stock: 0, retailPrice: 0, costPrice: 0, sellingPrice: 0, quantity: 1, discountPct: 0, taxPct: 0, lineTotal: 0 }],
+    //   summaryDiscount: 0, summaryTax: 0, shippingCharges: 0, adjustment: 0, advancePayment: 0,
+    //   paymentTerms: "Immediate", paymentMethod: "Bank Transfer",
+    //   deliveryMethod: "Courier", approvalStatus: "Pending", requiresApproval: false
+    // }
     defaultValues: {
-      orderNumber: `SO-${new Date().getFullYear()}-${Math.floor(Math.random() * 10000).toString().padStart(5, '0')}`,
-      salesOwner: "",
-      orderDate: new Date().toISOString().split("T")[0],
-      status: "Draft",
-      priority: "Medium",
-      sameAsBilling: true,
-      items: [{ productId: "", sku: "", stock: 0, retailPrice: 0, costPrice: 0, sellingPrice: 0, quantity: 1, discountPct: 0, taxPct: 0, lineTotal: 0 }],
-      summaryDiscount: 0, summaryTax: 0, shippingCharges: 0, adjustment: 0, advancePayment: 0,
-      paymentTerms: "Immediate", paymentMethod: "Bank Transfer",
-      deliveryMethod: "Courier", approvalStatus: "Pending", requiresApproval: false
-    }
+  orderNumber: `SO-${new Date().getFullYear()}-${Math.floor(Math.random() * 10000)
+    .toString()
+    .padStart(5, "0")}`,
+
+  salesOwner: "",
+
+  orderDate: new Date().toISOString().split("T")[0],
+  deliveryDate: "",
+
+  status: "Draft",
+  priority: "Medium",
+
+  customerId: "",
+  contactPerson: "",
+  phone: "",
+  email: "",
+
+  billingAddress: "",
+  shippingAddress: "",
+  sameAsBilling: true,
+
+  items: [
+    {
+      productId: "",
+      sku: "",
+      stock: 0,
+      retailPrice: 0,
+      costPrice: 0,
+      sellingPrice: 0,
+      quantity: 1,
+      discountPct: 0,
+      taxPct: 0,
+      lineTotal: 0,
+    },
+  ],
+
+  subtotal: 0,
+  summaryDiscount: 0,
+  summaryTax: 0,
+  shippingCharges: 0,
+  adjustment: 0,
+  grandTotal: 0,
+
+  paymentTerms: "Immediate",
+  paymentMethod: "Bank Transfer",
+  advancePayment: 0,
+
+  deliveryMethod: "Courier",
+  deliveryInstructions: "",
+  trackingNumber: "",
+  expectedDeliveryDate: "",
+
+  internalNotes: "",
+  customerNotes: "",
+
+  requiresApproval: false,
+  approver: "",
+  approvalStatus: "Pending",
+}
   });
 
   const { fields, append, remove } = useFieldArray({ control, name: "items" });
 
   // Live Watches
-  const wItems = watch("items");
+ const wItems = useWatch({
+  control,
+  name: "items",
+});
   const wSubDisc = watch("summaryDiscount");
   const wSubTax = watch("summaryTax");
   const wShipping = watch("shippingCharges");
@@ -285,7 +348,7 @@ export default function NewOrderForm() {
                 quantity: p.quantity || (p as any).qty || 1,
                 discountPct: p.discount || 0,
                 taxPct: p.tax || 0,
-                lineTotal: p.total
+                lineTotal: p.lineTotal || 0
               })) || [],
               subtotal: o.orderValue || 0,
               summaryDiscount: 0,
@@ -366,49 +429,136 @@ export default function NewOrderForm() {
     }
   };
 
+  // const onSubmit = async (data: OrderFormValues) => {
+  //   setIsSubmitting(true);
+  //   try {
+  //     const payload = {
+  //       ...data,
+  //       customerName: customers.find(c => c.id === data.customerId)?.name || "Unknown Customer",
+  //       products: data.items.map(item => {
+  //          const sp = item.sellingPrice || 0;
+  //          const qty = item.quantity || 0;
+  //          const base = sp * qty;
+  //          const afterDisc = base - (base * (item.discountPct || 0) / 100);
+  //          const lineTotal = afterDisc + (afterDisc * (item.taxPct || 0) / 100);
+  //          return {
+  //            productId: item.productId,
+  //            productName: productsData.find(p => p.id === item.productId)?.name || "Unknown",
+  //            sku: item.sku,
+  //            price: item.sellingPrice,
+  //            quantity: item.quantity,
+  //            discount: item.discountPct,
+  //            tax: item.taxPct,
+  //            lineTotal: lineTotal
+  //          }
+  //       }),
+  //       orderValue: data.grandTotal,
+  //       orderStatus: data.status,
+  //       notes: { internal: data.internalNotes, customer: data.customerNotes }
+  //     };
+
+  //     if (orderId) {
+  //       await updateOrder(orderId, payload as any, auth.slug || "default-tenant");
+  //       setSuccessMessage("Sales Order updated successfully!");
+  //     } else {
+  //       await createOrder(auth.slug || "default-tenant", payload as any);
+  //       setSuccessMessage("Sales Order created successfully!");
+  //     }
+  //     setSuccessModalOpen(true);
+  //   } catch (err: unknown) {
+  //     toast.error(`Failed to ${orderId ? 'update' : 'create'} order.`);
+  //   } finally {
+  //     setIsSubmitting(false);
+  //   }
+  // };
+
+
   const onSubmit = async (data: OrderFormValues) => {
-    setIsSubmitting(true);
-    try {
-      const payload = {
-        ...data,
-        customerName: customers.find(c => c.id === data.customerId)?.name || "Unknown Customer",
-        products: data.items.map(item => {
-           const sp = item.sellingPrice || 0;
-           const qty = item.quantity || 0;
-           const base = sp * qty;
-           const afterDisc = base - (base * (item.discountPct || 0) / 100);
-           const lineTotal = afterDisc + (afterDisc * (item.taxPct || 0) / 100);
-           return {
-             productId: item.productId,
-             productName: productsData.find(p => p.id === item.productId)?.name || "Unknown",
-             sku: item.sku,
-             price: item.sellingPrice,
-             quantity: item.quantity,
-             discount: item.discountPct,
-             tax: item.taxPct,
-             total: lineTotal
-           }
-        }),
-        orderValue: data.grandTotal,
-        orderStatus: data.status,
-        notes: { internal: data.internalNotes, customer: data.customerNotes }
+  setIsSubmitting(true);
+
+  try {
+    const products = data.items.map((item) => {
+      const sp = Number(item.sellingPrice) || 0;
+      const qty = Number(item.quantity) || 0;
+      const discount = Number(item.discountPct) || 0;
+      const tax = Number(item.taxPct) || 0;
+
+      const base = sp * qty;
+
+      const afterDiscount =
+        base - (base * discount) / 100;
+
+      const lineTotal =
+        afterDiscount + (afterDiscount * tax) / 100;
+
+      return {
+        productId: item.productId,
+        productName:
+          productsData.find((p) => p.id === item.productId)?.name ||
+          "Unknown",
+        sku: item.sku,
+        price: sp,
+        quantity: qty,
+        discount,
+        tax,
+
+        // 🔥 IMPORTANT
+        lineTotal: Number(lineTotal.toFixed(2)),
       };
+    });
 
-      if (orderId) {
-        await updateOrder(orderId, payload as any, auth.slug || "default-tenant");
-        setSuccessMessage("Sales Order updated successfully!");
-      } else {
-        await createOrder(auth.slug || "default-tenant", payload as any);
-        setSuccessMessage("Sales Order created successfully!");
-      }
-      setSuccessModalOpen(true);
-    } catch (err: unknown) {
-      toast.error(`Failed to ${orderId ? 'update' : 'create'} order.`);
-    } finally {
-      setIsSubmitting(false);
+    const payload = {
+      ...data,
+
+      customerName:
+        customers.find((c) => c.id === data.customerId)?.name ||
+        "Unknown Customer",
+
+      // 🔥 Send calculated items/products
+      items: data.items.map((item, index) => ({
+        ...item,
+        lineTotal: products[index].lineTotal,
+      })),
+
+      products,
+
+      orderValue: data.grandTotal,
+      orderStatus: data.status,
+
+      notes: {
+        internal: data.internalNotes,
+        customer: data.customerNotes,
+      },
+    };
+
+    console.log("FINAL PAYLOAD:", payload);
+
+    if (orderId) {
+      await updateOrder(
+        orderId,
+        payload as any,
+        auth.slug || "default-tenant"
+      );
+
+      setSuccessMessage("Sales Order updated successfully!");
+    } else {
+      await createOrder(
+        auth.slug || "default-tenant",
+        payload as any
+      );
+
+      setSuccessMessage("Sales Order created successfully!");
     }
-  };
 
+    setSuccessModalOpen(true);
+
+  } catch (err) {
+    console.error("Order submit error:", err);
+    toast.error(`Failed to ${orderId ? "update" : "create"} order.`);
+  } finally {
+    setIsSubmitting(false);
+  }
+};
   return (
     <div className="min-h-screen bg-base-200 p-4 md:p-6 lg:p-8 font-sans">
       
@@ -438,7 +588,9 @@ export default function NewOrderForm() {
         </div>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+      <form onSubmit={handleSubmit(onSubmit,(errors)=>{
+        console.log("Form Errors: ", errors)
+      })} className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         
         {/* ── Left Column (Form Sections) ── */}
         <div className="lg:col-span-3 space-y-4">

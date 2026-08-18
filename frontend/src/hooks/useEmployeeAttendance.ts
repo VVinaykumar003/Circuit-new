@@ -6,9 +6,9 @@ import {
   checkOut as apiCheckOut,
   startBreak as apiStartBreak,
   endBreak as apiEndBreak,
-} from "@/services/sales/attendanceService";
+} from "@/services/attendanceService";
 import type { EmployeeDashboardData, TodayAttendance } from "@/type/index";
-import { useAuth } from "@/auth/useAuth"; 
+import { useAuth } from "@/auth/AuthContext";
 
 export const useEmployeeAttendance = () => {
   const [data, setData] = useState<EmployeeDashboardData | null>(null);

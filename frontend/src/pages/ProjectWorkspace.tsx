@@ -14,9 +14,9 @@ import ProjectMembers from "../components/projects/ProjectMembers";
 import ProjectActivity from "../components/projects/ProjectActivity";
 import ProjectChat from "@/components/projects/ProjectChat";
 
-import { useAuth } from "@/auth/useAuth"; 
-import { getProjectById } from "@/services/IT/projectService";
-import { getTasksByProjectId } from "@/services/IT/taskService"; // renamed service
+import { useAuth } from "@/auth/AuthContext";
+import { getProjectById } from "@/services/projectService";
+import { getTasksByProjectId } from "@/services/taskService"; // renamed service
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
 import WorkUpdate from "./WorkUpdate";
 
@@ -76,7 +76,7 @@ export default function ProjectWorkspace() {
 
   const today = new Date();
   const overdueTasks = tasks.filter(
-    (t) => new Date(t.dueDate) < today && t.status !== "completed",
+    (t) => t.dueDate && new Date(t.dueDate) < today && t.status !== "completed",
   );
 
   const latestTasks = [...tasks]
@@ -122,7 +122,7 @@ export default function ProjectWorkspace() {
         <button
           key={tab.key}
           onClick={() => setActiveTab(tab.key)}
-          className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap
+          className={`px-3.5 py-1.5 rounded-lg text-[13px] font-medium transition-all duration-200 whitespace-nowrap
             ${
               isActive
                 ? "bg-primary text-primary-content shadow-sm"
@@ -217,28 +217,28 @@ const StatCard = ({
   icon?: React.ReactNode;
 }) => (
   <div
-    className={`flex flex-col items-start bg-white/70 border ${borderColor || "border-primary"} rounded-lg p-4 text-center ${color ? `text-${color}` : ""}`}
+    className={`flex flex-col items-start bg-white/70 border ${borderColor || "border-primary"} rounded-lg p-3 text-center ${color ? `text-${color}` : ""}`}
   >
     <div className="flex justify-between  w-full ">
     <p className="text-sm font-bold ">{label}</p>
     {icon && <div className="bg-primary/50 text-primary-content rounded-lg p-1">{icon}</div>}
     </div>
-    <p className="text-lg font-semibold">{value}</p>
+    <p className="text-md font-semibold">{value}</p>
   </div>
 );
 
 const DescriptionCard = ({ description }: { description: string }) => (
-  <div className="bg-white/70 border border-primary/30 rounded-lg p-6">
-    <h3 className="text-black font-semibold mb-2">Description</h3>
-    <p className="text-sm font-medium text-black/50 ">{description}</p>
+  <div className="bg-white/70 border border-primary/30 rounded-lg p-4">
+    <h3 className="text-black font-semibold text-md  mb-1">Description</h3>
+    <p className="text-[14px] text-black/50 ">{description}</p>
   </div>
 );
 
 const HighPriorityTasksCard = ({ tasks }: { tasks: any[] }) => (
-  <div className="bg-white/70 border border-error rounded-lg p-6">
-    <h3 className=" text-black font-semibold mb-3">High Priority Tasks</h3>
+  <div className="bg-white/70 border border-error rounded-lg p-4">
+    <h3 className=" text-black font-semibold text-md  mb-2">High Priority Tasks</h3>
     {tasks.length === 0 ? (
-      <p className="text-sm font-medium text-black/50">No high priority tasks </p>
+      <p className="text-[14px] text-black/50">No high priority tasks </p>
     ) : (
       <ul className="space-y-2 text-sm">
         {tasks.slice(0, 3).map((task) => (
@@ -253,10 +253,10 @@ const HighPriorityTasksCard = ({ tasks }: { tasks: any[] }) => (
 );
 
 const LatestTasksCard = ({ tasks }: { tasks: any[] }) => (
-  <div className="bg-white/70 border border-primary/30 rounded-lg p-6">
-    <h3 className=" text-black font-semibold mb-3">Latest Tasks</h3>
+  <div className="bg-white/70 border border-primary/30 rounded-lg p-4">
+    <h3 className=" text-black font-semibold text-md mb-2">Latest Tasks</h3>
     {tasks.length === 0 ? (
-      <p className="text-sm font-medium text-black/50">No latest tasks </p>
+      <p className="text-[14px] text-black/50">No latest tasks </p>
     ) : (
       <ul className="space-y-2 text-sm">
         {tasks.map((task) => (
@@ -297,9 +297,9 @@ const OverdueTasksCard = ({ tasks }: { tasks: any[] }) => (
 );
 
 const TeamCard = ({ team }: { team: any[] }) => (
-  <div className="bg-primary rounded-lg p-6">
-    <h3 className="font-semibold text-primary-content mb-3">Team Members</h3>
-    <ul className="space-y-2 text-sm">
+  <div className="bg-primary rounded-lg p-5">
+    <h3 className="font-semibold text-primary-content mb-2">Team Members</h3>
+    <ul className="space-y-2 text-[13px]">
       {team.map((member: any) => (
         <li
           key={member.user._id}

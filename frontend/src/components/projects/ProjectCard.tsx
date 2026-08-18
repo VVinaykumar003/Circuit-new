@@ -6,8 +6,8 @@ import { MdChat, MdFileOpen } from "react-icons/md";
 import Swal from "sweetalert2";
 import { useState } from "react";
 import EditProjectModal from "./EditProjectModal";
-import { updateProject } from "@/services/IT/projectServices";
-import { useAuth } from "@/auth/useAuth"; 
+import { updateProject } from "@/services/projectServices";
+import { useAuth } from "@/auth/AuthContext";
 import { Edit2 } from "lucide-react";
 
 interface Props {
@@ -94,14 +94,14 @@ export default function ProjectCard({
   };
 
   return (
-    <div   onClick={() => navigate(`/projects/${project.id}`)} className="group bg-base-200 text-primary border border-primary shadow-sm rounded-xl p-2 sm:p-5 space-y-4 hover:shadow-lg transition relative w-full  h-full flex flex-col justify-between  min-w-0 max-w-full cursor-pointer">
+    <div   onClick={() => navigate(`/projects/${project.id}`)} className="group bg-base-200 text-primary border border-primary shadow-sm rounded-xl p-1.5 sm:p-4 space-y-4 hover:shadow-lg transition relative w-full  h-full flex flex-col justify-between  min-w-0 max-w-full cursor-pointer">
       {/* HEADER */}
-      <div className="grid grid-cols-[1fr_auto] gap-3 items-start">
-        <h3 className="font-bold  text-lg leading-snug line-clamp-2 break-words flex-1 min-w-0 ">
+      <div className="grid grid-cols-[1fr_auto] gap-2.5 items-start">
+        <h3 className="font-bold  text-md leading-snug line-clamp-2 break-words flex-1 min-w-0 ">
           {project.name}
         </h3>
        
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center gap-1.5 shrink-0">
           <StatusBadge
             status={
               project.status === "Active" || project.status === "Completed"
@@ -157,18 +157,18 @@ export default function ProjectCard({
       </div>
 
       {/* MANAGER */}
-      <p className="text-sm font-medium text-primary/70 mb-4">
-        Manager: <span className="font-medium">{project.manager}</span>
+      <p className="text-[13px]  text-primary/70 mb-4">
+        Manager: <span className="">{project.manager}</span>
       </p>
 
       {/* PROGRESS */}
-      <div className="mb-4">
+      <div className="mb-3">
         <div className="flex justify-between text-xs font-medium text-primary/60 mb-1">
           <span>Progress</span>
           <span>{project.progress}%</span>
         </div>
         <progress
-          className="progress progress-primary w-full h-3 rounded-lg"
+          className="progress progress-primary w-full h-2.5 rounded-md"
           value={project.progress}
           max={100}
         />
@@ -176,16 +176,16 @@ export default function ProjectCard({
 
       
      {/* META */}
-<div className="mt-4 flex  justify-between items-center gap-4 text-xs text-primary/70 flex-wrap">
+<div className="mt-3 flex  justify-between items-center gap-3 text-xs text-primary/70 flex-wrap">
   
   {/* Left Meta Info */}
   <div className="flex items-center gap-4 whitespace-nowrap flex-wrap">
-    <span className="flex text-sm font-medium items-center gap-1">
-      <FaUser /> {project.teamCount}
+    <span className="flex text-sm  items-center gap-1">
+      <FaUser size={13} /> {project.teamCount}
     </span>
 
-    <span className="flex text-sm font-medium items-center gap-1">
-      <FaCalendarAlt size={14} /> {project.dueDate}
+    <span className="flex text-sm  items-center gap-1">
+      <FaCalendarAlt size={13} /> {project.dueDate}
     </span>
   </div>
 
@@ -228,7 +228,7 @@ export default function ProjectCard({
   font-medium
 "
   >
-    <MdChat size={18} />
+    <MdChat size={14} />
     <span >Chat</span>
   </button>
 </div>
