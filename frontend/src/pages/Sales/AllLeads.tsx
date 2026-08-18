@@ -26,7 +26,7 @@ import {
   MdNotes,
   MdPerson,
 } from "react-icons/md";
-import { deleteLead, getLeads, updateLead, convertLeadToCustomer } from "@/services/leadServices";
+import { deleteLead, getLeads, updateLead, convertLeadToCustomer } from "@/services/sales/leadServices";
 import { useAuth } from "@/auth/AuthContext";
 import { toast } from "react-toastify";
 

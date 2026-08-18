@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { useState, useEffect, useCallback } from 'react';
-import type { ForecastOverviewData } from '../type/salesForecast';
+import type { ForecastOverviewData } from '../../type/salesForecast';
 
 const apiClient = axios.create({
   baseURL: '/api',

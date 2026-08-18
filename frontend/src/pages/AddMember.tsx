@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { toast } from "react-toastify";
 import { FaEye, FaEyeSlash, FaPen, FaUser, FaUserFriends, FaShieldAlt, FaBriefcase, FaUniversity } from "react-icons/fa";
-import { createMember } from "../services/memberService";
+import { createMember } from "../services/IT/memberService";
 import { useAuth } from "@/auth/AuthContext";
 import { uploadImage } from "@/services/uploadService";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
@@ -127,6 +127,11 @@ const AddMember = () => {
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+
+    // Clear the error for the field being edited
+    if (errors[name as keyof Errors]) {
+      setErrors((prev) => ({ ...prev, [name]: undefined }));
+    }
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -155,6 +160,11 @@ const AddMember = () => {
 
       const finalData = {
         ...formData,
+        // If department is 'other', use the custom department value instead.
+        department:
+          formData.department === "other"
+            ? formData.customDepartment
+            : formData.department,
         imageUrl: imgUrl,
       };
 
@@ -193,9 +203,19 @@ const AddMember = () => {
       setSelectedFile(null);
       setErrors({});
     } catch (error: any) {
-      const errorMessage =
-        error.response?.data?.message || "Failed to register employee";
-      toast.error(errorMessage);
+      const backendError = error.response?.data;
+
+      // Default error message
+      let errorMessage = "An unexpected error occurred. Please try again.";
+
+      if (backendError && backendError.message) {
+        errorMessage = backendError.message;
+        // If the backend provides a specific field, set the inline error
+        if (backendError.field) {
+          setErrors((prev) => ({ ...prev, [backendError.field]: backendError.message }));
+        }
+      }
+      toast.error(errorMessage); // Always show a toast
     } finally {
       setAdding(false);
     }
@@ -496,14 +516,7 @@ const AddMember = () => {
               disabled={adding}
               className="btn btn-primary w-full sm:w-auto min-w-[200px] shadow-sm hover:shadow-md transition-all"
             >
-              {adding ? (
-                <>
-                  <span className="loading loading-spinner loading-sm"></span>
-                  Registering...
-                </>
-              ) : (
-                "Register Employee"
-              )}
+               {adding ? "Registering..." : "Register Employee ✓"}
             </button>
           </div>
         </form>

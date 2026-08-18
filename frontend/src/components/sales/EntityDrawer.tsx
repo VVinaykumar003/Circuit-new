@@ -1,5 +1,5 @@
 import { useAuth } from "@/auth/AuthContext";
-import { updateAccount, updateContact } from "@/services/salesService";
+import { updateAccount, updateContact } from "@/services/sales/salesService";
 import { useEffect, useState } from "react";
 
 import { entitySchemas } from "./schema/entitySchemas";

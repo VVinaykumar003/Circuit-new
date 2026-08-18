@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { getEmployees, runMonthly } from "@/services/payrollService";
+import { getEmployees, runMonthly } from "@/services/IT/payrollService";
 // import { getMembers } from "@/services/memberService";
 import { useAuth } from "@/auth/AuthContext";
 import { toast } from "react-toastify";

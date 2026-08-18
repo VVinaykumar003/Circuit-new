@@ -172,8 +172,8 @@
 
 // export default WorkUpdateForm;
 import { useEffect, useRef, useState } from "react";
-import { addWorkUpdate } from "@/services/workUpdateService";
-import { getProject } from "@/services/projectServices";
+import { addWorkUpdate } from "@/services/IT/workUpdateService";
+import { getProject } from "@/services/IT/projectServices";
 import { toast } from "react-toastify";
 import { MdClose, MdFolder, MdAssignment, MdLightbulbOutline, MdCheckCircle, MdOutlineAttachFile, MdCloudUpload } from "react-icons/md";
 

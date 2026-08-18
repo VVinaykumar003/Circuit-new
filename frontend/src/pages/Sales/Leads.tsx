@@ -5,9 +5,9 @@ import * as z from "zod";
 import { useNavigate } from "react-router-dom";
 import { MdSave, MdContentCopy, MdDelete } from "react-icons/md";
 import { toast } from "react-toastify";
-import { getSalesEmployees } from "@/services/memberService";
+import { getSalesEmployees } from "@/services/IT/memberService";
 import { useAuth } from "@/auth/AuthContext";
-import { createLead } from "@/services/salesService";
+import { createLead } from "@/services/sales/salesService";
 
 /* ─────────────────────────── Zod Schema ─────────────────────────── */
 

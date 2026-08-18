@@ -14,7 +14,7 @@ import {
 import { MdRefresh, MdBarChart, MdShare, MdSort, MdError } from "react-icons/md";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/auth/AuthContext";
-import { getSalesDashboardData } from "@/services/salesService";
+import { getSalesDashboardData } from "@/services/sales/salesService";
 
 /* ─────────────────────────── types ─────────────────────────── */
 interface StatCard {

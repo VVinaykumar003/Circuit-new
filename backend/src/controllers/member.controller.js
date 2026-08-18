@@ -160,15 +160,35 @@ const employeeId = `${deptCode}-${String(count + 1).padStart(3, "0")}`;
 
   } catch (error) {
 
-    logger.error("Create employee failed", {
-      error: error.message
-    });
+    logger.error("Create employee failed", { error: error.message, code: error.code, keyValue: error.keyValue });
 
-    res.status(500).json({
-      message: "Server error",
-      error: error.message
-    });
+    // Handle MongoDB unique constraint errors (code 11000)
+    if (error.code === 11000) {
+      const field = Object.keys(error.keyPattern)[0];
+      const value = error.keyValue[field];
 
+      // Map backend field names to user-friendly labels
+      const fieldNames = {
+        email: "Email",
+        employeeId: "Employee ID",
+        aadhaar: "Aadhaar Number",
+        pan: "PAN Number",
+      };
+
+      const friendlyFieldName = fieldNames[field] || field;
+
+      return res.status(400).json({
+        message: `${friendlyFieldName} '${value}' is already registered.`,
+        field: field,
+      });
+    }
+
+    // Generic server error for all other cases
+    return res.status(500).json({
+      success: false,
+      message: "An unexpected error occurred on the server.",
+      error: error.message,
+    });
   }
 
 };

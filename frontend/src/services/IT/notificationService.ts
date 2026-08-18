@@ -1,4 +1,4 @@
-import API from "../api/axios";
+import API from "../../api/axios";
 
 // ✅ Send Notification (with attachments)
 export const sendNotification = (organizationSlug: string, formData: FormData) =>

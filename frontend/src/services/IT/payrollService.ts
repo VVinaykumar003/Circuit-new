@@ -61,7 +61,7 @@
 //   return API.put(`/payroll/${slug}/${id}/pay`);
 // };
 
-import API from "../api/axios";
+import API from "../../api/axios";
 import api from "./api";
 
 const BASE_PATH = "payroll";

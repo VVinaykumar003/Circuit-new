@@ -1,4 +1,4 @@
-import { getStructure, setStructure } from "@/services/payrollService";
+import { getStructure, setStructure } from "@/services/IT/payrollService";
 
 export async function fetchSalaryStructure(
   slug: string,

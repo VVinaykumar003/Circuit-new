@@ -4,7 +4,7 @@ import Button from "../ui/Button";
 import type { AttendanceRecord, UserRole } from "../../type/attendance";
 import Table from "../ui/Table";
 import { useAuth } from "@/auth/AuthContext";
-import { approveAttendance } from "@/services/attendanceService";
+import { approveAttendance } from "@/services/sales/attendanceService";
 import { toast } from "react-toastify";
 // import { useNotificationSocket } from '@/hooks/notifiaction';
 import Pagination from "../ui/Pagination";
@@ -129,28 +129,7 @@ export default function AttendanceTable({
         )}
 
         <Table
-          // headers={[
-          //   ...(isAdmin
-          //     ? [
-          //         <div className="w-10">
-          //           <input
-          //             type="checkbox"
-          //             className="checkbox checkbox-sm rounded"
-          //             checked={allSelected}
-          //             disabled={selectableRecords.length === 0}
-          //             onChange={toggleSelectAll}
-          //           />
-          //         </div>,
-          //       ]
-          //     : []),
-          //   "Employee",
-          //   "Date",
-          //   "Check In",
-          //   "Status",
-          //   "Mode",
-          //   ...(isAdmin ? ["Action"] : []),
-          // ]}
-          headers={[
+         headers={[
             "Employee",
             "Date",
             "Check In",
@@ -229,21 +208,6 @@ export default function AttendanceTable({
                         Absent
                       </Button>
                     </div>
-
-                    {/* {r.status === "absent" && (
-                  <div className="flex justify-start gap-2">
-                    <Button size="xs" variant="primary" onClick={() => handleApproval(r.attendanceDocId, r.employeeId, "PRESENT")}>
-                      Present
-                    </Button>
-                  </div>
-                )}
-                {r.status === "approved" && (
-                  <div className="flex justify-start gap-2">
-                    <Button size="xs" variant="error" className="text-base-content" onClick={() => handleApproval(r.attendanceDocId, r.employeeId, "ABSENT")}>
-                     Absent
-                    </Button>
-                  </div>
-                )} */}
                   </td>
                 )}
                 {isAdmin && (

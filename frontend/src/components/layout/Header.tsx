@@ -6,9 +6,9 @@ import type { Notification } from "@/type/notification";
 import { useAuth } from "../../auth/AuthContext";
 import { toast } from "react-toastify";
 import { uploadImage } from "@/services/uploadService";
-import { getNotifications , markAsRead, markAllAsRead } from "@/services/notificationService";
+import { getNotifications , markAsRead, markAllAsRead } from "@/services/IT/notificationService";
 import { socket } from "@/socket";
-import api from "@/services/api";
+import api from "@/services/IT/api";
 
 
 interface HeaderProps {

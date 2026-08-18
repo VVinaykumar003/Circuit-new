@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { getPolicy, updatePolicy } from "@/services/payrollService";
+import { getPolicy, updatePolicy } from "@/services/IT/payrollService";
 import { useAuth } from "@/auth/AuthContext";
 import { toast } from "react-toastify";
 import Button from "@/components/ui/Button";

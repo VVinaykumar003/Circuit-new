@@ -2,7 +2,7 @@
 import axios from "axios";
 
 // Use import.meta.env for Vite projects to access environment variables.
-const API_BASE_URL = import.meta.env.VITE_BACKEND_URL
+const API_BASE_URL = import.meta.env.VITE_NODE_ENV === "production"
   ? `${import.meta.env.VITE_BACKEND_URL}/api`
   : "http://localhost:5000/api";
 

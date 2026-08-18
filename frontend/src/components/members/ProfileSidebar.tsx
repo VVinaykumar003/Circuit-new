@@ -250,7 +250,7 @@ import {
   SaveIcon,
   MapPin,
 } from "lucide-react";
-import { updateMember } from "@/services/memberService";
+import { updateMember } from "@/services/IT/memberService";
 import { toast } from "react-toastify";
 import { getOrganizationSlug } from "@/utils/auth";
 import { useAuth } from "@/auth/AuthContext";

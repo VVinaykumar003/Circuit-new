@@ -28,7 +28,7 @@ import {
   MdCheckCircle,
   MdWarning,
 } from "react-icons/md";
-import { getAllProducts, deleteProduct, updateProduct, createProduct } from "@/services/productServices";
+import { getAllProducts, deleteProduct, updateProduct, createProduct } from "@/services/sales/productServices";
 import { useAuth } from "@/auth/AuthContext";
 import { toast } from "react-toastify";
 import ImportExportActions from "@/components/import-export/ImportExportActions";

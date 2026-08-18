@@ -34,8 +34,8 @@ import {
 } from "react-icons/md";
 import { toast } from "react-toastify";
 import { useAuth } from "@/auth/AuthContext";
-import { getOrders, updateOrder, deleteOrder, emailCustomerOrder, createOrder, type Order } from "@/services/orderServices";
-import { getSalesReps } from "@/services/salesRepServices";
+import { getOrders, updateOrder, deleteOrder, emailCustomerOrder, createOrder, type Order } from "@/services/sales/orderServices";
+import { getSalesReps } from "@/services/sales/salesRepServices";
 import ImportExportActions from "@/components/import-export/ImportExportActions";
 import type { ColumnConfig } from "@/type/importExport.types";
 

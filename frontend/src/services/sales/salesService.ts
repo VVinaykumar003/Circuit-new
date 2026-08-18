@@ -1,4 +1,4 @@
-import API from "../api/axios";
+import API from "../../api/axios";
 
 export const createLead = (slug:string, data:any) => {
   return API.post(`/leads/${slug}/create`, data);

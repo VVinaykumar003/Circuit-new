@@ -10,10 +10,10 @@ import {
 import { toast } from "react-toastify";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "@/auth/AuthContext";
-import { createOrder, getOrderById, updateOrder } from "@/services/orderServices";
-import { getSalesReps } from "@/services/salesRepServices";
-import { getAllProducts } from "@/services/productServices";
-import { getAllAccounts } from "@/services/salesService";
+import { createOrder, getOrderById, updateOrder } from "@/services/sales/orderServices";
+import { getSalesReps } from "@/services/sales/salesRepServices";
+import { getAllProducts } from "@/services/sales/productServices";
+import { getAllAccounts } from "@/services/sales/salesService";
 import { useQuery } from "@tanstack/react-query";
 
 // const productsData = [

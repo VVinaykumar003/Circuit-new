@@ -304,8 +304,8 @@ import {
   getWorkUpdates,
   editWorkUpdate,
   deleteWorkUpdate,
-} from "@/services/workUpdateService";
-import { getProject } from "@/services/projectServices";
+} from "@/services/IT/workUpdateService";
+import { getProject } from "@/services/IT/projectServices";
 import { MdDelete, MdEdit } from "react-icons/md";
 import Swal from "sweetalert2";
 import { toast } from "react-toastify";

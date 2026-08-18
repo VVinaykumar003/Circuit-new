@@ -1,4 +1,4 @@
-import API from "../api/axios";
+import API from "../../api/axios";
 
 /**
  * Publishes a new holiday.

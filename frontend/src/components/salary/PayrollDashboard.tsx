@@ -4,8 +4,8 @@ import StatusBadge from '../ui/StatusBadge';
 import Button from '../ui/Button';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/auth/AuthContext';
-import { getAllPayroll } from '@/services/payrollService';
-import { getAllEmployees } from '@/services/attendanceService';
+import { getAllPayroll } from '@/services/IT/payrollService';
+import { getAllEmployees } from '@/services/sales/attendanceService';
 
 const PayrollDashboard = () => {
     const { auth } = useAuth();

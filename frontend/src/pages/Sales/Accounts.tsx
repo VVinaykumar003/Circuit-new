@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/auth/AuthContext";
-import { deleteAccount, getAllAccounts } from "@/services/salesService";
+import { deleteAccount, getAllAccounts } from "@/services/sales/salesService";
 
 import {
   useReactTable,

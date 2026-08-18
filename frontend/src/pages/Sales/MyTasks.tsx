@@ -27,7 +27,7 @@ import {
   getSalesTaskByEmpId,
   getSalesTaskById,
   updateSalesTask,
-} from "@/services/salesTaskServices";
+} from "@/services/sales/salesTaskServices";
 import { useAuth } from "@/auth/AuthContext";
 
 /* ─────────────────────────────────────────────────────────────

@@ -6,7 +6,7 @@ import { MdChat, MdFileOpen } from "react-icons/md";
 import Swal from "sweetalert2";
 import { useState } from "react";
 import EditProjectModal from "./EditProjectModal";
-import { updateProject } from "@/services/projectServices";
+import { updateProject } from "@/services/IT/projectServices";
 import { useAuth } from "@/auth/AuthContext";
 import { Edit2 } from "lucide-react";
 

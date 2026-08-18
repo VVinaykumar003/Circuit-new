@@ -3,7 +3,7 @@ import { MdDelete } from "react-icons/md";
 
 import { useAuth } from "@/auth/AuthContext";
 import { useEffect, useState } from "react";
-import { getMembers } from "@/services/memberService";
+import { getMembers } from "@/services/IT/memberService";
 
 
 interface User {

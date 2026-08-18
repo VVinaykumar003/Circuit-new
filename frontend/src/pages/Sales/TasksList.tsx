@@ -30,8 +30,8 @@ import {
   MdCheckCircle,
 } from "react-icons/md";
 import { useAuth } from "@/auth/AuthContext";
-import { getSalesTasks, updateSalesTask, deleteSalesTask, createSalesTask } from "@/services/salesTaskServices";
-import { getSalesReps } from "@/services/salesRepServices";
+import { getSalesTasks, updateSalesTask, deleteSalesTask, createSalesTask } from "@/services/sales/salesTaskServices";
+import { getSalesReps } from "@/services/sales/salesRepServices";
 import ImportExportActions from "@/components/import-export/ImportExportActions";
 import type { ColumnConfig } from "@/type/importExport.types";
 

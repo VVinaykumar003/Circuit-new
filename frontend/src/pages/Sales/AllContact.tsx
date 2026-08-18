@@ -23,7 +23,7 @@ import {
   MdDelete,
   MdAssignmentInd,
 } from "react-icons/md";
-import { deleteContact, getAllContacts } from "@/services/salesService";
+import { deleteContact, getAllContacts } from "@/services/sales/salesService";
 import { useAuth } from "@/auth/AuthContext";
 import Swal from "sweetalert2";
 import { toast } from "react-toastify";

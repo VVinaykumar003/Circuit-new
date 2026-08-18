@@ -19,7 +19,7 @@ import type {
   UserRole,
 } from "../../type/attendance";
 import { useAuth } from "@/auth/AuthContext";
-import { getMyAttendance } from "@/services/attendanceService";
+import { getMyAttendance } from "@/services/sales/attendanceService";
 import { useNotificationSocket } from "@/hooks/notifiaction";
 import { usePagination } from "@/hooks/usePagination";
 

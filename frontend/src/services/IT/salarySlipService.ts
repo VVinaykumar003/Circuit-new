@@ -1,4 +1,4 @@
-import API from "../api/axios";
+import API from "../../api/axios";
 
 export const getMySalarySlips = (slug: string, params?: any) => {
   return API.get(`/salary-slip/${slug}/my`, { params });

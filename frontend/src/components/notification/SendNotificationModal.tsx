@@ -229,7 +229,7 @@ import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
 import type { Notification } from "@/type/notification";
 import { useAuth } from "@/auth/AuthContext";
-import { sendNotification, updateNotification } from "@/services/notificationService";
+import { sendNotification, updateNotification } from "@/services/IT/notificationService";
 import { toast } from "react-toastify";
 
 interface Member {

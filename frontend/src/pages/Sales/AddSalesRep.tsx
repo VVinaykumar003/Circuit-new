@@ -6,9 +6,9 @@ import { MdSave, MdContentCopy, MdAdd, MdDelete, MdCloudUpload, MdPersonAdd, MdC
 import { toast } from "react-toastify";
 import { useNavigate, useParams } from "react-router-dom";
 import { useAuth } from "@/auth/AuthContext";
-import { createSalesRep, getSalesRepById, getSalesReps, updateSalesRep } from "@/services/salesRepServices";
+import { createSalesRep, getSalesRepById, getSalesReps, updateSalesRep } from "@/services/sales/salesRepServices";
 import { useQuery } from "@tanstack/react-query";
-import { getSalesEmployees } from "@/services/memberService";
+import { getSalesEmployees } from "@/services/IT/memberService";
 
 /* ─────────────────────────── Zod Schema ─────────────────────────── */
 const salesRepSchema = z.object({

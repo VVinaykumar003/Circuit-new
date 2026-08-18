@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { getSummary, getMonthlyList, markSlipPaid } from "@/services/payrollService";
+import { getSummary, getMonthlyList, markSlipPaid } from "@/services/IT/payrollService";
 import { useAuth } from "@/auth/AuthContext";
 import { toast } from "react-toastify";
 // import Button from "@/components/ui/Button";
@@ -16,7 +16,7 @@ import {
   MdAccountBalanceWallet,
 } from "react-icons/md";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
-import {  downloadSlipPdf } from "@/services/payrollService";
+import {  downloadSlipPdf } from "@/services/IT/payrollService";
 import Select from "@/components/ui/Select";
 import Input from "@/components/ui/Input";
 import StatusBadge from "@/components/ui/StatusBadge";

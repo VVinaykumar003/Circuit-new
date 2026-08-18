@@ -10,11 +10,11 @@ import {
   getPayrollConfig,
   setStructure,
   updatePayrollConfig,
-} from "@/services/payrollService";
+} from "@/services/IT/payrollService";
 // import api from "@/services/api";
 import { toast } from "react-toastify";
 import { MdCurrencyRupee } from "react-icons/md";
-import { getMembers } from "@/services/memberService";
+import { getMembers } from "@/services/IT/memberService";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
 import GlobalPayoutConfig from "@/components/salary/GlobalPayoutConfiguration";
 

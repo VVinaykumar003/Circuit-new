@@ -9,7 +9,7 @@ import ProjectFilters from "@/components/projects/ProjectFilters";
 import { useAuth } from "@/auth/AuthContext";
 import { toast } from "react-toastify";
 import { Link } from "react-router-dom";
-import { getProject, deleteProject } from "@/services/projectServices";
+import { getProject, deleteProject } from "@/services/IT/projectServices";
 // import { getOrganizationSlug } from "@/utils/auth";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
 import Pagination from "@/components/ui/Pagination";

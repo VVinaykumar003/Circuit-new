@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/auth/AuthContext";
 import { toast } from "react-toastify";
-import { updateProject } from "@/services/projectServices";
-import { getMembers } from "@/services/memberService";
+import { updateProject } from "@/services/IT/projectServices";
+import { getMembers } from "@/services/IT/memberService";
 
 interface Props {
   project: any;

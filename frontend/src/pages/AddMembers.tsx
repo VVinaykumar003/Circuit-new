@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { FaEye, FaEyeSlash, FaUser, FaShieldAlt, FaBriefcase, FaUniversity, FaUserFriends } from "react-icons/fa";
 import { toast } from "react-toastify";
-import { createMember } from "../services/memberService";
+import { createMember } from "../services/IT/memberService";
 // import { getOrganizationSlug } from "@/utils/auth";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
 import { useAuth } from "@/auth/AuthContext";
@@ -429,7 +429,7 @@ const AddMember = () => {
               </div>
             )}
 
-            {/* ── STEP 4: Banking ── */}
+            {/* ── STEP 4: Banking ── */} 
             {currentStep === 4 && (
               <div className="space-y-6">
                 <div className="flex items-center gap-3 mb-2">

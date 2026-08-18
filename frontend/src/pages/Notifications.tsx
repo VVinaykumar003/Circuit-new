@@ -5,12 +5,12 @@ import NotificationPage from "@/components/notification/NotificationPages";
 import SendNotificationModal from "@/components/notification/SendNotificationModal";
 
 import { MdSend, MdNotificationsNone } from "react-icons/md";
-import { getMembers } from "@/services/memberService";
+import { getMembers } from "@/services/IT/memberService";
 import { useAuth } from "@/auth/AuthContext";
 import {
   deleteNotification,
   getNotifications,
-} from "@/services/notificationService";
+} from "@/services/IT/notificationService";
 import Swal from "sweetalert2";
 import Button from "@/components/ui/Button";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";

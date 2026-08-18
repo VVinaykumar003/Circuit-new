@@ -17,9 +17,9 @@ import {
   MdCalendarMonth,
   MdMenuBook,
 } from "react-icons/md";
-import { applyLeave, getMyLeaves, deleteLeave, updateLeave } from "@/services/leaveService";
-import { getHolidays } from "@/services/holidayService";
-import { getLeavePolicy } from "@/services/leavePolicyService";
+import { applyLeave, getMyLeaves, deleteLeave, updateLeave } from "@/services/IT/leaveService";
+import { getHolidays } from "@/services/IT/holidayService";
+import { getLeavePolicy } from "@/services/IT/leavePolicyService";
 import { toast } from "react-toastify";
 // import { getOrganizationSlug } from "@/utils/auth";
 // import { getUser } from "@/utils/getUser";

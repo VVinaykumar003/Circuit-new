@@ -7,8 +7,8 @@ import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/auth/AuthContext";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { createSalesTask } from "@/services/salesTaskServices";
-import { getSalesReps } from "@/services/salesRepServices";
+import { createSalesTask } from "@/services/sales/salesTaskServices";
+import { getSalesReps } from "@/services/sales/salesRepServices";
 
 /* ─────────────────────────── Zod Schema ─────────────────────────── */
 const taskSchema = z.object({

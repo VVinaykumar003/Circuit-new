@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { getMyHistory, downloadSlipPdf } from "@/services/payrollService";
+import { getMyHistory, downloadSlipPdf } from "@/services/IT/payrollService";
 import { useAuth } from "@/auth/AuthContext";
 import { toast } from "react-toastify";
 import Button from "@/components/ui/Button";

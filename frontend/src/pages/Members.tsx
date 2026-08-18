@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import MemberCard from "@/components/members/MemberCard";
 import type { Member } from "@/type/member";
-import { getMembers, deleteMember } from "@/services/memberService";
+import { getMembers, deleteMember } from "@/services/IT/memberService";
 // import { getOrganizationSlug } from "@/utils/auth";
 import { useAuth } from "@/auth/AuthContext";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";

@@ -18,7 +18,7 @@ import {
   markAsRead,
   deleteNotification,
   type Notification,
-} from "@/services/notificationServices";
+} from "@/services/IT/notificationServices";
 import { toast } from "react-toastify";
 
 /* ─────────────────────────── helpers ─────────────────────────── */

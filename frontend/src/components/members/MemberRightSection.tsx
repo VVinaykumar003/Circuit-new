@@ -8,7 +8,7 @@ import ProjectDetails from "../projects/ProjectDetails";
 import MemberTask from "./MemberTask";
 import Tabs from "../ui/Tabs";
 import { useAuth } from "@/auth/AuthContext";
-import { getProject } from "@/services/projectServices";
+import { getProject } from "@/services/IT/projectServices";
 import { useNavigate } from "react-router-dom";
 
 

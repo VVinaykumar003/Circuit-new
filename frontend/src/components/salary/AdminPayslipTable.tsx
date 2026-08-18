@@ -9,7 +9,7 @@ import Select from "@/components/ui/Select";
 import Input from "@/components/ui/Input";
 import StatusBadge from "../ui/StatusBadge";
 import { useAuth } from "@/auth/AuthContext";
-import { getAllSalarySlips, downloadSalarySlipPDF } from "@/services/salarySlipService";
+import { getAllSalarySlips, downloadSalarySlipPDF } from "@/services/IT/salarySlipService";
 import { toast } from "react-toastify";
 
 /* ---------------- COMPONENT ---------------- */

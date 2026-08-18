@@ -104,7 +104,7 @@ import type { Project, Participant } from "../../type/project";
 import { useState } from "react";
 import EditProjectModal from "./EditProjectModal";
 import { useAuth } from "@/auth/AuthContext";
-import { updateProject } from "@/services/projectServices";
+import { updateProject } from "@/services/IT/projectServices";
 
 interface Props {
   project: Project;

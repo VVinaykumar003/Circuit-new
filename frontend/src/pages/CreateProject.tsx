@@ -2,7 +2,7 @@ import API from "@/api/axios";
 import { useAuth } from "@/auth/AuthContext";
 import { AddParticipant } from "@/components/projects/AddParticipant";
 import CreateProjectForm from "@/components/projects/CreateProjectForm";
-import { createProject } from "@/services/projectServices";
+import { createProject } from "@/services/IT/projectServices";
 import { useState } from "react";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
 import { toast } from "react-toastify";

@@ -1,6 +1,6 @@
 import { useAuth } from '@/auth/AuthContext';
 import ProfileSidebar from '@/components/members/ProfileSidebar';
-import { getMemberById } from '@/services/memberService';
+import { getMemberById } from '@/services/IT/memberService';
 import type { Member } from '@/type/member';
 import { ArrowLeft } from 'lucide-react';
 import { useEffect, useState } from 'react'

@@ -15,9 +15,9 @@ import {
 } from "react-icons/md";
 import { toast } from "react-toastify";
 
-import { getAllLeaves, updateLeaveStatus, bulkUpdateLeaveStatus } from "@/services/leaveService";
-import { getHolidays, addHoliday, updateHoliday, deleteHoliday } from "@/services/holidayService";
-import { getLeavePolicy, updateLeavePolicy } from "@/services/leavePolicyService";
+import { getAllLeaves, updateLeaveStatus, bulkUpdateLeaveStatus } from "@/services/IT/leaveService";
+import { getHolidays, addHoliday, updateHoliday, deleteHoliday } from "@/services/IT/holidayService";
+import { getLeavePolicy, updateLeavePolicy } from "@/services/IT/leavePolicyService";
 import type { LeaveRequest } from "@/type/leave";
 import LeaveCalendar from "./LeaveCalendar";
 import AddHolidayDrawer from "./AddHolidayDrawer";

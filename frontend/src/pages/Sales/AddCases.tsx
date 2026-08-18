@@ -7,8 +7,8 @@ import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/auth/AuthContext";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { createCase, type Case } from "@/services/caseServices";
-import { getSalesReps } from "@/services/salesRepServices";
+import { createCase, type Case } from "@/services/sales/caseServices";
+import { getSalesReps } from "@/services/sales/salesRepServices";
 
 /* ─────────────────────────── Zod Schema ─────────────────────────── */
 const caseSchema = z.object({

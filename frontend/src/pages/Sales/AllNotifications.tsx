@@ -3,7 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { MdCheckCircle, MdDelete, MdSearch, MdOutlineSettings, MdClose ,MdWarning } from 'react-icons/md';
 import {  useNavigate } from 'react-router-dom';
 import { useAuth } from '@/auth/AuthContext';
-import { getNotifications, markAllAsRead, markAsRead,deleteNotification, type Notification } from '@/services/notificationServices';
+import { getNotifications, markAllAsRead, markAsRead,deleteNotification, type Notification } from '@/services/IT/notificationServices';
 import { toast } from 'react-toastify';
 
 export default function AllNotifications() {

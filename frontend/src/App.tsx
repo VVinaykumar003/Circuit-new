@@ -38,6 +38,7 @@ import MyTasks from "./pages/Sales/MyTasks";
 import AllNotifications from "./pages/Sales/AllNotifications";
 import AdminNotificationCenter from "./pages/Sales/AdminNotificationCenter";
 import EmployeePayslip from "./components/salary/Employeepayslip";
+import AttendanceManagementPage from "./pages/Sales/AttendanceManagementPage";
 // import NotificationDetails from "./pages/Sales/NotificaitionDetails";
 
 /* Pages (lazy) */
@@ -154,6 +155,7 @@ export default function App() {
             />
             
             <Route path="/sales" element={<SalesDashboard />} />
+            <Route path="/sales/attendance" element={<AttendanceManagementPage />} />
             <Route path="/sales/dashboard" element={<Navigate to="/sales" replace />} />
             <Route path="/sales/products" element={<AllProducts />} />
             <Route path="/sales/products/new" element={<NewProduct />} />

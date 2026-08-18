@@ -36,8 +36,8 @@ import {
 } from "react-icons/md";
 import { toast } from "react-toastify";
 import { useAuth } from "@/auth/AuthContext";
-import { getCases, updateCase, deleteCase, createCase, type Case } from "@/services/caseServices";
-import { getSalesReps } from "@/services/salesRepServices";
+import { getCases, updateCase, deleteCase, createCase, type Case } from "@/services/sales/caseServices";
+import { getSalesReps } from "@/services/sales/salesRepServices";
 import { PieChart, Pie, Cell, BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer } from "recharts";
 import ImportExportActions from "@/components/import-export/ImportExportActions";
 import type { ColumnConfig } from "@/type/importExport.types";

@@ -1,4 +1,4 @@
-import API from "../api/axios";
+import API from "../../api/axios";
 
 /**
  * Marks or updates attendance for a department or the whole organization.

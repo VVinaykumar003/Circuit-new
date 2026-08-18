@@ -1,5 +1,5 @@
 // services/memberService.js
-import API from "../api/axios";
+import API from "../../api/axios";
 
 /**
  * Fetches all members for an organization.

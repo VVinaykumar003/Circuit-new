@@ -5,9 +5,9 @@ import * as z from "zod";
 import { useNavigate } from "react-router-dom";
 import { MdSave, MdBusiness, MdDelete } from "react-icons/md";
 import { toast } from "react-toastify";
-import { createAccount } from "@/services/salesService";
+import { createAccount } from "@/services/sales/salesService";
 import { useAuth } from "@/auth/AuthContext";
-import { getSalesEmployees } from "@/services/memberService";
+import { getSalesEmployees } from "@/services/IT/memberService";
 
 const COUNTRIES = [
   "India", "United States", "United Kingdom", "Canada", "Australia",
