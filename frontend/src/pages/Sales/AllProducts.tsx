@@ -25,7 +25,7 @@ import {
   MdInventory,
 } from "react-icons/md";
 import { createProduct } from "@/services/productServices";
-import { useAuth } from "@/auth/AuthContext";
+import { useAuth } from "@/auth/useAuth";
 import ImportExportActions from "@/components/import-export/ImportExportActions";
 import { EditProductModal } from "@/components/sales/Product/EditProductModal";
 import { ProductModals } from "@/components/sales/Product/ProductModals";

@@ -6,7 +6,7 @@ import { socket } from "./socket";
 import ProjectChat from "./components/projects/ProjectChat";
 import Notifications from "./pages/Notifications";
 import SettingsPage from "./pages/Settings";
-import { useAuth } from "./auth/AuthContext";
+import { useAuth } from "@/auth/useAuth";
 import WorkUpdates from "./pages/WorkUpdate";
 import NewProduct from "./pages/Sales/Products";
 import AllProducts from "./pages/Sales/AllProducts";

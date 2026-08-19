@@ -1,7 +1,7 @@
 import type { Task } from "@/type/task";
 import StatusBadge from "../ui/StatusBadge";
 import React from "react";
-import { useAuth } from "@/auth/AuthContext";
+import { useAuth } from "@/auth/useAuth";
 import { FileEdit, Trash2Icon } from "lucide-react";
 import Swal from "sweetalert2";
 

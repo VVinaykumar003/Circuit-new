@@ -11,7 +11,7 @@ import AttachmentInput from "../ui/AttachmentInput";
 import Checklist from "../ui/CheckList";
 import type { Tag } from "../../type/tag";
 
-import { useAuth } from "@/auth/AuthContext";
+import { useAuth } from "@/auth/useAuth";
 import API from "@/api/axios";
 import type { ChecklistItem } from "@/type/task";
 import { toast } from "react-toastify";

@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { toast } from "react-toastify";
 import { socket } from "@/socket";
-import { useAuth } from "@/auth/AuthContext";
+import { useAuth } from "@/auth/useAuth";
 
 
 

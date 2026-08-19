@@ -10,7 +10,7 @@ import { getProject } from "@/services/projectServices";
 import { MdDelete, MdEdit } from "react-icons/md";
 import Swal from "sweetalert2";
 import { toast } from "react-toastify";
-import { useAuth } from "@/auth/AuthContext";
+import { useAuth } from "@/auth/useAuth";
 
 interface WorkUpdate {
   _id: string;

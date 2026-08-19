@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useAuth } from "@/auth/AuthContext";
+import { useAuth } from "@/auth/useAuth";
 import { toast } from "react-toastify";
 import { updateProject } from "@/services/projectServices";
 import { getMembers } from "@/services/memberService";

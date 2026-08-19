@@ -7,7 +7,7 @@ import {
   MdAccessTime
 } from "react-icons/md";
 import { markAttendance , getMyAttendance } from "@/services/attendanceService";
-import { useAuth } from "@/auth/AuthContext";
+import { useAuth } from "@/auth/useAuth";
 import { toast } from "react-toastify";
 // TODO: Adjust this import path to match your actual frontend socket file!
 import { socket } from "@/socket";

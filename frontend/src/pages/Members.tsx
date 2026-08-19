@@ -5,7 +5,7 @@ import MemberCard from "@/components/members/MemberCard";
 import type { Member } from "@/type/member";
 import { getMembers, deleteMember } from "@/services/memberService";
 // import { getOrganizationSlug } from "@/utils/auth";
-import { useAuth } from "@/auth/AuthContext";
+import { useAuth } from "@/auth/useAuth";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
 import Swal from "sweetalert2";
 import { toast } from "react-toastify";

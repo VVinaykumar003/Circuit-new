@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { MdNotifications, MdTask, MdPerson, MdShoppingCart, MdAttachMoney, MdFlag, MdEvent, MdCampaign, MdInfo, MdCheckCircle } from 'react-icons/md';
-import { useAuth } from '@/auth/AuthContext';
+import { useAuth } from '@/auth/useAuth';
 import { getUnreadNotifications, markAsRead, type Notification } from '@/services/notificationServices';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 

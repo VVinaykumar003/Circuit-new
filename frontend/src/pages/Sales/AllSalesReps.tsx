@@ -48,7 +48,7 @@ import {
   Line
 } from "recharts";
 import { toast } from "react-toastify";
-import { useAuth } from "@/auth/AuthContext";
+import { useAuth } from "@/auth/useAuth";
 import { getSalesReps, updateSalesRep, deleteSalesRep, createSalesRep, type SalesRep } from "@/services/salesRepServices";
 import ImportExportActions from "@/components/import-export/ImportExportActions";
 import type { ColumnConfig } from "@/type/importExport.types";

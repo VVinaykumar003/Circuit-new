@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { getMyHistory, downloadSlipPdf } from "@/services/payrollService";
-import { useAuth } from "@/auth/AuthContext";
+import { useAuth } from "@/auth/useAuth";
 import { toast } from "react-toastify";
 import Button from "@/components/ui/Button";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";

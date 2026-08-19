@@ -5,7 +5,7 @@ import * as z from "zod";
 import { MdSave, MdContentCopy, MdAttachment, MdSend, MdDelete, MdCheckCircle } from "react-icons/md";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/auth/AuthContext";
+import { useAuth } from "@/auth/useAuth";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createSalesTask } from "@/services/salesTaskServices";
 import { getSalesReps } from "@/services/salesRepServices";

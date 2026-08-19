@@ -27,7 +27,7 @@ import {
   MdPerson,
 } from "react-icons/md";
 import { deleteLead, getLeads, updateLead, convertLeadToCustomer } from "@/services/leadServices";
-import { useAuth } from "@/auth/AuthContext";
+import { useAuth } from "@/auth/useAuth";
 import { toast } from "react-toastify";
 
 /* ─────────────────────────── types ─────────────────────────── */

@@ -24,7 +24,7 @@ import AddHolidayDrawer from "./AddHolidayDrawer";
 import LeavePolicy from "./LeavePolicy";
 import MobileLeaveTabs from "./MobileLeaveTabs";
 // import { getOrganizationSlug } from "@/utils/auth";
-import { useAuth } from "@/auth/AuthContext";
+import { useAuth } from "@/auth/useAuth";
 import { data } from "react-router-dom";
 import LeaveDrawer from "./LeaveDrawer";
 

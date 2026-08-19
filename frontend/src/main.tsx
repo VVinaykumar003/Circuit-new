@@ -7,7 +7,7 @@ import App from "./App.tsx";
 import ScrollToTop from "./components/ScrollToTop.tsx";
 import { ThemeProvider } from "./context/theme-provider"; // ✅ corrected import
 import "./index.css";
-import { AuthProvider } from "./auth/AuthContext.tsx";
+import { AuthProvider } from "@/auth/authProvider.tsx";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 const queryClient = new QueryClient();

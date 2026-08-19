@@ -14,7 +14,7 @@ import ProjectMembers from "../components/projects/ProjectMembers";
 import ProjectActivity from "../components/projects/ProjectActivity";
 import ProjectChat from "@/components/projects/ProjectChat";
 
-import { useAuth } from "@/auth/AuthContext";
+import { useAuth } from "@/auth/useAuth";
 import { getProjectById } from "@/services/projectService";
 import { getTasksByProjectId } from "@/services/taskService"; // renamed service
 import Breadcrumbs from "@/components/ui/Breadcrumbs";

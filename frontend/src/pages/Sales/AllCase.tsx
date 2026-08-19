@@ -35,7 +35,7 @@ import {
   MdTrendingUp,
 } from "react-icons/md";
 import { toast } from "react-toastify";
-import { useAuth } from "@/auth/AuthContext";
+import { useAuth } from "@/auth/useAuth";
 import {
   getCases,
   updateCase,

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import Button from "@/components/ui/Button";
 
-import { useAuth } from "@/auth/AuthContext";
+import { useAuth } from "@/auth/useAuth";
 
 interface Props {
   basic: number;

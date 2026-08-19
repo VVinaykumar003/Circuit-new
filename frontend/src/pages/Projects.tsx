@@ -6,7 +6,7 @@ import ProjectDrawer from "../components/projects/ProjectDrawer";
 import ProjectDetails from "../components/projects/ProjectDetails";
 import ProjectGridSkeleton from "@/components/projects/ProjectGridSkeleton";
 import ProjectFilters from "@/components/projects/ProjectFilters";
-import { useAuth } from "@/auth/AuthContext";
+import { useAuth } from "@/auth/useAuth";
 import { toast } from "react-toastify";
 import { Link } from "react-router-dom";
 import { getProject, deleteProject } from "@/services/projectServices";

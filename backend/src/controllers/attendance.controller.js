@@ -1493,6 +1493,14 @@ const getAdminDashboard = asyncHandler(async (req, res) => {
         as: 'employeeDetails'
       }
     },
+    {
+  $match: {
+    "records.status": {
+      $in: ["PRESENT", "PENDING"],
+    },
+  },
+},
+
     { $unwind: { path: '$employeeDetails', preserveNullAndEmptyArrays: true } },
     {
       $facet: {
@@ -1534,16 +1542,85 @@ const getAdminDashboard = asyncHandler(async (req, res) => {
               approval: '$records.approval'
             }
           }
-        ]
+        ],
+         employees: [
+  {
+    $sort: {
+      "employeeDetails.name": 1,
+    },
+  },
+  {
+    $project: {
+      attendanceDocId: "$_id",
+      _id: "$records._id",
+
+      employeeId: "$records.employee",
+
+      employeeName:
+        "$employeeDetails.name",
+
+      email:
+        "$employeeDetails.email",
+
+      designation:
+        "$employeeDetails.designation",
+
+      profileImageUrl:
+        "$employeeDetails.imageUrl",
+
+      date: "$date",
+
+      status:
+        "$records.status",
+
+      approval:
+        "$records.approval",
+
+      checkIn:
+        "$records.checkIn",
+
+      checkOut:
+        "$records.checkOut",
+
+      workingHours:
+        "$records.workingHours",
+
+      late:
+        "$records.lateBy",
+
+      mode:
+        "$records.mode",
+
+      location:
+        "$records.location",
+    },
+  },
+]
+
+
+
+
       }
     }
   ]);
 
   const data = aggregationResult[0];
-  const response = {
-    kpis: data.kpis[0] || { presentToday: 0, absentToday: 0, lateEmployees: 0, pendingApprovals: 0, onLeave: 0, workFromHome: 0 },
-    approvals: data.approvals || []
-  };
+ const response = {
+  kpis: data.kpis[0] || {
+    presentToday: 0,
+    absentToday: 0,
+    lateEmployees: 0,
+    pendingApprovals: 0,
+    onLeave: 0,
+    workFromHome: 0,
+  },
+
+  // Pending approval employees
+  approvals: data.approvals || [],
+
+  // All employees with attendance
+  employees: data.employees || [],
+};
 
   // logger.info('Admin dashboard data:', response);
 

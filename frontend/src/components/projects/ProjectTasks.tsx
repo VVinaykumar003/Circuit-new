@@ -15,7 +15,7 @@ import {
   X,
 } from "lucide-react";
 import API from "@/api/axios";
-import { useAuth } from "@/auth/AuthContext";
+import { useAuth } from "@/auth/useAuth";
 import { toast } from "react-toastify";
 import { Edit2, FileEdit, Trash } from "lucide-react";
 

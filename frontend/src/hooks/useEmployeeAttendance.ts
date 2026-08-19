@@ -8,7 +8,7 @@ import {
   endBreak as apiEndBreak,
 } from "@/services/attendanceService";
 import type { EmployeeDashboardData, TodayAttendance } from "@/type/index";
-import { useAuth } from "@/auth/AuthContext";
+import { useAuth } from "@/auth/useAuth";
 
 export const useEmployeeAttendance = () => {
   const [data, setData] = useState<EmployeeDashboardData | null>(null);

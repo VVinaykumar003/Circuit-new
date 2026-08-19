@@ -6,7 +6,7 @@ import {
   // We will reuse apiApprove for rejections
 } from "@/services/attendanceService";
 import type { AdminDashboardData } from '@/type/index';
-import { useAuth } from "@/auth/AuthContext";
+import { useAuth } from "@/auth/useAuth";
 
 // import {dummyAdminDashboardData} from '@/data/dummyData'
 

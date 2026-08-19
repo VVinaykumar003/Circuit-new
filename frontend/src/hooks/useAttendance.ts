@@ -7,7 +7,7 @@ import {
   getAdminDashboard,
 } from "../services/attendanceService";
 import type { AttendanceFilters } from "../type/attendance";
-import { useAuth } from "@/auth/AuthContext";
+import { useAuth } from "@/auth/useAuth";
 
 export function useMyAttendance(filters: Partial<AttendanceFilters>, page: number, pageSize = 10) {
   const { auth } = useAuth();

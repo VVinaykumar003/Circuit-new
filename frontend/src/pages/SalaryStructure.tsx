@@ -4,7 +4,7 @@ import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
 import StatutorySettingsCard from "@/components/salary/StatutorySettingsCard";
 import SalarySlipPreview from "@/components/salary/SalarySlipPreview";
-import { useAuth } from "@/auth/AuthContext";
+import { useAuth } from "@/auth/useAuth";
 // import { getAllEmployees } from "@/services/attendanceService";
 import {
   getPayrollConfig,

@@ -22,7 +22,7 @@ import {
   MdSupportAgent,
 } from "react-icons/md";
 import { FolderKanban, UserPlus, Target, PhoneCall } from "lucide-react";
-import { useAuth } from "../../auth/AuthContext";
+import { useAuth } from "@/auth/useAuth";
 import { useActivities } from "@/hooks/useActivities";
 
 /* ─────────────────────────── types ─────────────────────────── */

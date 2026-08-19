@@ -2,7 +2,7 @@ import React, { useState, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { getSalesRepById } from "@/services/salesRepServices";
-import { useAuth } from "@/auth/AuthContext";
+import { useAuth } from "@/auth/useAuth";
 import {
   MdEdit,
   MdPeople,

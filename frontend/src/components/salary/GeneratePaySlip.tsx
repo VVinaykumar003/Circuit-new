@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { getEmployees, runMonthly } from "@/services/payrollService";
 // import { getMembers } from "@/services/memberService";
-import { useAuth } from "@/auth/AuthContext";
+import { useAuth } from "@/auth/useAuth";
 import { toast } from "react-toastify";
 import Button from "@/components/ui/Button";
 import Select from "@/components/ui/Select";

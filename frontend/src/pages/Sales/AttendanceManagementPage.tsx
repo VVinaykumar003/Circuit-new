@@ -4,7 +4,7 @@ import AdminApproval from "./AdminApproval";
 import EmployeeAttendanceHistory from "./Employee/EmployeeAttendanceHistory";
 import AdminAttendanceHistory from "./AdminAttendanceHistory";
 // import TeamAttendance from "./TeamAttendance";
-import { useAuth } from "@/auth/AuthContext";
+import { useAuth } from "@/auth/useAuth";
 
 const allTabsConfig = [
   { id: 0, name: "Employee Attendance", component: <EmployeeAttendance />, roles: ["employee"] },

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { getPolicy, updatePolicy } from "@/services/payrollService";
-import { useAuth } from "@/auth/AuthContext";
+import { useAuth } from "@/auth/useAuth";
 import { toast } from "react-toastify";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";

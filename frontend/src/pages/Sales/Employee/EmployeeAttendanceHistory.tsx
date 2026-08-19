@@ -7,7 +7,7 @@ import AttendanceTimeline from "@/components/sales/AttendanceTimeline";
 import AttendanceDetailsDrawer from "../../../components/sales/AttendanceDetailsDrawer";
 import { useMyAttendance, useMyStats } from "../../../hooks/useAttendance";
 import { defaultAttendanceFilters } from "../../../type/attendance";
-import { useAuth } from "@/auth/AuthContext";
+import { useAuth } from "@/auth/useAuth";
 import type { Attendance, AttendanceFilters as Filters } from "../../../type/attendance";
 
 type ViewMode = "table" | "timeline";

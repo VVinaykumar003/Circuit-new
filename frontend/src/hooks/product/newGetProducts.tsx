@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { toast } from "react-toastify";
 
-import { useAuth } from "@/auth/AuthContext";
+import { useAuth } from "@/auth/useAuth";
 import { getAllProducts } from "@/services/productServices";
 import type { Product } from "@/type/salesProduct";
 import type { ColumnConfig } from "@/type/importExport.types";

@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useTheme } from "../../context/use-theme";
 import { MdNotifications, MdMenu, MdSearch, MdClose, MdLightMode, MdDarkMode } from "react-icons/md";
-import { useAuth } from "../../auth/AuthContext";
+import { useAuth } from "@/auth/useAuth";
 import { toast } from "react-toastify"; // Keep toast for avatar upload
 import { uploadImage } from "@/services/uploadService";
 import {type OrganizationMember} from '@/type/User';

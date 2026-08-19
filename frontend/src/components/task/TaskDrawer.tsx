@@ -9,7 +9,7 @@
 // import AttachmentInput from "../ui/AttachmentInput";
 // import Checklist from "../ui/CheckList";
 
-// import { useAuth } from "@/auth/AuthContext";
+// import { useAuth } from "@/auth/useAuth";
 // import API from "@/api/axios";
 // import type { Tag } from "../../type/tag";
 // import type { Task } from "../../type/task";
@@ -387,7 +387,7 @@ import AssigneeSelect from "../ui/AssigneeSelect";
 import AttachmentInput from "../ui/AttachmentInput";
 import Checklist from "../ui/CheckList";
 
-import { useAuth } from "@/auth/AuthContext";
+import { useAuth } from "@/auth/useAuth";
 import API from "@/api/axios";
 import type { Tag } from "../../type/tag";
 import type { Task } from "../../type/task";

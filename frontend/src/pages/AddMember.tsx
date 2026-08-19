@@ -2,7 +2,7 @@ import { useState } from "react";
 import { toast } from "react-toastify";
 import { FaEye, FaEyeSlash, FaPen, FaUser, FaUserFriends, FaShieldAlt, FaBriefcase, FaUniversity } from "react-icons/fa";
 import { createMember } from "../services/memberService";
-import { useAuth } from "@/auth/AuthContext";
+import { useAuth } from "@/auth/useAuth";
 import { uploadImage } from "@/services/uploadService";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
 

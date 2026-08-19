@@ -10,7 +10,7 @@ import SalarySlipPreview from "../components/salary/SalarySlipPreview";
 import GlobalPayoutConfiguration from "../components/salary/GlobalPayoutConfiguration";
 import StatutorySettingsCard from "../components/salary/StatutorySettingsCard";
 
-import { useAuth } from "@/auth/AuthContext";
+import { useAuth } from "@/auth/useAuth";
 import { getMembers } from "@/services/memberService";
 
 import { MdCurrencyRupee } from "react-icons/md";

@@ -3,6 +3,7 @@ import AdminDashboardSkeleton from '@/components/shared/skeletons/AdminDashboard
 import ErrorState from '@/components/shared/ErrorState';
 import AdminKpiCards from '@/components/sales/AdminKpiCards';
 import ApprovalTable from '@/components/sales/ApprovalTable';
+import EmployeeAttendanceList from './EmployeeAttendanceList';
 
 const AdminApproval = () => {
   const {
@@ -28,7 +29,11 @@ const AdminApproval = () => {
     );
   }
 //  console.log(`Attendance : ${JSON.stringify(data)}`);
-  const { kpis, approvals }= data; // Explicitly type approvals
+const {
+  kpis,
+  approvals,
+  employees,
+} = data;
   console.log(`Data from : ${approvals}` )
    
   return (
@@ -43,6 +48,10 @@ const AdminApproval = () => {
         onReject={handleReject}
         actionLoading={actionLoading}
       />
+
+      <EmployeeAttendanceList
+  employees={employees}
+/>
     </div>
   );
 };

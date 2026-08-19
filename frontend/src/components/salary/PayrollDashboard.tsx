@@ -3,7 +3,7 @@ import Table  from "../ui/Table"
 import StatusBadge from '../ui/StatusBadge';
 import Button from '../ui/Button';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/auth/AuthContext';
+import { useAuth } from '@/auth/useAuth';
 import { getAllPayroll } from '@/services/payrollService';
 import { getAllEmployees } from '@/services/attendanceService';
 

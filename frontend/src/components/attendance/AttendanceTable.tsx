@@ -3,7 +3,7 @@ import StatusBadge from "../ui/StatusBadge";
 import Button from "../ui/Button";
 import type { AttendanceRecord, UserRole } from "../../type/attendance";
 import Table from "../ui/Table";
-import { useAuth } from "@/auth/AuthContext";
+import { useAuth } from "@/auth/useAuth";
 import { approveAttendance } from "@/services/attendanceService";
 import { toast } from "react-toastify";
 // import { useNotificationSocket } from '@/hooks/notifiaction';

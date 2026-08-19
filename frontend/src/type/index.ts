@@ -111,6 +111,33 @@ export interface AdminApprovalRecord {
   approval: ApprovalStatus;
 }
 
+export interface AdminEmployee {
+  attendanceDocId: string;
+  _id: string;
+
+  employeeId: string;
+  employeeName: string;
+  email?: string;
+  designation?: string;
+  imageUrl?: string;
+
+  date: string;
+
+  status: "PRESENT" | "PENDING";
+  approval?: "Pending" | "Approved" | "Rejected";
+
+  checkIn?: string | null;
+  checkOut?: string | null;
+
+  workingHours?: number;
+  late?: number;
+
+  mode?: string;
+  location?: string;
+}
+
+
+
 export interface AdminDashboardData {
   kpis: {
     presentToday: number;
@@ -121,4 +148,5 @@ export interface AdminDashboardData {
     workFromHome: number;
   };
   approvals: AdminApprovalRecord[];
+  employees: AdminEmployee[];
 }

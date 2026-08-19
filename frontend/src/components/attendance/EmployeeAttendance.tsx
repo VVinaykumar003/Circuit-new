@@ -18,7 +18,7 @@ import type {
   AttendanceStatus,
   UserRole,
 } from "../../type/attendance";
-import { useAuth } from "@/auth/AuthContext";
+import { useAuth } from "@/auth/useAuth";
 import { getMyAttendance } from "@/services/attendanceService";
 import { useNotificationSocket } from "@/hooks/notifiaction";
 import { usePagination } from "@/hooks/usePagination";

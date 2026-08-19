@@ -17,7 +17,7 @@ import {
   MdNotifications,
   MdEventAvailable,
 } from "react-icons/md";
-import { useAuth } from "../../auth/AuthContext";
+import { useAuth } from "@/auth/useAuth";
 
 interface Props {
   isOpen: boolean;

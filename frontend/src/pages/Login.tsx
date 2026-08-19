@@ -5,7 +5,7 @@ import loginAnimation from "../assets/loginAnimation.json";
 import { LockIcon, User2Icon } from "lucide-react";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { login as loginService } from "../services/authService";
-import { useAuth } from "../auth/AuthContext";
+import { useAuth } from "@/auth/useAuth";
 import { toast } from "react-toastify";
 import Button from "@/components/ui/Button";
 import { socket } from "@/services/socket";

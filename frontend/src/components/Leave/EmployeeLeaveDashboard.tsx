@@ -23,7 +23,7 @@ import { getLeavePolicy } from "@/services/leavePolicyService";
 import { toast } from "react-toastify";
 // import { getOrganizationSlug } from "@/utils/auth";
 // import { getUser } from "@/utils/getUser";
-import { useAuth } from "@/auth/AuthContext";
+import { useAuth } from "@/auth/useAuth";
 import { socket } from "@/socket";
 import Pagination from "@/components/ui/Pagination"
 import Swal from "sweetalert2";

@@ -14,7 +14,7 @@ import {
 } from "react-icons/md";
 import { toast } from "react-toastify";
 import { useNavigate, useParams } from "react-router-dom";
-import { useAuth } from "@/auth/AuthContext";
+import { useAuth } from "@/auth/useAuth";
 import {
   createOrder,
   getOrderById,
