@@ -6,26 +6,21 @@ const getBaseUrl = () => {
     import.meta.env.MODE === "production" ||
     import.meta.env.VITE_NODE_ENV === "production";
 
-  const explicitUrl =
-    import.meta.env.VITE_API_URL ||
-    import.meta.env.VITE_BACKEND_URL ||
-    import.meta.env.VITE_PRODUCTION_URL;
-
-  if (explicitUrl && typeof explicitUrl === "string" && explicitUrl.trim() !== "") {
-    let clean = explicitUrl.trim().replace(/\/+$/, "");
-    if (!clean.endsWith("/api")) {
-      clean = `${clean}/api`;
-    }
-    return clean;
-  }
-
-  // In production builds without explicit URL, default to /api for same-origin Vercel rewrites
+  // In production builds, default to /api for same-origin Vercel rewrites
+  // This completely eliminates third-party cross-origin cookie rejection in browsers
   if (isProd) {
+    if (import.meta.env.VITE_DIRECT_BACKEND_URL) {
+      let clean = String(import.meta.env.VITE_DIRECT_BACKEND_URL).trim().replace(/\/+$/, "");
+      return clean.endsWith("/api") ? clean : `${clean}/api`;
+    }
     return "/api";
   }
 
   const devUrl =
-    import.meta.env.VITE_DEVELOPMENT_URL || "http://localhost:5000";
+    import.meta.env.VITE_API_URL ||
+    import.meta.env.VITE_BACKEND_URL ||
+    import.meta.env.VITE_DEVELOPMENT_URL ||
+    "http://localhost:5000";
   let cleanDev = typeof devUrl === "string" ? devUrl.trim().replace(/\/+$/, "") : "http://localhost:5000";
   if (!cleanDev.endsWith("/api")) {
     cleanDev = `${cleanDev}/api`;

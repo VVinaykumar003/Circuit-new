@@ -25,22 +25,27 @@ const auth = async (req, res, next) => {
       }
     }
 
-    // --------------------------------------------------
     // 2️⃣ Extract Token: Cookies (Fallback if header absent/invalid)
-    // --------------------------------------------------
-    if (!token && req.cookies) {
-      const cookieCandidate =
-        req.cookies.token || req.cookies.jwt || req.cookies.authToken;
+    const getCookieToken = () => {
+      if (req.cookies) {
+        const cookieCandidate =
+          req.cookies.token || req.cookies.jwt || req.cookies.authToken;
 
-      if (cookieCandidate && typeof cookieCandidate === "string") {
-        let cleaned = cookieCandidate.trim();
-        if (cleaned.startsWith('"') && cleaned.endsWith('"')) {
-          cleaned = cleaned.slice(1, -1).trim();
-        }
-        if (cleaned && cleaned !== "undefined" && cleaned !== "null") {
-          token = cleaned;
+        if (cookieCandidate && typeof cookieCandidate === "string") {
+          let cleaned = cookieCandidate.trim();
+          if (cleaned.startsWith('"') && cleaned.endsWith('"')) {
+            cleaned = cleaned.slice(1, -1).trim();
+          }
+          if (cleaned && cleaned !== "undefined" && cleaned !== "null") {
+            return cleaned;
+          }
         }
       }
+      return null;
+    };
+
+    if (!token) {
+      token = getCookieToken();
     }
 
     // --------------------------------------------------
@@ -63,12 +68,27 @@ const auth = async (req, res, next) => {
       return res.status(500).json({ message: "Server configuration error" });
     }
 
-    const decoded = jwt.verify(token, secret);
+    let decoded;
+    try {
+      decoded = jwt.verify(token, secret);
+    } catch (verifyErr) {
+      // If header token was invalid/expired, try cookie fallback
+      const cookieToken = getCookieToken();
+      if (cookieToken && cookieToken !== token) {
+        try {
+          decoded = jwt.verify(cookieToken, secret);
+        } catch (_) {
+          throw verifyErr;
+        }
+      } else {
+        throw verifyErr;
+      }
+    }
 
     // --------------------------------------------------
     // 5️⃣ Find User
     // --------------------------------------------------
-    const userId = decoded.userId || decoded.id;
+    const userId = decoded.userId || decoded.id || decoded._id || decoded.sub;
 
     const user = await User.findById(userId).select("-password");
 
