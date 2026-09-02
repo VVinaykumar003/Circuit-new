@@ -9,7 +9,7 @@ export type Participant = {
 };
 
 export type Project = {
-  id: string;
+  _id: string;
   name: string;
   status: ProjectStatus;
   progress: number;       // 0–100

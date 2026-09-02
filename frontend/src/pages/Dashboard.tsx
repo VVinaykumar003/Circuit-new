@@ -1,5 +1,4 @@
-// import PageHeader from "../components/ui/PageHeader";
-import StatCard from "../components/ui/StatCard";
+import { PageHeader, StatsGrid } from "@/components/common";
 import EmptyState from "../components/ui/EmptyState";
 import StatusBadge from "../components/ui/StatusBadge";
 import confetti from "canvas-confetti";
@@ -120,10 +119,15 @@ export default function Dashboard() {
         if (attendanceRes.status === "fulfilled" && isAdmin) {
           const attendanceDocs = attendanceRes.value.data?.data || attendanceRes.value.data || [];
           attendanceDocs.forEach((doc: any) => {
-            (doc.records || []).forEach((r: any) => {
-              const status = (r.status || "").toUpperCase();
+            if (doc.records && Array.isArray(doc.records)) {
+              doc.records.forEach((r: any) => {
+                const status = (r.status || "").toUpperCase();
+                if (status === "PRESENT" || status === "HALF_DAY") presentCount++;
+              });
+            } else {
+              const status = (doc.status || "").toUpperCase();
               if (status === "PRESENT" || status === "HALF_DAY") presentCount++;
-            });
+            }
           });
         } else if (attendanceRes.status === "fulfilled" && !isAdmin) {
           const myDocs = attendanceRes.value.data?.data || [];
@@ -321,40 +325,44 @@ export default function Dashboard() {
     activityPage * ACTIVITIES_PER_PAGE
   );
 
-  const primaryBtnClass = "btn btn-primary btn-sm shadow-sm transition-all hover:shadow-md  text-sm";
-  const secondaryBtnClass = "btn btn-sm bg-base-100 border border-base-300 text-base-content/80 hover:bg-base-200 hover:border-base-300 shadow-sm transition-all  text-sm";
+  // const primaryBtnClass = "btn btn-primary btn-sm shadow-sm transition-all hover:shadow-md  text-sm";
+  // const secondaryBtnClass = "btn btn-sm bg-base-100 border border-base-300 text-base-content/80 hover:bg-base-200 hover:border-base-300 shadow-sm transition-all  text-sm";
 
- return (
-  <div className="px-3 py-3 sm:p-4 space-y-4">
-    <Breadcrumbs />
+  return (
+    <div className="px-2.5 py-2.5 sm:p-3 space-y-3">
+      <PageHeader
+        title="Dashboard"
+        breadcrumbs={[
+          { label: "Home" },
+          { label: "Dashboard", active: true },
+        ]}
+      />
 
-    {/* STATS */}
-    <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-2">
-      {statsToRender.map((stat) => (
-        <StatCard
-          key={stat.title}
-          title={stat.title}
-          value={stat.value}
-          icon={stat.icon}
-          helperText={stat.helperText}
-        />
-      ))}
-    </div>
+      {/* STATS */}
+      <StatsGrid
+        columns={{ default: 1, sm: 2, md: 2, lg: 4 }}
+        stats={statsToRender.map((stat) => ({
+          label: stat.title,
+          value: stat.value,
+          icon: stat.icon,
+          description: stat.helperText,
+        }))}
+      />
 
     {/* QUICK ACTIONS */}
     <div>
-      <h2 className="text-base font-semibold text-base-content mb-2">
+      <h2 className="text-sm font-semibold text-base-content mb-1.5">
         Quick Actions
       </h2>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:flex lg:flex-wrap gap-2">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:flex lg:flex-wrap gap-1.5">
         {isAdmin ? (
           <>
             <Link
               to="/tasks"
               className="btn btn-primary btn-xs w-full sm:w-auto shadow-sm transition-all text-xs"
             >
-              <MdAssignment size={16} />
+              <MdAssignment size={14} />
               Assign Task
             </Link>
 
@@ -362,7 +370,7 @@ export default function Dashboard() {
               to="/createProject"
               className="btn btn-xs w-full sm:w-auto bg-base-100 border border-base-300 text-base-content/80 hover:bg-base-200 shadow-sm transition-all text-xs"
             >
-              <MdWorkspaces size={16} />
+              <MdWorkspaces size={14} />
               Create Project
             </Link>
 
@@ -370,7 +378,7 @@ export default function Dashboard() {
               to="/addMember"
               className="btn btn-xs w-full sm:w-auto bg-base-100 border border-base-300 text-base-content/80 hover:bg-base-200 shadow-sm transition-all text-xs"
             >
-              <MdPersonAdd size={16} />
+              <MdPersonAdd size={14} />
               Add Member
             </Link>
 
@@ -378,7 +386,7 @@ export default function Dashboard() {
               to="/members"
               className="btn btn-xs w-full sm:w-auto bg-base-100 border border-base-300 text-base-content/80 hover:bg-base-200 shadow-sm transition-all text-xs"
             >
-              <MdPeople size={16} />
+              <MdPeople size={14} />
               Team Directory
             </Link>
 
@@ -386,7 +394,7 @@ export default function Dashboard() {
               to="/leaves"
               className="btn btn-xs w-full sm:w-auto bg-base-100 border border-base-300 text-base-content/80 hover:bg-base-200 shadow-sm transition-all text-xs"
             >
-              <MdPeople size={16} />
+              <MdPeople size={14} />
               Leave
             </Link>
           </>
@@ -396,7 +404,7 @@ export default function Dashboard() {
               to="/attendance"
               className="btn btn-primary btn-xs w-full sm:w-auto shadow-sm transition-all text-xs"
             >
-              <MdEventAvailable size={16} />
+              <MdEventAvailable size={14} />
               Attendance
             </Link>
 
@@ -404,7 +412,7 @@ export default function Dashboard() {
               to="/tasks"
               className="btn btn-xs w-full sm:w-auto bg-base-100 border border-base-300 text-base-content/80 hover:bg-base-200 shadow-sm transition-all text-xs"
             >
-              <MdAssignment size={16} />
+              <MdAssignment size={14} />
               My Tasks
             </Link>
 
@@ -412,7 +420,7 @@ export default function Dashboard() {
               to="/leaves"
               className="btn btn-xs w-full sm:w-auto bg-base-100 border border-base-300 text-base-content/80 hover:bg-base-200 shadow-sm transition-all text-xs"
             >
-              <MdFlightTakeoff size={16} />
+              <MdFlightTakeoff size={14} />
               Log Leave
             </Link>
 
@@ -420,17 +428,9 @@ export default function Dashboard() {
               to="/my-salary"
               className="btn btn-xs w-full sm:w-auto bg-base-100 border border-base-300 text-base-content/80 hover:bg-base-200 shadow-sm transition-all text-xs"
             >
-              <MdReceiptLong size={16} />
+              <MdReceiptLong size={14} />
               Download Payslips
             </Link>
-
-            {/* <Link
-              to="/members"
-              className="btn btn-xs w-full sm:w-auto bg-base-100 border border-base-300 text-base-content/80 hover:bg-base-200 shadow-sm transition-all text-xs"
-            >
-              <MdPeople size={16} />
-              Team Directory
-            </Link> */}
           </>
         )}
       </div>
@@ -480,12 +480,12 @@ export default function Dashboard() {
 
     {/* ATTENDANCE GRAPH */}
     {isAdmin && (
-      <div className="bg-base-100 rounded-xl shadow-sm border border-base-300 p-3 sm:p-4 mb-6 overflow-hidden">
-        <h2 className="text-base font-semibold text-base-content mb-4">
+      <div className="bg-base-100 rounded-xl shadow-sm border border-base-300 p-2.5 sm:p-3 mb-4 overflow-hidden">
+        <h2 className="text-sm font-semibold text-base-content mb-2.5">
           Attendance Trend (This Week)
         </h2>
 
-        <div className="h-[220px] sm:h-64 w-full overflow-x-auto">
+        <div className="h-[170px] sm:h-52 w-full overflow-x-auto">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart
               data={attendanceTrendData}
@@ -508,7 +508,7 @@ export default function Dashboard() {
                 tickLine={false}
                 tick={{
                   fill: "#6b7280",
-                  fontSize: 12,
+                  fontSize: 11,
                 }}
               />
 
@@ -517,7 +517,7 @@ export default function Dashboard() {
                 tickLine={false}
                 tick={{
                   fill: "#6b7280",
-                  fontSize: 12,
+                  fontSize: 11,
                 }}
                 allowDecimals={false}
                 domain={[
@@ -541,24 +541,24 @@ export default function Dashboard() {
 
               <Legend
                 wrapperStyle={{
-                  fontSize: "12px",
-                  paddingTop: "10px",
+                  fontSize: "11px",
+                  paddingTop: "6px",
                 }}
               />
 
               <Bar
-                barSize={28}
+                barSize={20}
                 dataKey="present"
                 fill="#8b5cf6"
-                radius={[4, 4, 0, 0]}
+                radius={[3, 3, 0, 0]}
                 name="Present"
               />
 
               <Bar
-                barSize={28}
+                barSize={20}
                 dataKey="absent"
                 fill="#f43f5e"
-                radius={[4, 4, 0, 0]}
+                radius={[3, 3, 0, 0]}
                 name="Absent"
               />
             </BarChart>
@@ -568,9 +568,9 @@ export default function Dashboard() {
     )}
 
     {/* RECENT ACTIVITY */}
-    <div className="bg-primary/10 rounded-xl shadow-sm border border-base-300 p-3  overflow-hidden">
-      <div className="flex items-center justify-between mb-2">
-        <h2 className="text-base font-semibold text-base-content">
+    <div className="bg-primary/10 rounded-xl shadow-sm border border-base-300 p-2.5 overflow-hidden">
+      <div className="flex items-center justify-between mb-1.5">
+        <h2 className="text-sm font-semibold text-base-content">
           Recent Activity
         </h2>
       </div>

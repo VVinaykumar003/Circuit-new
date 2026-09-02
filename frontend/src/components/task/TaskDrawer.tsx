@@ -376,7 +376,9 @@ import {
   MdDescription,
   MdAttachFile,
   MdChecklist,
+  MdAutorenew,
 } from "react-icons/md";
+import { toast } from "react-toastify";
 
 import { useState, useEffect } from "react";
 import Input from "../ui/Input";
@@ -390,7 +392,7 @@ import Checklist from "../ui/CheckList";
 import { useAuth } from "@/auth/useAuth";
 import API from "@/api/axios";
 import type { Tag } from "../../type/tag";
-import type { Task } from "../../type/task";
+import type { Task, TaskStatus } from "../../type/task";
 
 type Priority = "low" | "medium" | "high";
 
@@ -470,6 +472,8 @@ export default function TaskDrawer({
   const [assignees, setAssignees] = useState<User[]>([]);
   const [dueDate, setDueDate] = useState("");
   const [priority, setPriority] = useState<Priority>("medium");
+  const [status, setStatus] = useState<TaskStatus>("pending");
+  const [updatingStatus, setUpdatingStatus] = useState(false);
   const [tags, setTags] = useState<Tag[]>([]);
   const [attachments, setAttachments] = useState<File[]>([]);
   const [checklist, setChecklist] = useState<
@@ -484,6 +488,7 @@ export default function TaskDrawer({
     setDescription(task.description || "");
     setDueDate(task.dueDate ? task.dueDate.split("T")[0] : "");
     setPriority((task.priority as Priority) || "medium");
+    setStatus(task.status || "pending");
 
     const parsedTags =
       task.tag?.flatMap((t) => {
@@ -534,6 +539,34 @@ export default function TaskDrawer({
     if (task?.projectId) fetchParticipants();
   }, [task?.projectId, auth.slug]);
 
+  const handleStatusChange = async (newStatus: TaskStatus) => {
+    if (!task) return;
+    setStatus(newStatus);
+    setUpdatingStatus(true);
+    try {
+      const rawProjId = task.projectId;
+      const projId = typeof rawProjId === "object" && (rawProjId as any)?._id
+        ? (rawProjId as any)._id
+        : rawProjId;
+
+      const endpoint = projId && projId !== "undefined"
+        ? `/tasks/${auth.slug}/updateTaskStatus/${projId}/${task._id}`
+        : `/tasks/${auth.slug}/updateTaskStatus/${task._id}`;
+
+      const { data } = await API.patch(endpoint, { status: newStatus });
+      if (data?.success) {
+        toast.success(`Task status updated to ${newStatus.replace("-", " ")}`);
+        onUpdate(data.data || { ...task, status: newStatus });
+      }
+    } catch (err: any) {
+      console.error("Status update error", err);
+      toast.error(err.response?.data?.message || "Failed to update status");
+      setStatus(task.status || "pending");
+    } finally {
+      setUpdatingStatus(false);
+    }
+  };
+
   const handleUpdateTask = async () => {
     try {
       if (!task) return;
@@ -569,11 +602,13 @@ export default function TaskDrawer({
       );
 
       if (data.success) {
+        toast.success("Task updated successfully");
         onUpdate(data.data);
         onClose();
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Update task error", error);
+      toast.error(error.response?.data?.message || "Failed to update task");
     } finally {
       setUpdating(false);
     }
@@ -656,6 +691,22 @@ export default function TaskDrawer({
                 {assignee?.name || "Unassigned"}
               </div>
             )}
+          </Section>
+
+          <Section icon={<MdAutorenew />} label="Status">
+            <div className="flex items-center gap-2">
+              <select
+                value={status}
+                onChange={(e) => handleStatusChange(e.target.value as TaskStatus)}
+                disabled={updatingStatus}
+                className="select select-sm select-bordered w-full max-w-xs font-medium cursor-pointer"
+              >
+                <option value="pending">To Do (Pending)</option>
+                <option value="in-progress">In Progress</option>
+                <option value="completed">Completed</option>
+              </select>
+              {updatingStatus && <span className="loading loading-spinner loading-xs text-primary" />}
+            </div>
           </Section>
 
           <Section icon={<MdCalendarToday />} label="Due Date">

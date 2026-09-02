@@ -15,7 +15,7 @@ import {
 import { toast } from "react-toastify";
 import { MdCurrencyRupee } from "react-icons/md";
 import { getMembers } from "@/services/memberService";
-import Breadcrumbs from "@/components/ui/Breadcrumbs";
+import { PageHeader } from "@/components/common";
 import GlobalPayoutConfig from "@/components/salary/GlobalPayoutConfiguration";
 
 interface Employee {
@@ -297,8 +297,15 @@ export default function SalaryStructureDashboard() {
     fetchConfig();
   }, [auth.slug]);
   return (
-    <div className="space-y-6 p-4 sm:p-6">
-      <Breadcrumbs />
+    <div className="space-y-4 p-4 sm:p-6">
+      <PageHeader
+        title="Salary Structure"
+        breadcrumbs={[
+          { label: "Dashboard" },
+          { label: "Payroll" },
+          { label: "Salary Structure", active: true },
+        ]}
+      />
       {/* ✅ YAHI CALL KARNA HAI */}
       <GlobalPayoutConfig
         basic={globalConfig.basic}

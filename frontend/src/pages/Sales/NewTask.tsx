@@ -9,6 +9,7 @@ import { useAuth } from "@/auth/useAuth";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createSalesTask } from "@/services/salesTaskServices";
 import { getSalesReps } from "@/services/salesRepServices";
+import { PageHeader } from "@/components/common";
 
 /* ─────────────────────────── Zod Schema ─────────────────────────── */
 const taskSchema = z.object({
@@ -49,7 +50,6 @@ const taskSchema = z.object({
   communicationType: z.string().optional(),
   meetingMode: z.enum(["Online", "Offline", ""]).optional(),
   meetingLocation: z.string().optional(),
-  meetingLocation: z.string().optional(), // Make optional as it depends on meetingMode
   meetingLink: z.string().url("Invalid URL").or(z.literal("")).optional(),
   
   // Progress
@@ -190,28 +190,29 @@ export default function NewTask() {
     <div className="min-h-screen bg-base-200 p-4 md:p-6 lg:p-8 font-sans">
       
       {/* ── Page Header ── */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 bg-base-100 p-5 rounded-xl border border-base-300 shadow-sm">
-        <div>
-          <h1 className="text-2xl font-bold text-base-content tracking-tight">Add Sales Task</h1>
-          <div className="text-sm text-base-content/60 breadcrumbs mt-1">
-            <ul>
-              <li>Dashboard</li>
-              <li>Sales</li>
-              <li>Tasks</li>
-              <li className="font-semibold text-primary">Add Task</li>
-            </ul>
-          </div>
-        </div>
-        <div className="flex gap-2">
-          <button type="button" className="btn btn-outline btn-sm gap-2">
-            <MdSave size={16} /> Save Draft
-          </button>
-          <button type="button" className="btn btn-outline btn-sm gap-2" onClick={() => loadTemplate("Follow-up")}>
-            <MdContentCopy size={16} /> Load Template
-          </button>
-          <button onClick={() => navigate(-1)} type="button" className="btn btn-ghost btn-sm">Cancel</button>
-        </div>
-      </div>
+      <PageHeader
+        title="Add Sales Task"
+        breadcrumbs={[
+          { label: "Dashboard" },
+          { label: "Sales" },
+          { label: "Tasks" },
+          { label: "Add Task", active: true },
+        ]}
+        cancel
+        actions={[
+          {
+            label: "Save Draft",
+            icon: <MdSave size={16} />,
+            variant: "outline",
+          },
+          {
+            label: "Load Template",
+            icon: <MdContentCopy size={16} />,
+            variant: "outline",
+            onClick: () => loadTemplate("Follow-up"),
+          },
+        ]}
+      />
 
       {/* ── Main Layout ── */}
       <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 lg:grid-cols-4 gap-6">

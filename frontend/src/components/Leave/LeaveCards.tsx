@@ -9,6 +9,7 @@ import {
   MdVisibility,
   MdDelete,
   MdEventBusy,
+  MdAttachFile,
 } from "react-icons/md";
 
 
@@ -91,10 +92,19 @@ export default function LeaveCards({
              <div className="flex items-center gap-1 mt-3 text-sm text-base-content/50 font-medium">
              <span className="text-base-content/80">Reason : </span>
             <p className=" text-sm line-clamp-2 font-semibold">
-
               {leave.reason}
             </p>
             </div>
+
+            {/* ATTACHMENTS BADGE */}
+            {leave.attachments && leave.attachments.length > 0 && (
+              <div className="flex items-center gap-1 mt-2 text-xs text-primary font-medium bg-primary/10 w-fit px-2 py-0.5 rounded-md">
+                <MdAttachFile size={13} />
+                <span>
+                  {leave.attachments.length} attachment{leave.attachments.length > 1 ? "s" : ""}
+                </span>
+              </div>
+            )}
 
             {/* ACTIONS */}
             <div className="flex justify-end gap-2 mt-2">

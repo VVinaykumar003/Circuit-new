@@ -40,4 +40,15 @@ export const deleteLead = async (leadId: string, slug: string): Promise<{ succes
 export const convertLeadToCustomer = async (slug: string, leadId: string) => {
   const res = await API.post(`/leads/${slug}/convertLeadToCustomer/${leadId}`);
   return res.data;
-}
+};
+
+export const bulkDeleteLeads = async (leadIds: string[], slug: string): Promise<{ success: boolean; message?: string }> => {
+  try {
+    const res = await API.post(`/leads/${slug}/bulk-delete-leads`, { leadIds });
+    return res.data;
+  } catch (err) {
+    // Fallback: Delete individually in parallel if bulk endpoint is unavailable
+    await Promise.all(leadIds.map((id) => API.delete(`/leads/${slug}/deleteLead/${id}`)));
+    return { success: true, message: "Leads deleted successfully" };
+  }
+};

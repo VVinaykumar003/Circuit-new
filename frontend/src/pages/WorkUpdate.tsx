@@ -1,10 +1,14 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useAuth } from "@/auth/useAuth";
 import WorkUpdateForm from "@/components/workUpdate/WorkUpdateForm";
 import WorkUpdate from "@/components/workUpdate/WorkUpdates";
 import { MdViewList, MdAddChart, MdUpdate, MdWorkspaces } from "react-icons/md";
 
-const WorkUpdates = ({ projectId }: { projectId: string }) => {
+interface WorkUpdatesProps {
+  projectId?: string;
+}
+
+const WorkUpdates: React.FC<WorkUpdatesProps> = ({ projectId }) => {
   const { auth } = useAuth();
   const [activeTab, setActiveTab] = useState<"form" | "list">("list");
 

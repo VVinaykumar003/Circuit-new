@@ -18,6 +18,7 @@ import {
   MdAssignmentInd,
   MdArrowBack
 } from "react-icons/md";
+import { PageHeader, StatsGrid } from "@/components/common";
 import {
   AreaChart,
   Area,
@@ -146,39 +147,59 @@ export default function AccountDetails() {
     <div className="min-h-screen bg-base-200 font-sans flex flex-col pb-10">
       
       {/* ── Page Header ── */}
-      <div className="bg-base-100 border-b border-base-300 sticky top-0 z-20 shadow-sm">
-        <div className="px-6 py-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-          <div className="flex items-center gap-3">
-            <button onClick={() => navigate(-1)} className="btn btn-sm btn-circle btn-ghost text-base-content/60 hover:bg-base-200">
-              <MdArrowBack size={20} />
+      <div className="bg-base-100 border-b border-base-300 sticky top-0 z-20 shadow-sm px-6 py-4">
+        <PageHeader
+          title={acc.accountName}
+          breadcrumbs={[
+            { label: "Dashboard" },
+            { label: "Sales" },
+            { label: "Accounts" },
+            { label: "Account Details", active: true },
+          ]}
+          cancel
+          actions={[
+            {
+              label: "Edit Account",
+              icon: <MdEdit size={16} />,
+              variant: "outline",
+            },
+            {
+              label: "Create Order",
+              icon: <MdAdd size={16} />,
+              variant: "primary",
+            },
+          ]}
+        >
+          <div className="dropdown dropdown-end">
+            <button
+              tabIndex={0}
+              className="btn btn-outline btn-sm btn-square bg-base-100"
+            >
+              <MdMoreVert size={16} />
             </button>
-            <div>
-              <h1 className="text-xl font-bold text-base-content tracking-tight">{acc.accountName}</h1>
-              <div className="text-xs text-base-content/60 breadcrumbs mt-0.5 font-medium">
-                <ul>
-                  <li>Dashboard</li>
-                  <li>Sales</li>
-                  <li><a onClick={() => navigate("/sales/accounts")}>Accounts</a></li>
-                  <li className="text-primary">Account Details</li>
-                </ul>
-              </div>
-            </div>
+            <ul
+              tabIndex={0}
+              className="dropdown-content menu p-2 shadow-lg bg-base-100 rounded-box w-48 z-50 border border-base-200 mt-1"
+            >
+              <li>
+                <a>
+                  <MdAssignmentInd size={16} /> Assign Rep
+                </a>
+              </li>
+              <li>
+                <a>
+                  <MdAdd size={16} /> Add Contact
+                </a>
+              </li>
+              <div className="divider my-1"></div>
+              <li>
+                <a className="text-error">
+                  <MdDelete size={16} /> Delete Account
+                </a>
+              </li>
+            </ul>
           </div>
-          
-          <div className="flex gap-2 flex-wrap">
-            <button className="btn btn-outline btn-sm gap-2 bg-base-100"><MdEdit size={16} /> Edit Account</button>
-            <button className="btn btn-primary btn-sm gap-2"><MdAdd size={16} /> Create Order</button>
-            <div className="dropdown dropdown-end">
-              <button tabIndex={0} className="btn btn-outline btn-sm btn-square bg-base-100"><MdMoreVert size={16} /></button>
-              <ul tabIndex={0} className="dropdown-content menu p-2 shadow-lg bg-base-100 rounded-box w-48 z-50 border border-base-200 mt-1">
-                <li><a><MdAssignmentInd size={16} /> Assign Rep</a></li>
-                <li><a><MdAdd size={16} /> Add Contact</a></li>
-                <div className="divider my-1"></div>
-                <li><a className="text-error"><MdDelete size={16} /> Delete Account</a></li>
-              </ul>
-            </div>
-          </div>
-        </div>
+        </PageHeader>
       </div>
 
       <div className="flex flex-col lg:flex-row gap-6 px-6 pt-6 flex-1 max-w-[1600px] mx-auto w-full">
@@ -252,11 +273,17 @@ export default function AccountDetails() {
           )}
 
           {/* Account Analytics (Top of content) */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-             <StatCard title="Total Orders" value={acc.totalOrders} />
-             <StatCard title="YTD Revenue" value={`$${(acc.annualRevenue/2).toLocaleString()}`} />
-             <StatCard title="Account Age" value="2.5 Years" />
-          </div>
+          <StatsGrid
+            columns={{ default: 1, md: 3 }}
+            stats={[
+              { label: "Total Orders", value: acc.totalOrders },
+              {
+                label: "YTD Revenue",
+                value: `$${(acc.annualRevenue / 2).toLocaleString()}`,
+              },
+              { label: "Account Age", value: "2.5 Years" },
+            ]}
+          />
 
           {/* Tabs Section */}
           <div className="bg-base-100 rounded-xl shadow-sm border border-base-300 flex-1 flex flex-col overflow-hidden min-h-[600px]">

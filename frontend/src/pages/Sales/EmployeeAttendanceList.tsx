@@ -1,11 +1,11 @@
 import type { AdminEmployee } from "@/type/index";
 
 interface Props {
-  employees: AdminEmployee[];
+  employees?: AdminEmployee[];
 }
 
 const EmployeeAttendanceList = ({
-  employees,
+  employees = [],
 }: Props) => {
   return (
     <div className="rounded-xl border border-base-300 bg-base-100">

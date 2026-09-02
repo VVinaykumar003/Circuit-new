@@ -8,9 +8,13 @@ export type AttendanceRecord = {
   status: AttendanceStatus;
 };
 
-export type UserRole = "admin" | "employee" | "owner";
+export type UserRole = "admin" | "employee" | "owner" |'member';
 
 export type AttendanceStatus =
+  | "pending"
+  | "approved"
+  | "absent"
+  | "rejected"
   | "Present"
   | "Absent"
   | "Half Day"

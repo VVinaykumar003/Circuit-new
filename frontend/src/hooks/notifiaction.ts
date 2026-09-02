@@ -10,7 +10,7 @@ import { useAuth } from "@/auth/useAuth";
 // Path to the sound file in your public directory
 const NOTIFY_SOUND_URL = "/notification.mp3";
 
-export function useNotificationSocket(userId: string, onNotification?: () => void) {
+export function useNotificationSocket(userId?: string, onNotification?: () => void) {
   // 1. Initialize the Audio object once using useRef
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const { auth } = useAuth();

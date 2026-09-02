@@ -2,9 +2,8 @@ import React, { useEffect, useState } from "react";
 import { getSummary, getMonthlyList, markSlipPaid } from "@/services/payrollService";
 import { useAuth } from "@/auth/useAuth";
 import { toast } from "react-toastify";
-// import Button from "@/components/ui/Button";
-// import PageHeader from "@/components/ui/PageHeader";
 import Pagination from "@/components/ui/Pagination";
+import { PageHeader, StatsGrid } from "@/components/common";
 import {
   MdPendingActions,
   MdCheckCircle,
@@ -15,8 +14,7 @@ import {
   MdGroup,
   MdAccountBalanceWallet,
 } from "react-icons/md";
-import Breadcrumbs from "@/components/ui/Breadcrumbs";
-import {  downloadSlipPdf } from "@/services/payrollService";
+import { downloadSlipPdf } from "@/services/payrollService";
 import Select from "@/components/ui/Select";
 import Input from "@/components/ui/Input";
 import StatusBadge from "@/components/ui/StatusBadge";
@@ -157,10 +155,13 @@ export default function PayrollDashboard() {
     <div className="p-4 sm:p-6 bg-base-50 min-h-screen flex flex-col gap-6">
 
       {/* Header Section */}
-      <div className="flex flex-col gap-2 -mb-2">
-        <Breadcrumbs />
-        {/* <PageHeader title={"Payroll Dashboard"} subtitle={"Overview"} /> */}
-      </div>
+      <PageHeader
+        title="Payroll Dashboard"
+        breadcrumbs={[
+          { label: "Dashboard" },
+          { label: "Payroll", active: true },
+        ]}
+      />
 
       {/* Top Controls: Month/Year & Bulk Actions */}
       <div className="flex flex-col md:flex-row justify-between gap-3 items-start md:items-center bg-primary p-2.5 rounded-2xl shadow-sm border border-base-300">
@@ -189,146 +190,35 @@ export default function PayrollDashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         {/* 1. Stats Box (Spans 2 columns) */}
-        {/* <div className="lg:col-span-2 stats stats-vertical sm:stats-horizontal shadow-sm border border-primary bg-base-100 w-full rounded-2xl h-full ">
-          <div className="stat py-6 flex flex-col justify-center">
-            <div className="stat-figure text-info">
-              <MdGroup size={36} />
-            </div>
-            <div className="stat-title text-sm font-semibold uppercase tracking-wider text-base-content ">Total Staff</div>
-            <div className="stat-value text-info text-3xl mt-1">
-              {summary?.totalStaff || 0}
-            </div>
-            <div className="stat-desc text-xs mt-1 text-base-content ">
-              Eligible for payroll
-            </div>
-          </div>
-          
-          <div className="stat py-6 flex flex-col justify-center">
-            <div className="stat-figure text-warning">
-              <MdPendingActions size={36} />
-            </div>
-            <div className="stat-title text-sm font-semibold uppercase tracking-wider text-base-content ">Pending Payout</div>
-            <div className="stat-value text-warning text-3xl mt-1">
-              ₹{(summary?.pending || 0).toLocaleString()}
-            </div>
-            <div className="stat-desc text-xs mt-1  text-base-content ">
-              Needs disbursement
-            </div>
-          </div>
-
-          <div className="stat py-6 flex flex-col justify-center">
-            <div className="stat-figure text-success">
-              <MdAccountBalanceWallet size={36} />
-            </div>
-            <div className="stat-title text-sm font-semibold uppercase tracking-wider text-base-content ">Total Paid</div>
-            <div className="stat-value text-success text-3xl mt-1">
-              ₹{(summary?.paid || 0).toLocaleString()}
-            </div>
-            <div className="stat-desc text-xs mt-1 text-base-content">
-              Successfully processed
-            </div>
-          </div>
-        </div> */}
-        <div
-  className="
-    lg:col-span-2
-    stats stats-vertical md:stats-horizontal
-    shadow-sm border border-primary
-    bg-base-100
-    w-full rounded-2xl
-    overflow-hidden
-  "
->
-  {/* TOTAL STAFF */}
-  <div className="stat py-3 px-4 sm:px-6">
-    <div className="flex items-start justify-between gap-3">
-      <div className="min-w-0">
-        <div
-          className="
-            stat-title
-            text-xs sm:text-sm
-            font-semibold uppercase tracking-wider
-            text-base-content
-          "
-        >
-          Total Staff
+        <div className="lg:col-span-2">
+          <StatsGrid
+            columns={{ default: 1, sm: 3, md: 3, lg: 3 }}
+            className="mb-0 h-full"
+            stats={[
+              {
+                label: "Total Staff",
+                value: summary?.totalStaff || 0,
+                icon: <MdGroup size={20} />,
+                color: "text-info",
+                description: "Eligible for payroll",
+              },
+              {
+                label: "Pending Payout",
+                value: `₹${(summary?.pending || 0).toLocaleString()}`,
+                icon: <MdPendingActions size={20} />,
+                color: "text-warning",
+                description: "Needs disbursement",
+              },
+              {
+                label: "Total Paid",
+                value: `₹${(summary?.paid || 0).toLocaleString()}`,
+                icon: <MdAccountBalanceWallet size={20} />,
+                color: "text-success",
+                description: "Successfully processed",
+              },
+            ]}
+          />
         </div>
-
-        <div className="stat-value text-info text-2xl sm:text-3xl mt-2">
-          {summary?.totalStaff || 0}
-        </div>
-
-        <div className="stat-desc text-[11px] sm:text-xs mt-1 text-base-content">
-          Eligible for payroll
-        </div>
-      </div>
-
-      <div className="text-info shrink-0 mt-1">
-        <MdGroup className="text-2xl " />
-      </div>
-    </div>
-  </div>
-
-  {/* PENDING PAYOUT */}
-  <div className="stat py-3 px-4 sm:px-6">
-    <div className="flex items-start justify-between gap-3">
-      <div className="min-w-0">
-        <div
-          className="
-            stat-title
-            text-xs sm:text-sm
-            font-semibold uppercase tracking-wider
-            text-base-content
-          "
-        >
-          Pending Payout
-        </div>
-
-        <div className="stat-value text-warning text-xl sm:text-3xl mt-2 break-words">
-          ₹{(summary?.pending || 0).toLocaleString()}
-        </div>
-
-        <div className="stat-desc text-[11px] sm:text-xs mt-1 text-base-content">
-          Needs disbursement
-        </div>
-      </div>
-
-      <div className="text-warning shrink-0 mt-1">
-        <MdPendingActions className="text-2xl " />
-      </div>
-    </div>
-  </div>
-
-  {/* TOTAL PAID */}
-  <div className="stat py-3 px-4 sm:px-6">
-    <div className="flex items-start justify-between gap-3">
-      <div className="min-w-0">
-        <div
-          className="
-            stat-title
-            text-xs sm:text-sm
-            font-semibold uppercase tracking-wider
-            text-base-content
-          "
-        >
-          Total Paid
-        </div>
-
-        <div className="stat-value text-success text-xl sm:text-3xl mt-2 break-words">
-          ₹{(summary?.paid || 0).toLocaleString()}
-        </div>
-
-        <div className="stat-desc text-[11px] sm:text-xs mt-1 text-base-content">
-          Successfully processed
-        </div>
-      </div>
-
-      <div className="text-success shrink-0 mt-1">
-        <MdAccountBalanceWallet className="text-2xl sm:text-3xl" />
-      </div>
-    </div>
-  </div>
-</div>
 
         {/* 2. Chart Box (Spans 1 col, 2 rows) */}
         <div className="lg:col-span-1 lg:row-span-2 self-start  bg-base-100 rounded-2xl border border-primary shadow-sm p-6 w-full flex flex-col min-h-[320px]">

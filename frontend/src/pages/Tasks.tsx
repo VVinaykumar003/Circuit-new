@@ -9,9 +9,10 @@ import {
   MdAutorenew,
   MdCheckCircle,
   MdErrorOutline,
+  MdAdd,
 } from "react-icons/md";
 
-import StatCard from "@/components/ui/StatCard";
+import { PageHeader, StatsGrid } from "@/components/common";
 import TaskTable from "@/components/task/TaskTable";
 import TaskKanban from "@/components/task/TaskKanbanComponent";
 import EmptyState from "@/components/ui/EmptyState";
@@ -24,7 +25,6 @@ import { toast } from "react-toastify";
 import API from "@/api/axios";
 import NewTaskModal from "@/components/projects/NewTaskModal";
 import Pagination from "@/components/ui/Pagination";
-import Breadcrumbs from "@/components/ui/Breadcrumbs";
 
 /* ---------------- TYPES ---------------- */
 
@@ -42,6 +42,8 @@ export default function TaskDashboard() {
   const [loading, setLoading] = useState(true);
 
   const { auth } = useAuth();
+  const userRole = auth?.user?.role?.toLowerCase() || "";
+  const canCreateTask = ["admin", "owner", "manager"].includes(userRole);
 
   const [activeFilter, setActiveFilter] = useState<TaskFilter>("all");
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
@@ -49,8 +51,6 @@ export default function TaskDashboard() {
   const [page, setPage] = useState(1);
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState<TaskView>("table");
-
-
 
   /* ---------------- FETCH TASKS ---------------- */
 
@@ -98,6 +98,32 @@ export default function TaskDashboard() {
         task._id === updatedTask._id ? updatedTask : task,
       ),
     );
+  };
+
+  const handleStatusChange = async (taskId: string, newStatus: TaskStatus, projectId?: string) => {
+    try {
+      const task = tasks.find((t) => String(t._id || (t as any).id) === String(taskId));
+      const rawProjId = projectId || task?.projectId;
+      const projId = typeof rawProjId === "object" && (rawProjId as any)?._id
+        ? (rawProjId as any)._id
+        : rawProjId;
+
+      const endpoint = projId && projId !== "undefined"
+        ? `/tasks/${auth.slug}/updateTaskStatus/${projId}/${taskId}`
+        : `/tasks/${auth.slug}/updateTaskStatus/${taskId}`;
+
+      const res = await API.patch(endpoint, { status: newStatus });
+      if (res.data?.success) {
+        toast.success(`Task status updated to ${newStatus.replace("-", " ")}`);
+        if (res.data.data) {
+          handleTaskUpdated(res.data.data);
+        }
+      }
+    } catch (error: any) {
+      console.error("Failed to update task status in backend:", error);
+      toast.error(error.response?.data?.message || "Failed to update task status");
+      fetchTasks();
+    }
   };
   /* ---------------- FILTER LOGIC ---------------- */
 
@@ -149,51 +175,66 @@ export default function TaskDashboard() {
   }
 
   return (
-    <div className="p-4 sm:p-6 space-y-6">
-      <Breadcrumbs />
+    <div className="p-4 sm:p-6 space-y-4">
+      <PageHeader
+        title="Tasks"
+        breadcrumbs={[
+          { label: "Dashboard" },
+          { label: "Tasks", active: true },
+        ]}
+        actions={
+          canCreateTask
+            ? [
+                {
+                  label: "New Task",
+                  icon: <MdAdd size={16} />,
+                  variant: "primary",
+                  onClick: () => setOpen(true),
+                },
+              ]
+            : []
+        }
+      />
 
       {/* ================= STATS ================= */}
-
-      <section className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-4">
-        <StatCard
-          title="Total Tasks"
-          value={tasks.length}
-          icon={<MdAssignment size={20} />}
-        />
-
-        <StatCard
-          title="Pending"
-          value={tasks.filter((t) => t.status === "pending").length}
-          variant="warning"
-          icon={<MdHourglassEmpty size={20} />}
-        />
-
-        <StatCard
-          title="In Progress"
-          value={tasks.filter((t) => t.status === "in-progress").length}
-          variant="info"
-          icon={<MdAutorenew size={20} />}
-        />
-
-        <StatCard
-          title="Completed"
-          value={tasks.filter((t) => t.status === "completed").length}
-          variant="success"
-          icon={<MdCheckCircle size={20} />}
-        />
-
-        <StatCard
-          title="Overdue"
-          value={
-            tasks.filter((t: any) => {
+      <StatsGrid
+        columns={{ default: 2, sm: 3, md: 3, lg: 5 }}
+        stats={[
+          {
+            label: "Total Tasks",
+            value: tasks.length,
+            icon: <MdAssignment size={18} />,
+            color: "text-base-content",
+          },
+          {
+            label: "Pending",
+            value: tasks.filter((t) => t.status === "pending").length,
+            icon: <MdHourglassEmpty size={18} />,
+            color: "text-warning",
+          },
+          {
+            label: "In Progress",
+            value: tasks.filter((t) => t.status === "in-progress").length,
+            icon: <MdAutorenew size={18} />,
+            color: "text-info",
+          },
+          {
+            label: "Completed",
+            value: tasks.filter((t) => t.status === "completed").length,
+            icon: <MdCheckCircle size={18} />,
+            color: "text-success",
+          },
+          {
+            label: "Overdue",
+            value: tasks.filter((t: any) => {
               const due = new Date(t.dueDate);
               return due < new Date() && t.status !== "completed";
-            }).length
-          }
-          variant="error"
-          icon={<MdErrorOutline size={20} />}
-        />
-      </section>
+            }).length,
+            icon: <MdErrorOutline size={18} />,
+            color: "text-error",
+          },
+        ]}
+      />
 
       {/* ================= FILTER + VIEW ================= */}
 {/* 
@@ -239,15 +280,17 @@ export default function TaskDashboard() {
 
   <div className="flex flex-wrap gap-2 w-full lg:w-auto">
     
-    {/* NEW TASK → ALWAYS VISIBLE (mobile + desktop) */}
-    <Button
-      size="sm"
-      variant="primary"
-      onClick={() => setOpen(true)}
-      className="flex-1 sm:flex-none"
-    >
-      + New Task
-    </Button>
+    {/* NEW TASK → ONLY VISIBLE TO ADMIN / OWNER / MANAGER */}
+    {canCreateTask && (
+      <Button
+        size="sm"
+        variant="primary"
+        onClick={() => setOpen(true)}
+        className="flex-1 sm:flex-none"
+      >
+        + New Task
+      </Button>
+    )}
 
     {/* THESE → ONLY DESKTOP */}
     <div className="hidden md:flex gap-2">
@@ -288,9 +331,11 @@ export default function TaskDashboard() {
                   : `You have no ${activeFilter.replace("-", " ")} tasks.`
               }
             />
-            <Button variant="primary" className="mt-6" onClick={() => setOpen(true)}>
-              + Get Started
-            </Button>
+            {canCreateTask && (
+              <Button variant="primary" className="mt-6" onClick={() => setOpen(true)}>
+                + Get Started
+              </Button>
+            )}
           </div>
         ) : active === "table" ? (
           <>
@@ -319,6 +364,7 @@ export default function TaskDashboard() {
               tasks={filteredTasks}
               setTasks={setTasks}
               onTaskSelect={setSelectedTask}
+              onStatusChange={handleStatusChange}
             />
           </div>
         ) : null}

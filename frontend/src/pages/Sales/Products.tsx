@@ -8,7 +8,7 @@ import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { useProduct } from "@/hooks/useProduct";
 import { FaWindows, FaApple, FaLinux, FaAndroid, FaAppleWhole, FaGlobe } from "react-icons/fa6";
 import {InfoCard ,FormSection, FormRow,  } from "@/components/sales/Product/ProcductComponent";
-// import type { Product } from "@/type/salesProduct";
+import { PageHeader } from "@/components/common";
 
 
 /* ─────────────────────────── component ─────────────────────── */
@@ -71,52 +71,53 @@ export default function NewProduct() {
   const isSubmittingLocal = isSubmitting;
 
   return (
-    <div className="min-h-screen bg-base-200 padding-[16px] md:padding-[24px] lg:padding-[32px] font-sans">
+    <div className="min-h-screen bg-base-200 p-3 md:p-4 lg:p-6 font-sans">
       
       {/* ── Page Header ── */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center margin-bottom-[24px] gap-[16px] bg-base-100 padding-[20px] rounded-[12px] border border-base-300 shadow-[0_1px_3px_rgba(0,0,0,0.08)] mb-3">
-        <div className="p-2">
-          <h1 className="text-[24px] font-[700] text-base-content tracking-tight">{isEditMode ? "Edit Software Product" : "Add New Software Product"}</h1>
-          <div className="text-[14px] text-base-content/60 breadcrumbs margin-top-[4px]">
-            <ul>
-              <li>Dashboard</li>
-              <li>Sales</li>
-              <li>Products</li>
-              <li className="font-[600] text-primary">{isEditMode ? "Edit Product" : "Add Product"}</li>
-            </ul>
-          </div>
-        </div>
-        <div className="flex gap-[8px] flex-wrap">
-          <button type="button" className="btn btn-outline btn-sm gap-2" onClick={() => loadTemplate("Software")}>
-            <MdContentCopy size={16} /> Load Template
-          </button>
-          <button type="button" className="btn btn-outline btn-sm gap-2">
-            <MdSave size={16} /> Save Draft
-          </button>
-          <button onClick={() => navigate(-1)} type="button" className="btn btn-ghost btn-sm">Cancel</button>
-        </div>
-      </div>
+      <PageHeader
+        title={isEditMode ? "Edit Software Product" : "Add New Software Product"}
+        breadcrumbs={[
+          { label: "Dashboard" },
+          { label: "Sales" },
+          { label: "Products" },
+          { label: isEditMode ? "Edit Product" : "Add Product", active: true },
+        ]}
+        cancel
+        actions={[
+          {
+            label: "Load Template",
+            icon: <MdContentCopy size={14} />,
+            variant: "outline",
+            onClick: () => loadTemplate("Software"),
+          },
+          {
+            label: "Save Draft",
+            icon: <MdSave size={14} />,
+            variant: "outline",
+          },
+        ]}
+      />
 
-      <form onSubmit={handleSubmit(hookOnSubmit)} className="grid grid-cols-1 lg:grid-cols-4 gap-[24px]">
+      <form onSubmit={handleSubmit(hookOnSubmit)} className="grid grid-cols-1 lg:grid-cols-4 gap-4">
         
         {/* ── Left Column (Form Sections) ── */}
-        <div className="lg:col-span-3 space-y-[16px]">
+        <div className="lg:col-span-3 space-y-3">
           
           {/* 1. Software Information */}
           <FormSection title="1. Software Information" defaultExpanded>
             <FormRow label="Product Name" required error={errors.productName?.message}>
-              <input {...register("productName")} className={`input input-bordered width-full ${errors.productName ? "input-error" : ""}`} placeholder="e.g. Circuit CRM Enterprise" />
+              <input {...register("productName")} className={`input input-bordered w-full ${errors.productName ? "input-error" : ""}`} placeholder="e.g. Circuit CRM Enterprise" />
             </FormRow>
             
             <FormRow label="Product Code" required error={errors.productCode?.message}>
-              <div className="flex gap-[8px]">
-                <input {...register("productCode")} className={`input input-bordered width-full ${errors.productCode ? "input-error" : ""}`} placeholder="e.g. CRM-ENT-001" />
-                <button type="button" onClick={handleAutoGenerateCode} className="btn btn-outline btn-primary whitespace-nowrap">Auto Generate</button>
+              <div className="flex gap-2">
+                <input {...register("productCode")} className={`input input-bordered w-full ${errors.productCode ? "input-error" : ""}`} placeholder="e.g. CRM-ENT-001" />
+                <button type="button" onClick={handleAutoGenerateCode} className="btn btn-outline btn-primary btn-xs whitespace-nowrap">Auto Generate</button>
               </div>
             </FormRow>
 
             <FormRow label="SKU" error={errors.sku?.message}>
-              <input {...register("sku")} className="input input-bordered width-full" placeholder="Stock Keeping Unit (optional)" />
+              <input {...register("sku")} className="input input-bordered w-full" placeholder="Stock Keeping Unit (optional)" />
             </FormRow>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-[16px]">
@@ -318,8 +319,8 @@ export default function NewProduct() {
               {imagePreviews.length > 0 && (
                 <div className="flex flex-wrap gap-[16px] margin-top-[16px]">
                   {imagePreviews.map((src, idx) => (
-                    <div key={idx} className="relative group width-[96px] height-[96px] rounded-[10px] overflow-hidden border border-base-300 shadow-[0_1px_3px_rgba(0,0,0,0.08)]">
-                      <img src={src} alt="Preview" className="width-full height-full object-cover" />
+                    <div key={idx} className="relative group w-[96px] h-[96px] rounded-[10px] overflow-hidden border border-base-300 shadow-[0_1px_3px_rgba(0,0,0,0.08)]">
+                      <img src={src} alt="Preview" className="w-full h-full object-cover block" />
                       <button
                         type="button"
                         onClick={() => removeImage(idx)}

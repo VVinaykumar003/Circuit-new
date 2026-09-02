@@ -4,7 +4,7 @@ import { FaEye, FaEyeSlash, FaPen, FaUser, FaUserFriends, FaShieldAlt, FaBriefca
 import { createMember } from "../services/memberService";
 import { useAuth } from "@/auth/useAuth";
 import { uploadImage } from "@/services/uploadService";
-import Breadcrumbs from "@/components/ui/Breadcrumbs";
+import { PageHeader } from "@/components/common";
 
 type UserRole = "employee" | "manager" | "admin";
 type Errors = {
@@ -207,17 +207,15 @@ const AddMember = () => {
   return (
     <div className="min-h-screen bg-base-200/40 py-6 px-4 sm:px-6 lg:px-8">
       <div className="max-w-5xl mx-auto space-y-6">
-        <Breadcrumbs />
-
-        {/* Page Header */}
-        <div className="flex flex-col gap-1 mb-8">
-          <h1 className="text-xl md:text-lg font-bold text-base-content tracking-tight">
-            Employee Onboarding
-          </h1>
-          <p className="text-base-content/60 text-sm">
-            Register a new team member and set up their profile, employment, and financial details.
-          </p>
-        </div>
+        <PageHeader
+          title="Employee Onboarding"
+          breadcrumbs={[
+            { label: "Dashboard" },
+            { label: "Team Members" },
+            { label: "Add Member", active: true },
+          ]}
+          cancel
+        />
 
         <form onSubmit={handleSubmit} className="space-y-6">
           

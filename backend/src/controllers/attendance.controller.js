@@ -438,12 +438,28 @@ const markAttendance = asyncHandler(async (req, res) => {
     }
   }
 
+  const nextDate = new Date(queryDate);
+  nextDate.setDate(nextDate.getDate() + 1);
+
+  // Check if employee has already marked attendance for this date in the organization
+  const alreadyMarked = await Attendance.findOne({
+    organization: orgId,
+    date: {
+      $gte: queryDate,
+      $lt: nextDate,
+    },
+    'records.employee': userId,
+  });
+
+  if (alreadyMarked) {
+    throw new ValidationError('You have already marked attendance for today.');
+  }
+
   const existing = await Attendance.findOne({
     organization: orgId,
     date: queryDate,
     department: departmentObjectId // Use the resolved ObjectId
   });
-
 
   const newRecord = {
     employee: userId,
@@ -485,20 +501,8 @@ const markAttendance = asyncHandler(async (req, res) => {
   };
 
   if (existing) {
-    // Prevent duplicate attendance: Check if employee already marked today
-    const recordIndex = existing.records.findIndex(r => r.employee.toString() === userId.toString());
-    
-    if (recordIndex >= 0) {
-      // Update existing record instead of creating a duplicate
-      existing.records[recordIndex].checkIn = new Date();
-      existing.records[recordIndex].status = 'PENDING';
-      existing.records[recordIndex].mode = mode || 'office';
-    } else {
-      existing.records.push(newRecord);
-    }
-
+    existing.records.push(newRecord);
     existing.totalEmployees = existing.records.length;
-    // Note: Top-level location is less important now that it's per-record
 
     existing.markModified('records');
     await existing.save();
@@ -754,7 +758,9 @@ const getMyAttendance = asyncHandler(async (req, res) => {
   const userId = req.user.id || req.user._id;
   const orgId = req.organization._id || req.organization;
 
-  const { startDate, endDate, date } = req.query;
+  const startDate = req.query.startDate || req.query.fromDate;
+  const endDate = req.query.endDate || req.query.toDate;
+  const { date } = req.query;
 
   if (!userId) {
     throw new ValidationError("Employee ID is required");
@@ -781,17 +787,18 @@ const getMyAttendance = asyncHandler(async (req, res) => {
       $gte: queryDate,
       $lt: nextDate,
     };
-  } else if (startDate && endDate) {
-    const start = new Date(startDate);
-    start.setHours(0, 0, 0, 0);
-
-    const end = new Date(endDate);
-    end.setHours(23, 59, 59, 999);
-
-    filter.date = {
-      $gte: start,
-      $lte: end,
-    };
+  } else if (startDate || endDate) {
+    filter.date = {};
+    if (startDate) {
+      const start = new Date(startDate);
+      start.setHours(0, 0, 0, 0);
+      filter.date.$gte = start;
+    }
+    if (endDate) {
+      const end = new Date(endDate);
+      end.setHours(23, 59, 59, 999);
+      filter.date.$lte = end;
+    }
   }
 
   // --------------------------------------------------
@@ -889,15 +896,18 @@ const getOrganizationAttendance = asyncHandler(
       req.organization._id ||
       req.organization;
 
+    const qStartDate = req.query.startDate || req.query.fromDate;
+    const qEndDate = req.query.endDate || req.query.toDate;
+    const search = req.query.search || req.query.name;
     const {
       date,
-      startDate,
-      endDate,
       departmentId,
       status,
-      search,
       month,
     } = req.query;
+
+    const startDate = qStartDate;
+    const endDate = qEndDate;
 
     // --------------------------------------------------
     // Permission
@@ -965,35 +975,37 @@ const getOrganizationAttendance = asyncHandler(
     // --------------------------------------------------
 
     else if (
-      startDate &&
+      startDate ||
       endDate
     ) {
-      const start = new Date(
-        startDate
-      );
+      match.date = {};
+      if (startDate) {
+        const start = new Date(
+          startDate
+        );
 
-      start.setHours(
-        0,
-        0,
-        0,
-        0
-      );
+        start.setHours(
+          0,
+          0,
+          0,
+          0
+        );
+        match.date.$gte = start;
+      }
 
-      const end = new Date(
-        endDate
-      );
+      if (endDate) {
+        const end = new Date(
+          endDate
+        );
 
-      end.setHours(
-        23,
-        59,
-        59,
-        999
-      );
-
-      match.date = {
-        $gte: start,
-        $lte: end,
-      };
+        end.setHours(
+          23,
+          59,
+          59,
+          999
+        );
+        match.date.$lte = end;
+      }
     }
 
     // --------------------------------------------------

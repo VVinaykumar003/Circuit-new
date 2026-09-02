@@ -108,13 +108,95 @@
   * {
     box-sizing: border-box;
   }
-    html {
+
+  html {
     font-family: 'Inter', sans-serif;
   }
 
   body {
     @apply bg-base-100 text-base-content;
     font-family: 'Inter', sans-serif;
+    font-size: 0.8125rem; /* ~13px base font */
+  }
+
+  /* Compact form controls (~25% reduction) */
+  .input:not(.input-xs):not(.input-sm):not(.input-lg),
+  .select:not(.select-xs):not(.select-sm):not(.select-lg) {
+    height: 2rem;
+    min-height: 2rem;
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+    font-size: 0.8125rem;
+  }
+
+  .input-sm,
+  .select-sm {
+    height: 1.625rem;
+    min-height: 1.625rem;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+    font-size: 0.75rem;
+  }
+
+  .textarea:not(.textarea-xs):not(.textarea-sm):not(.textarea-lg) {
+    padding: 0.45rem 0.65rem;
+    font-size: 0.8125rem;
+  }
+
+  /* Compact buttons (~25% reduction) */
+  .btn:not(.btn-xs):not(.btn-sm):not(.btn-lg) {
+    height: 2rem;
+    min-height: 2rem;
+    padding-left: 0.8rem;
+    padding-right: 0.8rem;
+    font-size: 0.8125rem;
+  }
+
+  .btn-sm {
+    height: 1.625rem;
+    min-height: 1.625rem;
+    padding-left: 0.6rem;
+    padding-right: 0.6rem;
+    font-size: 0.75rem;
+  }
+
+  .btn-xs {
+    height: 1.25rem;
+    min-height: 1.25rem;
+    padding-left: 0.4rem;
+    padding-right: 0.4rem;
+    font-size: 0.6875rem;
+  }
+
+  /* Compact table rows and cells (~25% reduction) */
+  .table :where(th, td) {
+    padding: 0.45rem 0.65rem;
+    font-size: 0.8125rem;
+  }
+
+  .table-sm :where(th, td) {
+    padding: 0.35rem 0.5rem;
+    font-size: 0.75rem;
+  }
+
+  /* Compact cards & badges */
+  .card-body {
+    padding: 1rem;
+    gap: 0.5rem;
+  }
+
+  .badge:not(.badge-xs):not(.badge-sm):not(.badge-lg) {
+    height: 1.25rem;
+    font-size: 0.75rem;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+
+  .badge-sm {
+    height: 1rem;
+    font-size: 0.6875rem;
+    padding-left: 0.35rem;
+    padding-right: 0.35rem;
   }
 
   input::-webkit-outer-spin-button,
@@ -123,7 +205,7 @@
     margin: 0;
   }
 
-  input[type=\"number\"] {
+  input[type="number"] {
     -moz-appearance: textfield;
   }
 }
@@ -149,10 +231,6 @@
   display: none;
 }
 
-
-/* body {
-  width:133.33%;
-  height:133.33%;
-  transform: scale(0.75);
-  transform-origin: top left;
-} */
+ #root ::-webkit-scrollbar{
+    display:none;
+  }

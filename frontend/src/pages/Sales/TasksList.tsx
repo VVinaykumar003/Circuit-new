@@ -34,6 +34,7 @@ import { getSalesTasks, updateSalesTask, deleteSalesTask, createSalesTask } from
 import { getSalesReps } from "@/services/salesRepServices";
 import ImportExportActions from "@/components/import-export/ImportExportActions";
 import type { ColumnConfig } from "@/type/importExport.types";
+import { PageHeader, StatsGrid } from "@/components/common";
 
 const taskColumns: ColumnConfig[] = [
   { key: "id", label: "Task ID", type: "string" },
@@ -514,37 +515,37 @@ console.log(data?.data);
     <div className="min-h-screen bg-base-200 p-4 md:p-6 font-sans flex flex-col h-full overflow-hidden relative">
       
       {/* ── Header ── */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 bg-base-100 p-5 rounded-xl border border-base-300 shadow-sm">
-        <div>
-          <h1 className="text-2xl font-bold text-base-content tracking-tight">Sales Tasks</h1>
-          <div className="text-sm text-base-content/60 breadcrumbs mt-1">
-            <ul>
-              <li>Dashboard</li>
-              <li>Sales</li>
-              <li className="font-semibold text-primary">Tasks</li>
-            </ul>
-          </div>
-        </div>
-        <div className="flex gap-2">
-          <ImportExportActions
-            moduleName="Sales Tasks"
-            columns={taskColumns}
-            data={filteredTasks}
-            selectedData={getSelectedTasks()}
-            onImportSubmit={handleImportSubmit}
-          />
-          <button className="btn btn-outline btn-sm btn-square" onClick={() => refetch()}>
-            <MdRefresh size={16} />
-          </button>
-          <button onClick={() => navigate("/sales/tasks/new")} className="btn btn-primary btn-sm gap-2">
-            <MdAdd size={16} /> Add Task
-          </button>
-        </div>
-      </div>
+      <PageHeader
+        title="Sales Tasks"
+        breadcrumbs={[
+          { label: "Dashboard" },
+          { label: "Sales" },
+          { label: "Tasks", active: true },
+        ]}
+        showRefresh
+        onRefresh={() => refetch()}
+        actions={[
+          {
+            label: "Add Task",
+            icon: <MdAdd size={16} />,
+            variant: "primary",
+            onClick: () => navigate("/sales/tasks/new"),
+          },
+        ]}
+      >
+        <ImportExportActions
+          moduleName="Sales Tasks"
+          columns={taskColumns}
+          data={filteredTasks}
+          selectedData={getSelectedTasks()}
+          onImportSubmit={handleImportSubmit}
+        />
+      </PageHeader>
 
       {/* ── Stats Dashboard ── */}
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4 mb-6">
-        {[
+      <StatsGrid
+        columns={{ default: 2, sm: 4, md: 4, lg: 8 }}
+        stats={[
           { label: "Total Tasks", value: stats.total, color: "text-base-content" },
           { label: "Pending", value: stats.pending, color: "text-base-content" },
           { label: "In Progress", value: stats.inProgress, color: "text-primary" },
@@ -553,13 +554,8 @@ console.log(data?.data);
           { label: "Today's Follow-ups", value: stats.todayFollowUps, color: "text-warning" },
           { label: "High Priority", value: stats.highPriority, color: "text-error" },
           { label: "Deal Value", value: `₹${stats.dealValue.toLocaleString()}`, color: "text-success" },
-        ].map((stat, idx) => (
-          <div key={idx} className="bg-base-100 border border-base-300 rounded-xl p-4 flex flex-col justify-center items-center shadow-sm hover:shadow-md transition-shadow">
-            <span className={`text-xl font-bold ${stat.color}`}>{stat.value}</span>
-            <span className="text-xs text-base-content/60 mt-1 text-center font-medium uppercase">{stat.label}</span>
-          </div>
-        ))}
-      </div>
+        ]}
+      />
 
       {/* ── Toolbar ── */}
       <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-4 bg-base-100 p-3 rounded-xl border border-base-300 shadow-sm">

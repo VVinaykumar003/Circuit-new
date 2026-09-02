@@ -4,7 +4,7 @@ import { toast } from "react-toastify";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
-import Breadcrumbs from "@/components/ui/Breadcrumbs";
+import { PageHeader } from "@/components/common";
 
 import SalarySlipPreview from "../components/salary/SalarySlipPreview";
 import GlobalPayoutConfiguration from "../components/salary/GlobalPayoutConfiguration";
@@ -164,8 +164,15 @@ export default function SalaryStructureDashboard() {
   }
 
   return (
-    <div className="space-y-6 p-4 sm:p-6">
-      <Breadcrumbs />
+    <div className="space-y-4 p-4 sm:p-6">
+      <PageHeader
+        title="Salary Structure Dashboard"
+        breadcrumbs={[
+          { label: "Dashboard" },
+          { label: "Payroll" },
+          { label: "Salary Structure", active: true },
+        ]}
+      />
 
         <GlobalPayoutConfiguration
           config={globalConfig}

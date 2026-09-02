@@ -14,29 +14,29 @@ const Pagination: React.FC<PaginationProps> = ({ currentPage, totalPages, onPage
   }
 
   return (
-    <div className="flex items-center justify-center sm:justify-end gap-2 mt-4 w-full">
+    <div className="flex items-center justify-center sm:justify-end gap-1.5 mt-3 w-full">
       <Button
         variant="outline"
-        size="sm"
+        size="xs"
         disabled={currentPage === 1}
         onClick={() => onPageChange(currentPage - 1)}
-        className="flex items-center gap-1"
+        className="flex items-center gap-0.5"
       >
-        <MdChevronLeft size={16} /> Prev
+        <MdChevronLeft size={14} /> Prev
       </Button>
       
-      <span className="text-sm font-medium text-base-content/70 px-2">
+      <span className="text-xs font-medium text-base-content/70 px-1.5">
         Page {currentPage} of {totalPages}
       </span>
 
       <Button
         variant="outline"
-        size="sm"
+        size="xs"
         disabled={currentPage === totalPages}
         onClick={() => onPageChange(currentPage + 1)}
-        className="flex items-center gap-1"
+        className="flex items-center gap-0.5"
       >
-        Next <MdChevronRight size={16} />
+        Next <MdChevronRight size={14} />
       </Button>
     </div>
   );

@@ -60,6 +60,26 @@ const validateOrderItems = async (items, organizationId) => {
         `Product "${product.productName}" is not active.`
       );
     }
+
+    // Auto-populate snapshot fields from product if missing
+    item.productName = item.productName || product.productName;
+    item.productCode = item.productCode || product.productCode || product.sku || "PROD";
+    item.sku = item.sku || product.sku || "";
+    item.productType = item.productType || product.productType || "Other";
+    item.unitPrice = Number(item.unitPrice ?? item.sellingPrice ?? item.price ?? product.sellingPrice ?? product.unitPrice ?? 0);
+    item.quantity = Number(item.quantity) || 1;
+    item.discountPct = Number(item.discountPct ?? item.discount ?? 0);
+    item.taxPct = Number(item.taxPct ?? item.tax ?? 0);
+
+    const subtotal = item.unitPrice * item.quantity;
+    const discountAmount = subtotal * (item.discountPct / 100);
+    const afterDisc = subtotal - discountAmount;
+    const taxAmount = afterDisc * (item.taxPct / 100);
+
+    item.lineSubtotal = item.lineSubtotal !== undefined ? Number(item.lineSubtotal) : subtotal;
+    item.lineDiscount = item.lineDiscount !== undefined ? Number(item.lineDiscount) : discountAmount;
+    item.lineTax = item.lineTax !== undefined ? Number(item.lineTax) : taxAmount;
+    item.lineTotal = item.lineTotal !== undefined ? Number(item.lineTotal) : (afterDisc + taxAmount);
   }
 };
 
@@ -646,6 +666,7 @@ exports.updateOrder = async (req, res) => {
     const allowedPaymentMethods = [
       "Cash",
       "Card",
+      "Credit Card",
       "UPI",
       "Bank Transfer",
       "Cheque",
@@ -663,6 +684,10 @@ exports.updateOrder = async (req, res) => {
         success: false,
         message: `Invalid payment method: ${updateData.paymentMethod}`,
       });
+    }
+
+    if (updateData.items && Array.isArray(updateData.items)) {
+      await validateOrderItems(updateData.items, organizationId);
     }
 
     // --------------------------------------------------------

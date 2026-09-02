@@ -8,7 +8,7 @@ export type ChecklistItem = {
 };
 
 export type Task = {
-  projectId: any;
+  projectId: string;
   _id: string;
   title: string;
   description?: string;

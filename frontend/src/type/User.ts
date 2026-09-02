@@ -8,6 +8,7 @@ export type OrganizationMember = {
   role: "owner" | "admin" | "member"; // Restricted to specific role strings
   slug: string;
   userId: string;       // Represents your MongoDB/Hex ObjectId string
+  _id?: string;
 };
 
 // Example usage with your data:

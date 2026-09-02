@@ -8,6 +8,7 @@ import { toast } from "react-toastify";
 import { createAccount } from "@/services/salesService";
 import { useAuth } from "@/auth/useAuth";
 import { getSalesEmployees } from "@/services/memberService";
+import { PageHeader } from "@/components/common";
 
 const COUNTRIES = [
   "India", "United States", "United Kingdom", "Canada", "Australia",
@@ -191,24 +192,16 @@ const payload = {
     <div className="min-h-screen bg-base-200 p-4 md:p-6 lg:p-8 font-sans">
       
       {/* Page Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 bg-base-100 p-5 rounded-xl border border-base-300 shadow-sm">
-        <div>
-          <h1 className="text-2xl font-bold text-base-content tracking-tight">Create New Account</h1>
-          <div className="text-sm text-base-content/60 breadcrumbs mt-1 font-medium">
-            <ul>
-              <li>Dashboard</li>
-              <li>Sales</li>
-              <li>Accounts</li>
-              <li className="text-primary">Create Account</li>
-            </ul>
-          </div>
-        </div>
-        <div className="flex gap-2 flex-wrap">
-          <button type="button" className="btn btn-outline btn-sm gap-2 bg-base-100" onClick={() => navigate(-1)}>
-            Cancel
-          </button>
-        </div>
-      </div>
+      <PageHeader
+        title="Create New Account"
+        breadcrumbs={[
+          { label: "Dashboard" },
+          { label: "Sales" },
+          { label: "Accounts" },
+          { label: "Create Account", active: true },
+        ]}
+        cancel
+      />
 
       <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         

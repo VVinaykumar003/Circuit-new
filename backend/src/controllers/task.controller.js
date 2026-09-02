@@ -179,10 +179,22 @@ const updateTask = async (req, res) => {
     const userRole = req.user.role;
     const { projectId, taskId } = req.params;
 
-    if (!["admin", "manager", "owner"].includes(userRole)) {
+    const existingTask = await Task.findOne({ _id: taskId, organization: orgId });
+    if (!existingTask) {
+      return res.status(404).json({
+        success: false,
+        message: "Task not found",
+      });
+    }
+
+    const isAssigned = existingTask.assignedTo?.some(
+      (uid) => uid.toString() === req.user._id.toString()
+    );
+
+    if (!["admin", "manager", "owner"].includes(userRole) && !isAssigned) {
       return res.status(403).json({
         success: false,
-        message: "You are not authorized to update tasks",
+        message: "You are not authorized to update this task",
       });
     }
 
@@ -203,18 +215,26 @@ const updateTask = async (req, res) => {
     if (description !== undefined) updateFields.description = description;
     if (priority !== undefined) updateFields.priority = priority;
     if (status !== undefined) updateFields.status = status;
-    if (assignedTo !== undefined) updateFields.assignedTo = assignedTo;
+    if (assignedTo !== undefined && ["admin", "manager", "owner"].includes(userRole)) {
+      updateFields.assignedTo = assignedTo;
+    }
     if (dueDate !== undefined) updateFields.dueDate = dueDate;
     if (tag !== undefined) updateFields.tag = tag;
 
-    // FIX: subtasks string -> JSON
-    const parsedSubtasks = JSON.parse(subtasks);
-
-    updateFields.subtasks = parsedSubtasks.map((sub) => ({
-      ...(sub._id && sub._id.length === 24 ? { _id: sub._id } : {}),
-      title: sub.title,
-      completed: sub.completed,
-    }));
+    // FIX: safely parse subtasks
+    if (subtasks !== undefined) {
+      let parsedSubtasks = [];
+      try {
+        parsedSubtasks = typeof subtasks === "string" ? JSON.parse(subtasks) : subtasks;
+      } catch (e) {
+        parsedSubtasks = [];
+      }
+      updateFields.subtasks = (parsedSubtasks || []).map((sub) => ({
+        ...(sub._id && sub._id.length === 24 ? { _id: sub._id } : {}),
+        title: sub.title,
+        completed: sub.completed,
+      }));
+    }
     // FILE UPLOAD SUPPORT
     let uploadedAttachments = [];
 
@@ -498,11 +518,17 @@ const updateTaskStatus = async (req, res) => {
     const { projectId, taskId } = req.params;
     const { status } = req.body;
 
+    const targetTaskId = taskId || projectId;
+    const query = { _id: targetTaskId, organization: orgId };
+    if (projectId && taskId && projectId !== "undefined" && projectId !== "all") {
+      query.projectId = projectId;
+    }
+
     const updatedTask = await Task.findOneAndUpdate(
-      { _id: taskId, projectId, organization: orgId },
+      query,
       { status },
       { new: true, runValidators: true },
-    );
+    ).populate("assignedTo", "name email");
 
     if (!updatedTask) {
       return res.status(404).json({

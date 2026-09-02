@@ -129,7 +129,7 @@ export default function AttendanceFilters({
     </label>
     <input
       type="date"
-      value={fromDate || today}
+      value={fromDate || ""}
       onChange={(e) =>
         onChange({
           name,
@@ -148,7 +148,7 @@ export default function AttendanceFilters({
     </label>
     <input
       type="date"
-      value={toDate || today}
+      value={toDate || ""}
       onChange={(e) =>
         onChange({
           name,

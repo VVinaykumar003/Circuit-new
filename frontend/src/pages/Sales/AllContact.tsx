@@ -30,6 +30,7 @@ import Swal from "sweetalert2";
 import { toast } from "react-toastify";
 import EntityDrawer from "@/components/sales/EntityDrawer";
 import { getSalesReps } from "@/services/salesRepServices";
+import { PageHeader, StatsGrid } from "@/components/common";
 
 /* ─────────────────────────── types ─────────────────────────── */
 export interface Contact {
@@ -401,38 +402,31 @@ export default function ContactsDashboard() {
   return (
     <div className="min-h-screen bg-base-200 p-4 md:p-6 font-sans flex flex-col h-full overflow-hidden relative">
       {/* ── Header ── */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 bg-base-100 p-5 rounded-xl border border-base-300 shadow-sm">
-        <div>
-          <h1 className="text-2xl font-bold text-base-content tracking-tight">
-            Contacts Management
-          </h1>
-          <div className="text-sm text-base-content/60 breadcrumbs mt-1 font-medium">
-            <ul>
-              <li>Dashboard</li>
-              <li>Sales</li>
-              <li className="text-primary">Contacts</li>
-            </ul>
-          </div>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <button className="btn btn-outline btn-sm gap-2 bg-base-100">
-            <MdDownload size={16} /> Export CSV
-          </button>
-          <button className="btn btn-outline btn-sm btn-square bg-base-100">
-            <MdRefresh size={16} />
-          </button>
-          <button
-            onClick={() => navigate("/sales/contacts/new")}
-            className="btn btn-primary btn-sm gap-2 shadow-sm"
-          >
-            <MdAdd size={16} /> Add Contact
-          </button>
-        </div>
-      </div>
+      <PageHeader
+        title="Contacts Management"
+        breadcrumbs={[
+          { label: "Dashboard" },
+          { label: "Sales" },
+          { label: "Contacts", active: true },
+        ]}
+        showExport
+        onExport={() => toast.info("Exporting contacts...")}
+        showRefresh
+        onRefresh={fetchContacts}
+        actions={[
+          {
+            label: "Add Contact",
+            icon: <MdAdd size={16} />,
+            variant: "primary",
+            onClick: () => navigate("/sales/contacts/new"),
+          },
+        ]}
+      />
 
       {/* ── Dashboard Stats ── */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        {[
+      <StatsGrid
+        columns={{ default: 2, md: 4 }}
+        stats={[
           {
             label: "Total Contacts",
             value: stats.total,
@@ -449,21 +443,8 @@ export default function ContactsDashboard() {
             value: stats.linkedLeads,
             color: "text-success",
           },
-        ].map((stat, idx) => (
-          <div
-            key={idx}
-            className="bg-base-100 border border-base-300 rounded-xl p-5 flex flex-col justify-center shadow-sm hover:shadow-md transition-shadow relative overflow-hidden"
-          >
-            <div className="absolute top-0 left-0 w-1 h-full bg-base-300"></div>
-            <span className="text-xs text-base-content/60 font-bold uppercase tracking-wider">
-              {stat.label}
-            </span>
-            <span className={`text-3xl font-black mt-1 ${stat.color}`}>
-              {stat.value}
-            </span>
-          </div>
-        ))}
-      </div>
+        ]}
+      />
 
       {/* ── Toolbar ── */}
       <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-4 bg-base-100 p-3 rounded-xl border border-base-300 shadow-sm">

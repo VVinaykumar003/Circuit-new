@@ -44,6 +44,7 @@ import {
   type Case,
 } from "@/services/caseServices";
 import { getSalesReps } from "@/services/salesRepServices";
+import { PageHeader, StatsGrid } from "@/components/common";
 import {
   PieChart,
   Pie,
@@ -610,45 +611,37 @@ export default function AllCase() {
   return (
     <div className="min-h-screen bg-base-200 p-4 md:p-6 font-sans flex flex-col h-full overflow-hidden relative">
       {/* ── Header ── */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 bg-base-100 p-5 rounded-xl border border-base-300 shadow-sm">
-        <div>
-          <h1 className="text-2xl font-bold text-base-content tracking-tight">
-            Cases Management
-          </h1>
-          <div className="text-sm text-base-content/60 breadcrumbs mt-1 font-medium">
-            <ul>
-              <li>Dashboard</li>
-              <li>Sales</li>
-              <li className="text-primary">Cases</li>
-            </ul>
-          </div>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <ImportExportActions
-            moduleName="Cases"
-            columns={caseColumns}
-            data={filteredCases}
-            selectedData={getSelectedCases()}
-            onImportSubmit={handleImportSubmit}
-          />
-          <button
-            onClick={() => refetch()}
-            className="btn btn-outline btn-sm btn-square bg-base-100"
-          >
-            <MdRefresh size={16} />
-          </button>
-          <button
-            onClick={() => navigate("/sales/cases/new")}
-            className="btn btn-primary btn-sm gap-2 shadow-sm"
-          >
-            <MdAdd size={16} /> Create Case
-          </button>
-        </div>
-      </div>
+      <PageHeader
+        title="Cases Management"
+        breadcrumbs={[
+          { label: "Dashboard" },
+          { label: "Sales" },
+          { label: "Cases", active: true },
+        ]}
+        showRefresh
+        onRefresh={() => refetch()}
+        actions={[
+          {
+            label: "Create Case",
+            icon: <MdAdd size={16} />,
+            variant: "primary",
+            onClick: () => navigate("/sales/cases/new"),
+          },
+        ]}
+      >
+        <ImportExportActions
+          moduleName="Cases"
+          columns={caseColumns}
+          data={filteredCases}
+          selectedData={getSelectedCases()}
+          onImportSubmit={handleImportSubmit}
+        />
+      </PageHeader>
 
       {/* ── Summary Cards ── */}
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4 mb-6">
-        {[
+      <StatsGrid
+        columns={{ default: 2, sm: 4, md: 4, lg: 8 }}
+        stats={[
           {
             label: "Total Cases",
             value: stats.total,
@@ -673,20 +666,8 @@ export default function AllCase() {
             value: stats.avgResolution,
             color: "text-secondary",
           },
-        ].map((stat, idx) => (
-          <div
-            key={idx}
-            className="bg-base-100 border border-base-300 rounded-xl p-4 flex flex-col justify-center items-center shadow-sm hover:shadow-md transition-shadow relative overflow-hidden"
-          >
-            <span className={`text-xl font-black mt-1 ${stat.color}`}>
-              {stat.value}
-            </span>
-            <span className="text-[10px] text-base-content/60 font-bold uppercase tracking-wider text-center mt-1">
-              {stat.label}
-            </span>
-          </div>
-        ))}
-      </div>
+        ]}
+      />
 
       {/* ── Toolbar ── */}
       <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-4 bg-base-100 p-3 rounded-xl border border-base-300 shadow-sm">

@@ -7,7 +7,7 @@ export type Member={
   role:UserRole;
 dateOfBirth?: string | Date;
 designation?:string;
-  imgUrl?: string;
+  imageUrl?: string;
   status?: "active" | "inactive";
   joinedAt?: string;
   phone?: string;

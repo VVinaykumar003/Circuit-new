@@ -4,7 +4,7 @@ import CompanySettings from "@/components/settings/CompanySettings";
 
 import SecuritySettings from "@/components/settings/SecuritySettings";
 import AppearanceSettings from "@/components/settings/AppearanceSettings";
-import Breadcrumbs from "@/components/ui/Breadcrumbs";
+import { PageHeader } from "@/components/common";
 import Button from "@/components/ui/Button";
 
 
@@ -26,9 +26,13 @@ export default function SettingsPage() {
   };
 return (
   <div className="p-6 bg-base-100 text-base-content min-h-screen">
-    <Breadcrumbs />
-
-    <h1 className="text-2xl font-semibold mb-6">Settings</h1>
+    <PageHeader
+      title="Settings"
+      breadcrumbs={[
+        { label: "Dashboard" },
+        { label: "Settings", active: true },
+      ]}
+    />
 
     {/* Tabs */}
     <div className="hidden md:block mb-6">

@@ -1,7 +1,7 @@
 import React, { Suspense } from "react";
 import type { UserRole } from "../type/attendance";
 import { useAuth } from "@/auth/useAuth";
-import Breadcrumbs from "@/components/ui/Breadcrumbs";
+import { PageHeader } from "@/components/common";
 
 const EmployeeAttendanceView = React.lazy(()=> import("../components/attendance/EmployeeAttendance"));
 const AdminAttendanceView = React.lazy(()=> import("../components/attendance/AdminAttendance"));
@@ -14,7 +14,13 @@ export default function Attendance() {
 
   return (
     <div className="p-4 sm:p-6 space-y-4">
-      <Breadcrumbs />
+      <PageHeader
+        title="Attendance"
+        breadcrumbs={[
+          { label: "Dashboard" },
+          { label: "Attendance", active: true },
+        ]}
+      />
       <Suspense fallback={<div className="p-4 text-center">Loading...</div>}>
         {role === "admin" || role === "owner" ? (
           <AdminAttendanceView />

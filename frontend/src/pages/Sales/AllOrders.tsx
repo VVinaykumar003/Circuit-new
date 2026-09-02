@@ -35,9 +35,9 @@ import {
 import { toast } from "react-toastify";
 import { useAuth } from "@/auth/useAuth";
 import { getOrders, updateOrder, deleteOrder, emailCustomerOrder, createOrder, type Order } from "@/services/orderServices";
-import { getSalesReps } from "@/services/salesRepServices";
 import ImportExportActions from "@/components/import-export/ImportExportActions";
 import type { ColumnConfig } from "@/type/importExport.types";
+import { PageHeader, StatsGrid } from "@/components/common";
 
 const orderColumns: ColumnConfig[] = [
   { key: "orderNumber", label: "Order Number", required: true, type: "string" },
@@ -357,30 +357,33 @@ export default function AllOrders() {
     <div className="min-h-screen bg-base-200 p-4 md:p-6 font-sans flex flex-col h-full overflow-hidden relative">
       
       {/* ── Page Header ── */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 gap-4 bg-base-100 p-5 rounded-xl border border-base-300 shadow-sm">
-        <div>
-          <h1 className="text-2xl font-bold text-base-content tracking-tight">All Orders</h1>
-          <div className="text-sm text-base-content/60 breadcrumbs mt-1">
-            <ul>
-              <li>Dashboard</li>
-              <li>Sales</li>
-              <li>Orders</li>
-              <li className="font-semibold text-primary">All Orders</li>
-            </ul>
-          </div>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <ImportExportActions
-            moduleName="Orders"
-            columns={orderColumns}
-            data={filteredOrders}
-            selectedData={getSelectedOrders()}
-            onImportSubmit={handleImportSubmit}
-          />
-          <button onClick={() => refetch()} className="btn btn-outline btn-sm btn-square"><MdRefresh size={16} /></button>
-          <button onClick={() => navigate("/sales/orders/new")} className="btn btn-primary btn-sm gap-2 shadow-sm"><MdAdd size={16} /> Create Order</button>
-        </div>
-      </div>
+      <PageHeader
+        title="All Orders"
+        breadcrumbs={[
+          { label: "Dashboard" },
+          { label: "Sales" },
+          { label: "Orders" },
+          { label: "All Orders", active: true },
+        ]}
+        showRefresh
+        onRefresh={() => refetch()}
+        actions={[
+          {
+            label: "Create Order",
+            icon: <MdAdd size={16} />,
+            variant: "primary",
+            onClick: () => navigate("/sales/orders/new"),
+          },
+        ]}
+      >
+        <ImportExportActions
+          moduleName="Orders"
+          columns={orderColumns}
+          data={filteredOrders}
+          selectedData={getSelectedOrders()}
+          onImportSubmit={handleImportSubmit}
+        />
+      </PageHeader>
 
       {/* ── Alerts ── */}
       {overDueCount > 0 && (
@@ -392,8 +395,9 @@ export default function AllOrders() {
       )}
 
       {/* ── Stats Dashboard ── */}
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4 mb-4">
-        {[
+      <StatsGrid
+        columns={{ default: 2, sm: 4, md: 4, lg: 8 }}
+        stats={[
           { label: "Total Orders", value: stats.total, color: "text-base-content" },
           { label: "Revenue", value: `₹${(stats.revenue/1000).toFixed(1)}k`, color: "text-success" },
           { label: "Draft", value: stats.draft, color: "text-base-content/50" },
@@ -402,13 +406,8 @@ export default function AllOrders() {
           { label: "Delivered", value: stats.delivered, color: "text-primary" },
           { label: "Cancelled", value: stats.cancelled, color: "text-error" },
           { label: "Avg Value", value: `₹${stats.aov.toFixed(0)}`, color: "text-base-content" },
-        ].map((stat, idx) => (
-          <div key={idx} className="bg-base-100 border border-base-300 rounded-xl p-4 flex flex-col justify-center items-center shadow-sm">
-            <span className={`text-xl font-bold ${stat.color}`}>{stat.value}</span>
-            <span className="text-xs text-base-content/60 mt-1 text-center font-medium uppercase">{stat.label}</span>
-          </div>
-        ))}
-      </div>
+        ]}
+      />
 
       {/* ── Toolbar ── */}
       <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-4 bg-base-100 p-3 rounded-xl border border-base-300 shadow-sm">

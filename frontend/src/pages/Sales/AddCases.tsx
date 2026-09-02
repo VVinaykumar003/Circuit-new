@@ -9,6 +9,7 @@ import { useAuth } from "@/auth/useAuth";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { createCase, type Case } from "@/services/caseServices";
 import { getSalesReps } from "@/services/salesRepServices";
+import { PageHeader } from "@/components/common";
 
 /* ─────────────────────────── Zod Schema ─────────────────────────── */
 const caseSchema = z.object({
@@ -98,22 +99,16 @@ export default function AddCases() {
     <div className="min-h-screen bg-base-200 p-4 md:p-6 lg:p-8 font-sans">
       
       {/* ── Page Header ── */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 bg-base-100 p-5 rounded-xl border border-base-300 shadow-sm">
-        <div>
-          <h1 className="text-2xl font-bold text-base-content tracking-tight">Create Case</h1>
-          <div className="text-sm text-base-content/60 breadcrumbs mt-1">
-            <ul>
-              <li>Dashboard</li>
-              <li>Sales</li>
-              <li>Cases</li>
-              <li className="font-semibold text-primary">Create Case</li>
-            </ul>
-          </div>
-        </div>
-        <div className="flex gap-2">
-          <button onClick={() => navigate(-1)} type="button" className="btn btn-ghost btn-sm">Cancel</button>
-        </div>
-      </div>
+      <PageHeader
+        title="Create Case"
+        breadcrumbs={[
+          { label: "Dashboard" },
+          { label: "Sales" },
+          { label: "Cases" },
+          { label: "Create Case", active: true },
+        ]}
+        cancel
+      />
 
       {/* ── Main Layout ── */}
       <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 lg:grid-cols-4 gap-6">

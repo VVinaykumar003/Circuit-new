@@ -2,7 +2,7 @@ import {BarChart, BarChart3, CalendarCheck, ClipboardCopy, ClipboardList, Clock 
 
 
 
-  type AttendanceTab = "records" | "mark";
+type AttendanceTab = "records" | "mark" | "summary";
 
 interface Props {
   active: AttendanceTab;

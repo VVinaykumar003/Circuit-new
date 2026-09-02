@@ -420,11 +420,44 @@ const deleteLead = async (req, res) => {
   }
 };
 
+const bulkDeleteLeads = async (req, res) => {
+  try {
+    const { leadIds } = req.body;
+    const organizationId = req.organization._id;
+
+    if (!Array.isArray(leadIds) || leadIds.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "leadIds array is required",
+      });
+    }
+
+    const result = await LeadModel.deleteMany({
+      _id: { $in: leadIds },
+      organizationId,
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: `${result.deletedCount} leads deleted successfully`,
+      deletedCount: result.deletedCount,
+    });
+  } catch (error) {
+    console.error("Bulk Delete Leads Error:", error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+      error: error.message,
+    });
+  }
+};
 
 module.exports = {
   createLead,
   getAllLeads,
   updateLead,
   deleteLead,
+  bulkDeleteLeads,
   convertLeadToCustomer
 };

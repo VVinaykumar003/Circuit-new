@@ -8,15 +8,16 @@ import ProjectGridSkeleton from "@/components/projects/ProjectGridSkeleton";
 import ProjectFilters from "@/components/projects/ProjectFilters";
 import { useAuth } from "@/auth/useAuth";
 import { toast } from "react-toastify";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { getProject, deleteProject } from "@/services/projectServices";
-// import { getOrganizationSlug } from "@/utils/auth";
-import Breadcrumbs from "@/components/ui/Breadcrumbs";
 import Pagination from "@/components/ui/Pagination";
+import { PageHeader, StatsGrid } from "@/components/common";
+import { MdAdd, MdWorkspaces, MdCheckCircle, MdPendingActions } from "react-icons/md";
 
 export default function Projects() {
   const { auth } = useAuth();
   const slug = auth.slug;
+  const navigate = useNavigate();
   // console.log("Auth in Projects:", auth);
 
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
@@ -114,7 +115,56 @@ export default function Projects() {
 
   return (
     <div className="p-4 sm:p-6 space-y-4">
-      <Breadcrumbs />
+      <PageHeader
+        title="Projects"
+        breadcrumbs={[
+          { label: "Dashboard" },
+          { label: "Projects", active: true },
+        ]}
+        actions={
+          canEdit
+            ? [
+                {
+                  label: "Create Project",
+                  icon: <MdAdd size={16} />,
+                  variant: "primary",
+                  onClick: () => navigate("/projects/create"),
+                },
+              ]
+            : []
+        }
+      />
+
+      <StatsGrid
+        columns={{ default: 2, sm: 2, md: 4 }}
+        stats={[
+          {
+            label: "Total Projects",
+            value: projects.length,
+            icon: <MdWorkspaces size={18} />,
+            color: "text-base-content",
+          },
+          {
+            label: "Active Projects",
+            value: projects.filter((p) => p.status === "active").length,
+            icon: <MdPendingActions size={18} />,
+            color: "text-primary",
+          },
+          {
+            label: "Completed",
+            value: projects.filter((p) => p.status === "completed").length,
+            icon: <MdCheckCircle size={18} />,
+            color: "text-success",
+          },
+          {
+            label: "On Hold",
+            value: projects.filter(
+              (p) => p.status === "on-hold" || p.status === "hold",
+            ).length,
+            color: "text-warning",
+          },
+        ]}
+      />
 
       {/* Project Filters */}
       <ProjectFilters value={filter} onChange={setFilter} />

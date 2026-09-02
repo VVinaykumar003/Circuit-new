@@ -6,6 +6,7 @@ import {
   MdCalendarToday,
 } from "react-icons/md";
 import type { LeaveRequest } from "@/type/leave";
+import { StatsGrid } from "@/components/common";
 
 interface Props {
   requests: LeaveRequest[];
@@ -13,15 +14,9 @@ interface Props {
 
 export default function LeaveStats({ requests }: Props) {
   const total = requests.length;
-  const pending = requests.filter(
-    (r) => r.status === "pending"
-  ).length;
-  const approved = requests.filter(
-    (r) => r.status === "approved"
-  ).length;
-  const rejected = requests.filter(
-    (r) => r.status === "rejected"
-  ).length;
+  const pending = requests.filter((r) => r.status === "pending").length;
+  const approved = requests.filter((r) => r.status === "approved").length;
+  const rejected = requests.filter((r) => r.status === "rejected").length;
 
   // This month calculation
   const currentMonth = new Date().getMonth();
@@ -30,67 +25,41 @@ export default function LeaveStats({ requests }: Props) {
     return date.getMonth() === currentMonth;
   }).length;
 
-  const stats = [
-    {
-      title: "Total Leaves",
-      value: total,
-      icon: MdEventNote,
-      color: "text-primary",
-    },
-    {
-      title: "Pending",
-      value: pending,
-      icon: MdHourglassEmpty,
-      color: "text-warning",
-    },
-    {
-      title: "Approved",
-      value: approved,
-      icon: MdCheckCircle,
-      color: "text-success",
-    },
-    {
-      title: "Rejected",
-      value: rejected,
-      icon: MdCancel,
-      color: "text-error",
-    },
-    {
-      title: "This Month",
-      value: thisMonth,
-      icon: MdCalendarToday,
-      color: "text-info",
-    },
-  ];
-
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 bg-primary p-3 rounded-2xl">
-      {stats.map((stat, index) => {
-        const Icon = stat.icon;
-
-        return (
-          <div
-            key={index}
-            className="bg-base-100 border border-base-300 rounded-xl p-3 shadow-sm hover:shadow-md transition "
-          >
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-base-content/60 font-medium">
-                  {stat.title}
-                </p>
-                <p className="text-lg text-base-content font-semibold">
-                  {stat.value}
-                </p>
-              </div>
-
-              <Icon
-                size={20}
-                className={`${stat.color}`}
-              />
-            </div>
-          </div>
-        );
-      })}
-    </div>
+    <StatsGrid
+      columns={{ default: 2, sm: 3, md: 3, lg: 5 }}
+      stats={[
+        {
+          label: "Total Leaves",
+          value: total,
+          icon: <MdEventNote size={18} />,
+          color: "text-primary",
+        },
+        {
+          label: "Pending",
+          value: pending,
+          icon: <MdHourglassEmpty size={18} />,
+          color: "text-warning",
+        },
+        {
+          label: "Approved",
+          value: approved,
+          icon: <MdCheckCircle size={18} />,
+          color: "text-success",
+        },
+        {
+          label: "Rejected",
+          value: rejected,
+          icon: <MdCancel size={18} />,
+          color: "text-error",
+        },
+        {
+          label: "This Month",
+          value: thisMonth,
+          icon: <MdCalendarToday size={18} />,
+          color: "text-info",
+        },
+      ]}
+    />
   );
 }

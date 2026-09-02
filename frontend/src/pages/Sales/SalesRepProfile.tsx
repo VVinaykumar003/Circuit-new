@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { getSalesRepById } from "@/services/salesRepServices";
 import { useAuth } from "@/auth/useAuth";
+import { PageHeader, StatsGrid } from "@/components/common";
 import {
   MdEdit,
   MdPictureAsPdf,
@@ -193,33 +194,74 @@ export default function SalesRepProfile() {
     <div className="min-h-screen bg-base-200 font-sans flex flex-col">
       
       {/* ── Page Header ── */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center px-6 py-4 bg-base-100 border-b border-base-300 sticky top-0 z-20 shadow-sm gap-4">
-        <div>
-          <h1 className="text-xl font-bold text-base-content tracking-tight">Sales Representative Details</h1>
-          <div className="text-sm text-base-content/60 breadcrumbs mt-1">
-            <ul>
-              <li>Dashboard</li>
-              <li>Sales</li>
-              <li>Representatives</li>
-              <li className="font-semibold text-primary">Details</li>
-            </ul>
-          </div>
-        </div>
-        <div className="flex gap-2 flex-wrap">
-          <button className="btn btn-outline btn-sm gap-1" onClick={() => navigate(`/sales/representatives/edit/${rep.id}`)}><MdEdit size={16} /> Edit</button>
-          <button className="btn btn-outline btn-sm gap-1" onClick={() => (document.getElementById('modal_assign_customer') as HTMLDialogElement)?.showModal()}><MdPeople size={16} /> Customers</button>
-          <button className="btn btn-outline btn-sm gap-1" onClick={() => (document.getElementById('modal_assign_lead') as HTMLDialogElement)?.showModal()}><MdOutlineAssignmentTurnedIn size={16} /> Leads</button>
-          
+      <div className="px-6 pt-4">
+        <PageHeader
+          title="Sales Representative Details"
+          breadcrumbs={[
+            { label: "Dashboard" },
+            { label: "Sales" },
+            { label: "Representatives" },
+            { label: "Details", active: true },
+          ]}
+          cancel
+          actions={[
+            {
+              label: "Edit",
+              icon: <MdEdit size={16} />,
+              variant: "outline",
+              onClick: () => navigate(`/sales/representatives/edit/${rep.id}`),
+            },
+            {
+              label: "Customers",
+              icon: <MdPeople size={16} />,
+              variant: "outline",
+              onClick: () =>
+                (
+                  document.getElementById(
+                    "modal_assign_customer",
+                  ) as HTMLDialogElement
+                )?.showModal(),
+            },
+            {
+              label: "Leads",
+              icon: <MdOutlineAssignmentTurnedIn size={16} />,
+              variant: "outline",
+              onClick: () =>
+                (
+                  document.getElementById(
+                    "modal_assign_lead",
+                  ) as HTMLDialogElement
+                )?.showModal(),
+            },
+          ]}
+        >
           <div className="dropdown dropdown-end">
-            <button tabIndex={0} className="btn btn-outline btn-sm gap-1">More <MdMoreVert size={16} /></button>
-            <ul tabIndex={0} className="dropdown-content menu p-2 shadow-lg bg-base-100 rounded-box w-48 z-50 border border-base-200 mt-1">
-              <li><a><MdPictureAsPdf size={16} /> Export PDF</a></li>
-              <li><a><MdPrint size={16} /> Print Profile</a></li>
+            <button tabIndex={0} className="btn btn-outline btn-sm gap-1 bg-base-100">
+              More <MdMoreVert size={16} />
+            </button>
+            <ul
+              tabIndex={0}
+              className="dropdown-content menu p-2 shadow-lg bg-base-100 rounded-box w-48 z-50 border border-base-200 mt-1"
+            >
+              <li>
+                <a>
+                  <MdPictureAsPdf size={16} /> Export PDF
+                </a>
+              </li>
+              <li>
+                <a>
+                  <MdPrint size={16} /> Print Profile
+                </a>
+              </li>
               <div className="divider my-1"></div>
-              <li><a className="text-error"><MdDelete size={16} /> Delete Rep</a></li>
+              <li>
+                <a className="text-error">
+                  <MdDelete size={16} /> Delete Rep
+                </a>
+              </li>
             </ul>
           </div>
-        </div>
+        </PageHeader>
       </div>
 
       {/* ── Main Layout ── */}
@@ -277,16 +319,44 @@ export default function SalesRepProfile() {
         <div className="flex-1 flex flex-col min-w-0">
           
           {/* Top Stats */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            <StatCard title="Monthly Target" value={`₹${rep.monthlyTarget.toLocaleString()}`} />
-            <StatCard title="Monthly Achievement" value={`₹${rep.monthlyAchievement.toLocaleString()}`} />
-            <StatCard title="Target Completion" value={`${((rep.monthlyAchievement/rep.monthlyTarget)*100).toFixed(1)}%`} progress={true} progressValue={(rep.monthlyAchievement/rep.monthlyTarget)*100} />
-            <StatCard title="Orders This Month" value={rep.ordersThisMonth} />
-            <StatCard title="Total Customers" value={rep.totalCustomers} />
-            <StatCard title="Total Leads" value={rep.totalLeads} />
-            <StatCard title="Conversion Rate" value={`${rep.conversionRate}%`} />
-            <StatCard title="Revenue This Month" value={`₹${rep.revenueThisMonth.toLocaleString()}`} />
-          </div>
+          <StatsGrid
+            columns={{ default: 2, lg: 4 }}
+            stats={[
+              {
+                label: "Monthly Target",
+                value: `₹${rep.monthlyTarget.toLocaleString()}`,
+              },
+              {
+                label: "Monthly Achievement",
+                value: `₹${rep.monthlyAchievement.toLocaleString()}`,
+              },
+              {
+                label: "Target Completion",
+                value: `${((rep.monthlyAchievement / rep.monthlyTarget) * 100).toFixed(1)}%`,
+                color: "text-primary",
+              },
+              {
+                label: "Orders This Month",
+                value: rep.ordersThisMonth,
+              },
+              {
+                label: "Total Customers",
+                value: rep.totalCustomers,
+              },
+              {
+                label: "Total Leads",
+                value: rep.totalLeads,
+              },
+              {
+                label: "Conversion Rate",
+                value: `${rep.conversionRate}%`,
+              },
+              {
+                label: "Revenue This Month",
+                value: `₹${rep.revenueThisMonth.toLocaleString()}`,
+              },
+            ]}
+          />
 
           {/* Tabs Section */}
           <div className="bg-base-100 rounded-xl shadow-sm border border-base-300 flex-1 flex flex-col overflow-hidden min-h-[500px]">

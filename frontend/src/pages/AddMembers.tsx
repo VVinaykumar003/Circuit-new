@@ -1,9 +1,10 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { FaEye, FaEyeSlash, FaUser, FaShieldAlt, FaBriefcase, FaUniversity, FaUserFriends } from "react-icons/fa";
 import { toast } from "react-toastify";
 import { createMember } from "../services/memberService";
-// import { getOrganizationSlug } from "@/utils/auth";
-import Breadcrumbs from "@/components/ui/Breadcrumbs";
+import { uploadImage } from "@/services/uploadService";
+import { PageHeader } from "@/components/common";
 import { useAuth } from "@/auth/useAuth";
 type UserRole = "member" | "manager" | "admin";
 type Errors = {
@@ -43,11 +44,13 @@ const Field = ({
 const AddMember = () => {
   const {auth} = useAuth();
   const slug = auth.slug;
+  const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(0);
   const [adding, setAdding] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState<Errors>({});
   const [preview, setPreview] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -67,6 +70,7 @@ const AddMember = () => {
     role: "member" as UserRole,
     designation: "",
     department: "",
+    customDepartment: "",
     joiningDate: "",
     previousCompany: "",
     bankName: "",
@@ -83,7 +87,10 @@ const AddMember = () => {
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) setPreview(URL.createObjectURL(file));
+    if (file) {
+      setSelectedFile(file);
+      setPreview(URL.createObjectURL(file));
+    }
   };
 
   const validate = (): boolean => {
@@ -108,33 +115,46 @@ const AddMember = () => {
     if (!validate()) return;
     setAdding(true);
     try {
-       
-       if (!slug) {
-         toast.error("User data not found. Please log in again.");
-         return;
-       }
-// console.log(slug,formData);
-            await createMember(slug, formData);
-      
-            toast.success("Employee Registered Successfully");
-            
+      if (!slug) {
+        toast.error("User data not found. Please log in again.");
+        return;
+      }
+
+      let imgUrl = "";
+      if (selectedFile) {
+        try {
+          imgUrl = await uploadImage(selectedFile);
+        } catch (uploadErr) {
+          console.warn("Image upload failed, proceeding without image", uploadErr);
+        }
+      }
+
+      await createMember(slug, {
+        ...formData,
+        imageUrl: imgUrl || undefined,
+      });
+
+      toast.success("Employee Registered Successfully");
+
       setFormData({
         name: "", email: "", password: "", phone: "", gender: "", dateOfBirth: "",
         currentAddress: "", permanentAddress: "", emergencyName: "", emergencyPhone: "",
         emergencyRelation: "", aadhaar: "", pan: "", passport: "", role: "member",
-        designation: "", department: "", joiningDate: "", previousCompany: "",
+        designation: "", department: "", customDepartment: "", joiningDate: "", previousCompany: "",
         bankName: "", accountNumber: "", ifscCode: "",
       });
       setPreview(null);
+      setSelectedFile(null);
       setErrors({});
       setCurrentStep(0);
-    } catch (error : any) {
-      console.error("error",error);
-       const errorMessage = error.response?.data?.message || "Failed to register employee";
-      toast.error("Failed to register employee",errorMessage);
-      
-      
-
+      navigate("/employees")
+    } catch (error: any) {
+      console.error("Employee registration error:", error);
+      const errorMessage =
+        error.response?.data?.message ||
+        error.response?.data?.error ||
+        "Failed to register employee";
+      toast.error(errorMessage);
     } finally {
       setAdding(false);
     }
@@ -172,20 +192,15 @@ const AddMember = () => {
       `}</style>
 
       <div className="form-wrap w-full max-w-3xl">
-        <div className="mb-6">
-          <Breadcrumbs />
-        </div>
-
-        {/* Header */}
-        <div className="mb-8 flex items-center gap-5">
-          <div className="w-12 h-12 rounded-2xl btn-primary flex items-center justify-center text-white shadow-lg">
-            <FaUser size={18} />
-          </div>
-          <div>
-            <h1 className="section-tag leading-none">Employee Onboarding</h1>
-            <p className="text-gray-500 text-sm mt-0.5">Register a new team member</p>
-          </div>
-        </div>
+        <PageHeader
+          title="Employee Onboarding"
+          breadcrumbs={[
+            { label: "Dashboard" },
+            { label: "Team Members" },
+            { label: "Add Member", active: true },
+          ]}
+          cancel
+        />
 
         {/* Stepper */}
         <div className="bg-white rounded-2xl p-4 mb-6 card-shadow">
@@ -411,12 +426,27 @@ const AddMember = () => {
                     <select name="department" value={formData.department} onChange={handleChange} className={inputBase}>
                       <option value="">Select department</option>
                       <option value="engineering">Engineering</option>
-                      <option value="hr">Human Resources</option>
-                      <option value="finance">Finance</option>
+                      <option value="sales">Sales</option>
                       <option value="marketing">Marketing</option>
+                      <option value="it">IT</option>
+                      <option value="customer-support">Customer Support</option>
+                      <option value="human-resource">Human Resources & Administration</option>
+                      <option value="finance">Finance</option>
                       <option value="operations">Operations</option>
+                      <option value="other">Other</option>
                     </select>
                   </Field>
+                  {formData.department === "other" && (
+                    <Field label="Custom Department">
+                      <input
+                        name="customDepartment"
+                        value={formData.customDepartment}
+                        onChange={handleChange}
+                        placeholder="Enter custom department"
+                        className={inputBase}
+                      />
+                    </Field>
+                  )}
                   <Field label="Joining Date">
                     <input type="date" name="joiningDate" value={formData.joiningDate}
                       onChange={handleChange} className={inputBase} />

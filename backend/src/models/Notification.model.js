@@ -62,6 +62,7 @@ const notificationSchema = new mongoose.Schema(
 
     readBy: [
       {
+        _id: false,
         user: {
           type: mongoose.Schema.Types.ObjectId,
           ref: "User",

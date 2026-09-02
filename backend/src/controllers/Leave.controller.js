@@ -69,28 +69,51 @@ console.log("📂 Uploaded files:", req.files);
     //   processedAttachments = processedAttachments.filter((item) => typeof item === "string" && item.trim() !== "");
     // }
 
-    const files = req.files || [];
-
-const uploadedAttachments = [];
-
-for (const file of files) {
-  const result = await new Promise((resolve, reject) => {
-    const stream = cloudinary.uploader.upload_stream(
-      {
-        folder: "leaves",
-        resource_type: "auto",
-      },
-      (error, result) => {
-        if (error) reject(error);
-        else resolve(result);
+    const uploadedAttachments = [];
+    if (req.body.attachments) {
+      try {
+        const parsed = typeof req.body.attachments === "string" ? JSON.parse(req.body.attachments) : req.body.attachments;
+        if (Array.isArray(parsed)) {
+          uploadedAttachments.push(...parsed.filter((u) => typeof u === "string" && u.trim()));
+        } else if (typeof parsed === "string" && parsed.trim()) {
+          uploadedAttachments.push(parsed.trim());
+        }
+      } catch (e) {
+        if (typeof req.body.attachments === "string" && req.body.attachments.trim()) {
+          uploadedAttachments.push(req.body.attachments.trim());
+        }
       }
-    );
+    }
 
-    streamifier.createReadStream(file.buffer).pipe(stream);
-  });
+    const files = req.files || [];
+    for (const file of files) {
+      try {
+        let resourceType = "auto";
+        if (file.mimetype && file.mimetype.startsWith("image/")) {
+          resourceType = "image";
+        }
+        const result = await new Promise((resolve, reject) => {
+          const stream = cloudinary.uploader.upload_stream(
+            {
+              folder: "leaves",
+              resource_type: resourceType,
+            },
+            (error, result) => {
+              if (error) reject(error);
+              else resolve(result);
+            }
+          );
 
-  uploadedAttachments.push(result.secure_url);
-}
+          streamifier.createReadStream(file.buffer).pipe(stream);
+        });
+
+        if (result && result.secure_url) {
+          uploadedAttachments.push(result.secure_url);
+        }
+      } catch (uploadErr) {
+        console.error("Cloudinary upload error in applyLeave:", uploadErr);
+      }
+    }
 
     logger.info("Apply leave request", { userId, leaveType: type, startDate: fromDate, endDate: toDate });
 
@@ -457,20 +480,59 @@ exports.updateLeave = async (req, res) => {
     leave.endDate = type === "half-day" ? fromDate : (toDate || leave.endDate);
     leave.reason = reason || leave.reason;
     
-    if (attachments !== undefined) {
-      let processedAttachments = [];
+    let updatedAttachmentsList = [];
+    if (req.body.existingAttachments) {
+      try {
+        const parsed = JSON.parse(req.body.existingAttachments);
+        if (Array.isArray(parsed)) updatedAttachmentsList.push(...parsed);
+      } catch (e) {
+        if (typeof req.body.existingAttachments === "string") updatedAttachmentsList.push(req.body.existingAttachments);
+      }
+    } else if (attachments !== undefined) {
       if (typeof attachments === "string") {
         try {
           const parsed = JSON.parse(attachments);
-          processedAttachments = Array.isArray(parsed) ? parsed : [attachments];
-        } catch (e) {
-          processedAttachments = [attachments];
+          if (Array.isArray(parsed)) updatedAttachmentsList.push(...parsed);
+          else updatedAttachmentsList.push(attachments);
+        } catch {
+          updatedAttachmentsList.push(attachments);
         }
       } else if (Array.isArray(attachments)) {
-        processedAttachments = attachments;
+        updatedAttachmentsList.push(...attachments);
       }
-      leave.attachments = processedAttachments.filter((item) => typeof item === "string" && item.trim() !== "");
+    } else {
+      updatedAttachmentsList = leave.attachments || [];
     }
+
+    const newFiles = req.files || [];
+    for (const file of newFiles) {
+      try {
+        let resourceType = "auto";
+        if (file.mimetype && file.mimetype.startsWith("image/")) {
+          resourceType = "image";
+        }
+        const result = await new Promise((resolve, reject) => {
+          const stream = cloudinary.uploader.upload_stream(
+            {
+              folder: "leaves",
+              resource_type: resourceType,
+            },
+            (error, result) => {
+              if (error) reject(error);
+              else resolve(result);
+            }
+          );
+          streamifier.createReadStream(file.buffer).pipe(stream);
+        });
+        if (result && result.secure_url) {
+          updatedAttachmentsList.push(result.secure_url);
+        }
+      } catch (err) {
+        console.error("Cloudinary upload error in updateLeave:", err);
+      }
+    }
+
+    leave.attachments = updatedAttachmentsList.filter((item) => typeof item === "string" && item.trim() !== "");
     if (session) leave.session = session;
     if (emergency !== undefined) leave.emergency = emergency;
 

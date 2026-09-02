@@ -1,7 +1,7 @@
 import AdminLeaveDashboard from "../components/Leave/AdminDashboard";
 import EmployeeLeaveDashboard from "../components/Leave/EmployeeLeaveDashboard";
 import { useAuth } from "@/auth/useAuth";
-import Breadcrumbs from "@/components/ui/Breadcrumbs";
+import { PageHeader } from "@/components/common";
 
 export default function LeavePage() {
   const { auth } = useAuth();
@@ -9,8 +9,18 @@ export default function LeavePage() {
 
   return (
     <div className="p-4 sm:p-6 space-y-4">
-      <Breadcrumbs />
-      {(role === "admin" || role === "owner") ? <AdminLeaveDashboard /> : <EmployeeLeaveDashboard />}
+      <PageHeader
+        title="Leave Management"
+        breadcrumbs={[
+          { label: "Dashboard" },
+          { label: "Leave", active: true },
+        ]}
+      />
+      {role === "admin" || role === "owner" ? (
+        <AdminLeaveDashboard />
+      ) : (
+        <EmployeeLeaveDashboard />
+      )}
     </div>
   );
 }

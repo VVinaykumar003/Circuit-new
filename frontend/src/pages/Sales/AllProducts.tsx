@@ -38,6 +38,7 @@ import { useProductEdit } from "@/hooks/product/useProductEdit";
 import { importProductSubmit } from "@/hooks/product/useProductImport";
 import { useStockUpdateProduct } from "@/hooks/product/stockUpadteProduct";
 import { useProductActions } from "@/hooks/product/newArchiveProduct";
+import { PageHeader, StatsGrid } from "@/components/common";
 
 
 
@@ -47,6 +48,33 @@ import { useProductActions } from "@/hooks/product/newArchiveProduct";
 interface AllProductsProps {
   products?: Product[];
   onAddProduct?: () => void;
+}
+
+function ProductImageCell({
+  imageUrl,
+  productName,
+}: {
+  imageUrl?: string;
+  productName?: string;
+}) {
+  const [hasError, setHasError] = useState(false);
+
+  return (
+    <div className="w-8 h-8 rounded-md bg-base-200 border border-base-300 overflow-hidden shrink-0">
+      {imageUrl && !hasError ? (
+        <img
+          src={imageUrl}
+          alt={productName || "Product"}
+          className="w-full h-full object-cover block"
+          onError={() => setHasError(true)}
+        />
+      ) : (
+        <div className="w-full h-full flex items-center justify-center">
+          <MdInventory className="text-base-content/30" size={16} />
+        </div>
+      )}
+    </div>
+  );
 }
 
 /* ─────────────────────────── component ─────────────────────── */
@@ -226,17 +254,10 @@ export default function AllProducts({ onAddProduct }: AllProductsProps) {
         id: "image",
         header: "Image",
         cell: (info) => (
-          <div className="w-10 h-10 rounded-md bg-base-200 border border-base-300 flex items-center justify-center overflow-hidden">
-            {info.row.original.imageUrl ? (
-              <img
-                src={info.row.original.imageUrl}
-                alt="Product"
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <MdInventory className="text-base-content/30" size={20} />
-            )}
-          </div>
+          <ProductImageCell
+            imageUrl={info.row.original.imageUrl}
+            productName={info.row.original.productName}
+          />
         ),
       }),
       columnHelper.accessor("productName", {
@@ -408,47 +429,39 @@ export default function AllProducts({ onAddProduct }: AllProductsProps) {
   return (
     <div className="min-h-screen bg-base-200 p-4 md:p-6 font-sans flex flex-col h-full overflow-hidden relative">
       {/* ── Page Header ── */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 bg-base-100 p-5 rounded-xl border border-base-300 shadow-sm">
-        <div>
-          <h1 className="text-2xl font-bold text-base-content tracking-tight">
-            Products
-          </h1>
-          <div className="text-sm text-base-content/60 breadcrumbs mt-1">
-            <ul>
-              <li>Dashboard</li>
-              <li>Sales</li>
-              <li className="font-semibold text-primary">Products</li>
-            </ul>
-          </div>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <ImportExportActions
-            moduleName="Products"
-            columns={productColumns}
-            data={filteredProducts}
-            selectedData={getSelectedProducts()}
-            onImportSubmit={handleImportSubmit}
-          />
-          <button
-            onClick={fetchProducts}
-            className="btn btn-outline btn-sm btn-square"
-          >
-            <MdRefresh size={16} />
-          </button>
-          <button
-            onClick={() =>
-              onAddProduct ? onAddProduct() : navigate("/sales/products/new")
-            }
-            className="btn btn-primary btn-sm gap-2 shadow-sm"
-          >
-            <MdAdd size={16} /> Add Product
-          </button>
-        </div>
-      </div>
+      <PageHeader
+        title="Products"
+        breadcrumbs={[
+          { label: "Dashboard" },
+          { label: "Sales" },
+          { label: "Products", active: true },
+        ]}
+        showRefresh
+        onRefresh={fetchProducts}
+        actions={[
+          {
+            label: "Add Product",
+            icon: <MdAdd size={14} />,
+            variant: "primary",
+            size: "xs",
+            onClick: () =>
+              onAddProduct ? onAddProduct() : navigate("/sales/products/new"),
+          },
+        ]}
+      >
+        <ImportExportActions
+          moduleName="Products"
+          columns={productColumns}
+          data={filteredProducts}
+          selectedData={getSelectedProducts()}
+          onImportSubmit={handleImportSubmit}
+        />
+      </PageHeader>
 
       {/* ── Stats Dashboard ── */}
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4 mb-6">
-        {[
+      <StatsGrid
+        columns={{ default: 2, sm: 4, md: 4, lg: 8 }}
+        stats={[
           {
             label: "Total Products",
             value: stats.total,
@@ -473,44 +486,32 @@ export default function AllProducts({ onAddProduct }: AllProductsProps) {
           },
           { label: "Categories", value: stats.categories, color: "text-info" },
           { label: "Brands", value: stats.brands, color: "text-base-content" },
-        ].map((stat, idx) => (
-          <div
-            key={idx}
-            className="bg-base-100 border border-base-300 rounded-xl p-4 flex flex-col justify-center items-center shadow-sm hover:shadow-md transition-shadow"
-          >
-            <span className={`text-xl font-bold ${stat.color}`}>
-              {stat.value}
-            </span>
-            <span className="text-xs text-base-content/60 mt-1 text-center font-medium uppercase">
-              {stat.label}
-            </span>
-          </div>
-        ))}
-      </div>
+        ]}
+      />
 
-      {error && <div className="alert alert-error mb-4">{error}</div>}
+      {error && <div className="alert alert-error mb-3">{error}</div>}
 
       {/* ── Toolbar ── */}
-      <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-4 bg-base-100 p-3 rounded-xl border border-base-300 shadow-sm">
-        <div className="flex items-center gap-3 w-full md:w-auto">
-          <div className="relative w-full md:w-72">
+      <div className="flex flex-col md:flex-row justify-between items-center gap-2.5 mb-3 bg-base-100 p-2.5 rounded-lg border border-base-300 shadow-sm">
+        <div className="flex items-center gap-2 w-full md:w-auto">
+          <div className="relative w-full md:w-60">
             <MdSearch
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-base-content/50"
-              size={18}
+              className="absolute left-2.5 top-1/2 -translate-y-1/2 text-base-content/50"
+              size={15}
             />
             <input
               type="text"
               placeholder="Search by name, SKU, code, brand..."
+              className="input input-xs input-bordered w-full pl-8 pr-3 focus:outline-none focus:border-primary"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="input input-sm input-bordered w-full pl-9 focus:outline-none focus:border-primary"
             />
           </div>
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className={`btn btn-sm ${showFilters ? "btn-primary" : "btn-outline"} gap-2`}
+            className={`btn btn-xs ${showFilters ? "btn-primary" : "btn-outline"} gap-1.5`}
           >
-            <MdFilterList size={16} /> Filters
+            <MdFilterList size={14} /> Filters
           </button>
         </div>
 
@@ -620,7 +621,7 @@ export default function AllProducts({ onAddProduct }: AllProductsProps) {
         {/* View 1: Table */}
         {view === "table" && (
           <div className="flex-1 overflow-auto">
-            <table className="table table-pin-rows table-pin-cols w-full text-sm">
+            <table className="table table-sm table-pin-rows table-pin-cols w-full text-xs">
               <thead>
                 {table.getHeaderGroups().map((headerGroup) => (
                   <tr
@@ -628,11 +629,11 @@ export default function AllProducts({ onAddProduct }: AllProductsProps) {
                     className="bg-base-200/50 text-base-content/70"
                   >
                     {headerGroup.headers.map((header) => (
-                      <th
-                        key={header.id}
-                        className="font-semibold py-3 cursor-pointer select-none"
-                        onClick={header.column.getToggleSortingHandler()}
-                      >
+                  <th
+                    key={header.id}
+                    className="font-semibold py-2 cursor-pointer select-none"
+                    onClick={header.column.getToggleSortingHandler()}
+                  >
                         {flexRender(
                           header.column.columnDef.header,
                           header.getContext(),
@@ -653,7 +654,7 @@ export default function AllProducts({ onAddProduct }: AllProductsProps) {
                     onClick={() => setSelectedProduct(row.original)}
                   >
                     {row.getVisibleCells().map((cell) => (
-                      <td key={cell.id} className="py-3">
+                      <td key={cell.id} className="py-1.5">
                         {flexRender(
                           cell.column.columnDef.cell,
                           cell.getContext(),
@@ -687,15 +688,17 @@ export default function AllProducts({ onAddProduct }: AllProductsProps) {
                   onClick={() => setSelectedProduct(product)}
                   className="card bg-base-100 shadow-sm border border-base-300 hover:border-primary cursor-pointer transition-colors"
                 >
-                  <figure className="h-40 bg-base-200 border-b border-base-200 relative">
+                  <figure className="h-40 bg-base-200 border-b border-base-200 relative overflow-hidden">
                     {product.imageUrl ? (
                       <img
                         src={product.imageUrl}
                         alt={product.productName}
-                        className="object-cover w-full h-full"
+                        className="w-full h-full object-cover block"
                       />
                     ) : (
-                      <MdInventory size={48} className="text-base-content/20" />
+                      <div className="w-full h-full flex items-center justify-center">
+                        <MdInventory size={48} className="text-base-content/20" />
+                      </div>
                     )}
                     {/* Badges on image */}
                     <div className="absolute top-2 left-2 flex flex-col gap-1">

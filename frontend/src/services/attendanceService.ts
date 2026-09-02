@@ -124,7 +124,7 @@ export const approveAttendance = (slug, attendanceId, data) => {
  * @returns {Promise<Array<object>>} A list of attendance documents.
  */
 export const getAttendance = (slug, params) => {
-  return API.get(`/${slug}/attendance/organization`, { params });
+  return API.get(`/attendance/${slug}/attendance/organization`, { params });
 };
 
 /**

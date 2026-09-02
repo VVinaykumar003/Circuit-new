@@ -3,7 +3,7 @@ import { getMyHistory, downloadSlipPdf } from "@/services/payrollService";
 import { useAuth } from "@/auth/useAuth";
 import { toast } from "react-toastify";
 import Button from "@/components/ui/Button";
-import Breadcrumbs from "@/components/ui/Breadcrumbs";
+import { PageHeader } from "@/components/common";
 import Pagination from "@/components/ui/Pagination";
 
 export default function MyPayslips() {
@@ -58,10 +58,15 @@ export default function MyPayslips() {
   );
 
   return (
-    <div className="space-y-6 p-4 sm:p-6">
-      <Breadcrumbs />
-
-      <h2 className="text-2xl font-bold">My Payslips</h2>
+    <div className="space-y-4 p-4 sm:p-6">
+      <PageHeader
+        title="My Payslips"
+        breadcrumbs={[
+          { label: "Dashboard" },
+          { label: "Payroll" },
+          { label: "My Payslips", active: true },
+        ]}
+      />
       
       <div className="bg-base-100 rounded-xl shadow-sm border border-base-300 overflow-hidden">
         <table className="w-full text-left">

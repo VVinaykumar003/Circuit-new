@@ -24,38 +24,51 @@ import { useAuth } from "@/auth/useAuth";
 import { getAttendance } from "@/services/attendanceService";
 
 import AttendanceGrid from "./AttendanceGrid";
+import type { Status } from "./FilertByStatus";
 
 type AttendanceTab = "records" | "summary" | "mark";
-type Status = "all" | "approved" | "pending" | "absent";
+
+export interface AttendanceRecordItem {
+  _id?: string;
+  employee?: string | {
+    _id?: string;
+    name?: string;
+    employeeId?: string;
+  };
+  status?: string;
+  checkIn?: string;
+  checkOut?: string;
+  mode?: string;
+}
+
+export interface AttendanceDocItem {
+  _id?: string;
+  attendanceDocId?: string;
+  date: string;
+  status?: string;
+  mode?: string;
+  checkIn?: string;
+  checkOut?: string;
+  employee?: string | {
+    _id?: string;
+    name?: string;
+    employeeId?: string;
+  };
+  records?: AttendanceRecordItem[];
+}
 
 const AdminAttendance = () => {
-  const getLocalISODate = () => {
-    const now = new Date();
-
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, "0");
-    const day = String(now.getDate()).padStart(2, "0");
-
-    return `${year}-${month}-${day}`;
-  };
   const { auth } = useAuth();
   const user = auth?.user;
 
   const slug = auth?.slug;
   const role: UserRole = user?.role || "admin";
 
-  const [activeTab, setActiveTab] = useState<AttendanceTab>("mark");
+  const [activeTab, setActiveTab] = useState<AttendanceTab>("records");
   const [statusFilter, setStatusFilter] = useState<Status>("all");
   const [showFilters, setShowFilters] = useState(false);
-  const [attendanceData, setAttendanceData] = useState<any[]>([]);
+  const [attendanceData, setAttendanceData] = useState<AttendanceDocItem[]>([]);
 
-  // const [filters, setFilters] = useState<{
-  //   name?: string;
-  //   fromDate?: string;
-  //   toDate?: string;
-  // }>({});
-  // const todayISO = new Date().toISOString().split("T")[0];
-  const todayISO = getLocalISODate();
   const todayDate = new Date();
 
   const [summaryFilters, setSummaryFilters] = useState({
@@ -70,18 +83,14 @@ const AdminAttendance = () => {
     name?: string;
     fromDate?: string;
     toDate?: string;
-  }>({
-    fromDate: todayISO,
-    toDate: todayISO,
-  });
-  // console.log("Current filters state:", filters);
-  // console.log(todayISO);
-  // console.log(filters);
+  }>({});
+
   const [records, setRecords] = useState<
     (AttendanceRecord & {
       attendanceDocId: string;
       employeeId: string;
       mode?: string;
+      rawDate: string;
     })[]
   >([]);
   // console.log("Fetched attendance records:", records);
@@ -100,176 +109,175 @@ const AdminAttendance = () => {
       toDate: toDate.toISOString().split("T")[0],
     };
   };
-  // useEffect(() => {
-  //   if (slug) {
-  //     setLoading(true);
-  //     getAttendance(slug, filters)
-  //       .then((res) => {
-  //         // The server returns { success: true, data: [...] }, we need to target the array
-  //         const responseData = res.data?.data || res.data || [];
-  //         const arr = Array.isArray(responseData) ? responseData : [];
-
-  //         const formattedRecords: (AttendanceRecord & {
-  //           attendanceDocId: string;
-  //           employeeId: string;
-  //           mode?: string;
-  //         })[] = [];
-  //         arr.forEach((doc: any) => {
-  //           const formattedDate = new Date(doc.date).toLocaleDateString(
-  //             "en-IN",
-  //             {
-  //               day: "2-digit",
-  //               month: "short",
-  //               year: "numeric",
-  //             },
-  //           );
-
-  //           (doc.records || []).forEach((record: any) => {
-  //             const employeeName =
-  //               typeof record.employee === "object" && record.employee?.name
-  //                 ? record.employee.name
-  //                 : "Unknown";
-  //             const employeeId = record.employee?._id;
-
-  //             if (!employeeId) return; // Cannot perform actions without an employee ID
-
-  //             const checkInTime = record.checkIn
-  //               ? new Date(record.checkIn).toLocaleTimeString("en-IN", {
-  //                   hour: "2-digit",
-  //                   minute: "2-digit",
-  //                 })
-  //               : new Date(doc.createdAt || doc.date).toLocaleTimeString(
-  //                   "en-IN",
-  //                   { hour: "2-digit", minute: "2-digit" },
-  //                 );
-
-  //             let mappedStatus: AttendanceStatus = "pending";
-  //             const backendStatus = (record.status || "").toUpperCase();
-  //             if (backendStatus === "PRESENT" || backendStatus === "HALF_DAY") {
-  //               mappedStatus = "approved";
-  //             } else if (
-  //               backendStatus === "REJECTED" ||
-  //               backendStatus === "ABSENT"
-  //             ) {
-  //               mappedStatus = "absent";
-  //             } // PENDING is the default
-
-  //             formattedRecords.push({
-  //               id: record._id,
-  //               attendanceDocId: doc._id,
-  //               employeeId: employeeId,
-  //               employee: employeeName,
-  //               date: formattedDate,
-  //               rawDate: new Date(doc.date).toISOString(),
-  //               checkIn: checkInTime,
-  //               status: mappedStatus,
-  //               mode: record.mode || "office",
-  //             });
-  //           });
-  //         });
-
-  //         setRecords(formattedRecords);
-  //       })
-  //       .catch((error) => {
-  //         console.error("Failed to fetch attendance records", error);
-  //         setRecords([]);
-  //       })
-  //       .finally(() => {
-  //         setLoading(false);
-  //       });
-  //     const { fromDate, toDate } = getMonthDateRange(
-  //       summaryFilters.month,
-  //       summaryFilters.year,
-  //     );
-
-  //     getAttendance(slug, {
-  //       fromDate,
-  //       toDate,
-  //       name: debouncedName, // 👈 yaha change
-  //     }).then((res) => {
-  //       const arr = res.data?.data || [];
-  //       setAttendanceData(arr);
-  //     });
-  //   }
-  // }, [slug, filters, refetchIndex,  summaryFilters.month, summaryFilters.year, debouncedName]);
 
   useEffect(() => {
     if (!slug) return;
 
     setLoading(true);
 
-    // 🔹 Records API (unchanged)
-    getAttendance(slug, filters)
+    // 🔹 Records API
+    getAttendance(slug, {
+      ...filters,
+      startDate: filters.fromDate,
+      endDate: filters.toDate,
+      search: filters.name,
+    })
       .then((res) => {
         // console.log("API RESPONSE", res.data);
         const responseData = res.data?.data || res.data || [];
 
-        const arr = Array.isArray(responseData) ? responseData : [];
+        const arr: AttendanceDocItem[] = Array.isArray(responseData)
+          ? responseData
+          : [];
 
-        const formattedRecords = [];
+        const formattedRecords: (AttendanceRecord & {
+          attendanceDocId: string;
+          employeeId: string;
+          mode?: string;
+          rawDate: string;
+        })[] = [];
 
-        arr.forEach((doc: any) => {
+        arr.forEach((doc: AttendanceDocItem) => {
           const formattedDate = new Date(doc.date).toLocaleDateString("en-IN", {
             day: "2-digit",
             month: "short",
             year: "numeric",
           });
 
-          (doc.records || []).forEach((record: any) => {
-            if (!record.employee?._id) return;
+          if (doc.records && Array.isArray(doc.records)) {
+            // Nested structure (legacy)
+            doc.records.forEach((record: AttendanceRecordItem) => {
+              const recordEmpObj =
+                typeof record.employee === "object" && record.employee !== null
+                  ? record.employee
+                  : null;
+              const recordEmpStr =
+                typeof record.employee === "string" ? record.employee : "";
+              const employeeId = recordEmpObj?._id || recordEmpStr || "";
+              const employeeName = recordEmpObj?.name || recordEmpStr || "Unknown";
 
-            formattedRecords.push({
-              id: record._id,
-              attendanceDocId: doc._id,
-              employeeId: record.employee._id,
-              employee: record.employee.name || "Unknown",
-              date: formattedDate,
-              rawDate: new Date(doc.date).toISOString(),
-              checkIn: record.checkIn
+              const checkInTime = record.checkIn
                 ? new Date(record.checkIn).toLocaleTimeString("en-IN", {
                     hour: "2-digit",
                     minute: "2-digit",
                   })
-                : "",
-              status:
-                record.status === "PRESENT" || record.status === "HALF_DAY"
+                : "";
+
+              const rawStatus = (record.status || "").toUpperCase();
+              const mappedStatus: AttendanceStatus =
+                rawStatus === "PRESENT" || rawStatus === "HALF_DAY"
                   ? "approved"
-                  : record.status === "ABSENT" || record.status === "REJECTED"
+                  : rawStatus === "ABSENT" || rawStatus === "REJECTED"
                     ? "absent"
-                    : "pending",
-              mode: record.mode || "office",
+                    : "pending";
+
+              formattedRecords.push({
+                id: record._id || `${doc._id}_${employeeId}`,
+                attendanceDocId: doc._id || "",
+                employeeId,
+                employee: employeeName,
+                date: formattedDate,
+                rawDate: new Date(doc.date).toISOString(),
+                checkIn: checkInTime,
+                status: mappedStatus,
+                mode: record.mode || "office",
+              });
             });
-          });
+          } else {
+            // Flat record structure (current backend aggregation)
+            const docEmpObj =
+              typeof doc.employee === "object" && doc.employee !== null
+                ? doc.employee
+                : null;
+            const docEmpStr =
+              typeof doc.employee === "string" ? doc.employee : "";
+            const employeeId = docEmpObj?._id || docEmpStr || doc._id || "";
+            const employeeName = docEmpObj?.name || docEmpStr || "Unknown";
+
+            const checkInTime = doc.checkIn
+              ? new Date(doc.checkIn).toLocaleTimeString("en-IN", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })
+              : "";
+
+            const rawStatus = (doc.status || "").toUpperCase();
+            const mappedStatus: AttendanceStatus =
+              rawStatus === "PRESENT" || rawStatus === "HALF_DAY"
+                ? "approved"
+                : rawStatus === "ABSENT" || rawStatus === "REJECTED"
+                  ? "absent"
+                  : "pending";
+
+            formattedRecords.push({
+              id: doc._id || doc.attendanceDocId || `${doc.date}_${employeeId}`,
+              attendanceDocId: doc.attendanceDocId || doc._id || "",
+              employeeId,
+              employee: employeeName,
+              date: formattedDate,
+              rawDate: doc.date
+                ? new Date(doc.date).toISOString()
+                : new Date().toISOString(),
+              checkIn: checkInTime,
+              status: mappedStatus,
+              mode: doc.mode || "office",
+            });
+          }
         });
 
         setRecords(formattedRecords);
       })
       .finally(() => setLoading(false));
 
-    // 🔹 Summary API (debounced 🔥)
+    // 🔹 Summary API
     const { fromDate, toDate } = getMonthDateRange(month, year);
 
     getAttendance(slug, {
       fromDate,
       toDate,
+      startDate: fromDate,
+      endDate: toDate,
     }).then((res) => {
-      setAttendanceData(res.data?.data || []);
+      setAttendanceData(res.data?.data || res.data || []);
     });
   }, [slug, filters, refetchIndex, month, year]);
 
   const employees = useMemo(() => {
     const map = new Map();
 
-    attendanceData.forEach((day: any) => {
-      day.records?.forEach((r: any) => {
-        if (!r.employee?._id) return;
-
-        map.set(r.employee._id, {
-          id: r.employee._id,
-          name: r.employee.name,
-          code: r.employee.employeeId || "EMP",
+    attendanceData.forEach((day: AttendanceDocItem) => {
+      if (day.records && Array.isArray(day.records)) {
+        day.records.forEach((r: AttendanceRecordItem) => {
+          const empObj =
+            typeof r.employee === "object" && r.employee !== null
+              ? r.employee
+              : null;
+          const empId =
+            empObj?._id ||
+            (typeof r.employee === "string" ? r.employee : undefined);
+          if (!empId) return;
+          map.set(empId, {
+            id: empId,
+            name: empObj?.name || "Unknown",
+            code: empObj?.employeeId || "EMP",
+          });
         });
-      });
+      } else {
+        const empObj =
+          typeof day.employee === "object" && day.employee !== null
+            ? day.employee
+            : null;
+        const empId =
+          empObj?._id ||
+          (typeof day.employee === "string" ? day.employee : undefined);
+        if (empId) {
+          map.set(empId, {
+            id: empId,
+            name: empObj?.name || "Unknown",
+            code: empObj?.employeeId || "EMP",
+          });
+        }
+      }
     });
 
     return Array.from(map.values());
@@ -282,34 +290,26 @@ const AdminAttendance = () => {
       emp.name.toLowerCase().includes(summaryFilters.name.toLowerCase()),
     );
   }, [employees, summaryFilters.name]);
-  // const monthlySummary = useMemo(() => {
-  //   const present = records.filter((r) => r.status === "approved").length;
-  //   const pending = records.filter((r) => r.status === "pending").length;
-  //   const absent = records.filter((r) => r.status === "absent").length;
-
-  //   return {
-  //     totalDays: records.length,
-  //     present,
-  //     pending,
-  //     absent,
-  //     wfh: Math.floor(records.length * 0.2),
-  //     halfDay: Math.floor(records.length * 0.1),
-  //     attendancePercentage:
-  //       records.length > 0 ? Math.round((present / records.length) * 100) : 0,
-  //   };
-  // }, [records]);
 
   const monthlySummary = useMemo(() => {
     let present = 0,
       absent = 0,
       pending = 0;
 
-    attendanceData.forEach((day: any) => {
-      day.records?.forEach((r: any) => {
-        if (r.status === "PRESENT") present++;
-        else if (r.status === "ABSENT") absent++;
+    attendanceData.forEach((day: AttendanceDocItem) => {
+      if (day.records && Array.isArray(day.records)) {
+        day.records.forEach((r: AttendanceRecordItem) => {
+          const st = (r.status || "").toUpperCase();
+          if (st === "PRESENT" || st === "HALF_DAY") present++;
+          else if (st === "ABSENT" || st === "REJECTED") absent++;
+          else pending++;
+        });
+      } else {
+        const st = (day.status || "").toUpperCase();
+        if (st === "PRESENT" || st === "HALF_DAY") present++;
+        else if (st === "ABSENT" || st === "REJECTED") absent++;
         else pending++;
-      });
+      }
     });
 
     const total = present + absent + pending;
@@ -327,12 +327,6 @@ const AdminAttendance = () => {
   }, [attendanceData]);
 
   const filteredRecords = useAttendanceFilters(records, filters, statusFilter);
-  const formatDate = (date: Date) =>
-    date.toLocaleDateString("en-IN", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    });
 
   const todayRecords = records.filter((record) => {
     const today = new Date().toLocaleDateString("en-IN", {
@@ -351,7 +345,11 @@ const AdminAttendance = () => {
   // );
 
   if (loading) {
-    return <div className="p-6 text-center">Loading attendance...</div>;
+    return <div className="p-6 text-center"> 
+     <EmptyState
+        title='Loading...'
+        
+        />   </div>;
   }
 
   return (
@@ -360,19 +358,15 @@ const AdminAttendance = () => {
         <div className="flex flex-col justify-center items-center h-screen bg-base-100">
           <span className="loading loading-spinner loading-lg text-primary"></span>
           <p className="mt-4 text-lg font-medium text-base-content/70">
-            Loading...
+        <EmptyState
+        title='Loading...'
+        
+        />   
           </p>
         </div>
       }
     >
-      {/* <div className="p-4 sm:p-6 max-w-7xl mx-auto space-y-4"> */}
-      {/* {filteredRecords.length === 0 ? (
-      <EmptyState
-        title="No attendance records"
-        description="Attendance will appear here"
-      />
-    ) : (
-    )} */}
+     
       <>
         {/* TABS */}
         <div className="mb-5 mt-4">

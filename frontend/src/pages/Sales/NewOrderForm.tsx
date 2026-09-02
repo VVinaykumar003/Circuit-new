@@ -1,3 +1,103 @@
+import React, {useState,useEffect,useMemo} from 'react';
+import { useNavigate,useParams } from "react-router-dom";
+import { useAuth } from '@/auth/useAuth';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useFieldArray, useForm } from 'react-hook-form';
+import { getAllProducts } from '@/services/api/products.api';
+import { getAllAccounts } from '@/services/api/crm.api';
+import { getSalesReps } from '@/services/salesRepServices';
+import { useQuery } from '@tanstack/react-query';
+import { toast } from 'react-toastify';
+import { createOrder, getOrderById, updateOrder } from '@/services/orderServices';
+import { MdAdd, MdAttachment, MdCalculate, MdCheckCircle, MdContentCopy, MdDelete, MdSave, MdSend, MdWarning } from 'react-icons/md';
+import { FormRow } from '@/components/sales/Product/ProcductComponent';
+import { PageHeader } from "@/components/common";
+
+/* ─────────────────────────── Helpers ─────────────────────────── */
+const numberToWords = (num: number): string => {
+  if (num === 0) return "Zero";
+  const a = ["", "One ", "Two ", "Three ", "Four ", "Five ", "Six ", "Seven ", "Eight ", "Nine ", "Ten ", "Eleven ", "Twelve ", "Thirteen ", "Fourteen ", "Fifteen ", "Sixteen ", "Seventeen ", "Eighteen ", "Nineteen "];
+  const b = ["", "", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"];
+  
+  const format = (n: number): string => {
+    if (n < 20) return a[n];
+    if (n < 100) return b[Math.floor(n / 10)] + (n % 10 !== 0 ? " " + a[n % 10] : "");
+    if (n < 1000) return a[Math.floor(n / 100)] + "Hundred " + (n % 100 !== 0 ? "and " + format(n % 100) : "");
+    if (n < 100000) return format(Math.floor(n / 1000)) + "Thousand " + (n % 1000 !== 0 ? format(n % 1000) : "");
+    if (n < 10000000) return format(Math.floor(n / 100000)) + "Lakh " + (n % 100000 !== 0 ? format(n % 100000) : "");
+    return format(Math.floor(n / 10000000)) + "Crore " + (n % 10000000 !== 0 ? format(n % 10000000) : "");
+  };
+  return "Rupees " + format(Math.floor(num)).trim() + " Only";
+};
+
+/* ─────────────────────────── Zod Schemas ─────────────────────────── */
+const orderItemSchema = z.object({
+  productId: z.string().min(1, "Product is required"),
+  sku: z.string().default(""),
+  stock: z.coerce.number().default(0),
+  retailPrice: z.coerce.number().default(0),
+  costPrice: z.coerce.number().default(0),
+  sellingPrice: z.coerce.number().min(0.01, "Selling price is required"),
+  quantity: z.coerce.number().min(1, "Quantity must be > 0"),
+  discountPct: z.coerce.number().min(0).max(100).default(0),
+  taxPct: z.coerce.number().min(0).max(100).default(0),
+  lineTotal: z.coerce.number().default(0),
+});
+
+const orderSchema = z.object({
+  // 1. Order Info
+  orderNumber: z.string(),
+  salesOwner: z.string().min(1, "Sales Owner is required"),
+  orderDate: z.string().min(1, "Order Date is required"),
+  deliveryDate: z.string().default(""),
+  status: z.string().default("Draft"),
+  priority: z.string().default("Medium"),
+
+  // 2. Customer Info
+  customerId: z.string().min(1, "Customer is required"),
+  contactPerson: z.string().default(""),
+  phone: z.string().default(""),
+  email: z.string().default(""),
+  billingAddress: z.string().min(1, "Billing address required"),
+  shippingAddress: z.string().default(""),
+  sameAsBilling: z.boolean().default(true),
+
+  // 3. Items
+  items: z.array(orderItemSchema).min(1, "At least one product is required"),
+
+  // 4. Summary
+  subtotal: z.coerce.number().default(0),
+  summaryDiscount: z.coerce.number().min(0).default(0),
+  summaryTax: z.coerce.number().min(0).default(0),
+  shippingCharges: z.coerce.number().min(0, "Cannot be negative").default(0),
+  adjustment: z.coerce.number().default(0),
+  grandTotal: z.coerce.number().default(0),
+
+  // 5. Payment
+  paymentTerms: z.string().default("Immediate"),
+  paymentMethod: z.string().default("Bank Transfer"),
+  advancePayment: z.coerce.number().min(0).default(0),
+
+  // 6. Delivery
+  deliveryMethod: z.string().default("Courier"),
+  deliveryInstructions: z.string().default(""),
+  trackingNumber: z.string().default(""),
+  expectedDeliveryDate: z.string().default(""),
+
+  // 7. Notes
+  internalNotes: z.string().default(""),
+  customerNotes: z.string().default(""),
+
+  // 8. Approval
+  requiresApproval: z.boolean().default(false),
+  approver: z.string().default(""),
+  approvalStatus: z.string().default("Pending"),
+});
+
+export type OrderFormValues = z.infer<typeof orderSchema>;
+
+
 /* ─────────────────────────── Component ─────────────────────────── */
 export default function NewOrderForm() {
   const navigate = useNavigate();
@@ -25,13 +125,16 @@ export default function NewOrderForm() {
     queryFn: () => getAllProducts(auth?.slug || "default-tenant"),
   });
 
-  console.log("Product : ", productsData)
+  // console.log("Product : ", productsData)
 
   useEffect(() => {
     if (products?.data) {
       const mappedProducts = products.data.map((p: any) => ({
         id: p._id || p.id,
         name: p.productName || p.name,
+        productName: p.productName || p.name,
+        productCode: p.productCode || p.sku || "PROD",
+        productType: p.productType || "Other",
         sku: p.sku || "",
         stock: p.stockQuantity ?? p.openingStock ?? 0,
         retail: p.sellingPrice || p.unitPrice || 0,
@@ -63,7 +166,7 @@ export default function NewOrderForm() {
   }, [salesReps, ownerSearch]);
 
   const { register, control, handleSubmit, watch, setValue, reset, formState: { errors } } = useForm<OrderFormValues>({
-    resolver: zodResolver(orderSchema),
+    resolver: zodResolver(orderSchema) as any,
     defaultValues: {
       orderNumber: `SO-${new Date().getFullYear()}-${Math.floor(Math.random() * 10000).toString().padStart(5, '0')}`,
       salesOwner: "",
@@ -181,6 +284,7 @@ export default function NewOrderForm() {
             });
           }
         } catch (err) {
+          console.error(err)
           toast.error("Failed to load order details.");
         }
       };
@@ -242,26 +346,44 @@ export default function NewOrderForm() {
   const onSubmit = async (data: OrderFormValues) => {
     setIsSubmitting(true);
     try {
+      const mappedItems = data.items.map(item => {
+        const pInfo = productsData.find(p => p.id === item.productId);
+        const sp = Number(item.sellingPrice) || 0;
+        const qty = Number(item.quantity) || 1;
+        const base = sp * qty;
+        const disc = Number(item.discountPct) || 0;
+        const discAmount = base * (disc / 100);
+        const afterDisc = base - discAmount;
+        const tax = Number(item.taxPct) || 0;
+        const taxAmount = afterDisc * (tax / 100);
+        const lineTotal = afterDisc + taxAmount;
+        return {
+          productId: item.productId,
+          productName: pInfo?.name || pInfo?.productName || "Product",
+          productCode: pInfo?.productCode || pInfo?.sku || item.sku || "PROD",
+          productType: pInfo?.productType || "Other",
+          sku: item.sku || pInfo?.sku || "",
+          unitPrice: sp,
+          sellingPrice: sp,
+          price: sp,
+          quantity: qty,
+          discountPct: disc,
+          discount: disc,
+          taxPct: tax,
+          tax: tax,
+          lineSubtotal: base,
+          lineDiscount: discAmount,
+          lineTax: taxAmount,
+          lineTotal: lineTotal,
+          total: lineTotal
+        };
+      });
+
       const payload = {
         ...data,
         customerName: customers.find(c => c.id === data.customerId)?.name || "Unknown Customer",
-        products: data.items.map(item => {
-           const sp = item.sellingPrice || 0;
-           const qty = item.quantity || 0;
-           const base = sp * qty;
-           const afterDisc = base - (base * (item.discountPct || 0) / 100);
-           const lineTotal = afterDisc + (afterDisc * (item.taxPct || 0) / 100);
-           return {
-             productId: item.productId,
-             productName: productsData.find(p => p.id === item.productId)?.name || "Unknown",
-             sku: item.sku,
-             price: item.sellingPrice,
-             quantity: item.quantity,
-             discount: item.discountPct,
-             tax: item.taxPct,
-             total: lineTotal
-           }
-        }),
+        items: mappedItems,
+        products: mappedItems,
         orderValue: data.grandTotal,
         orderStatus: data.status,
         notes: { internal: data.internalNotes, customer: data.customerNotes }
@@ -273,9 +395,11 @@ export default function NewOrderForm() {
       } else {
         await createOrder(auth.slug || "default-tenant", payload as any);
         setSuccessMessage("Sales Order created successfully!");
+        navigate('/sales/orders')
       }
       setSuccessModalOpen(true);
     } catch (err: unknown) {
+      console.error(err)
       toast.error(`Failed to ${orderId ? 'update' : 'create'} order.`);
     } finally {
       setIsSubmitting(false);
@@ -286,30 +410,44 @@ export default function NewOrderForm() {
     <div className="min-h-screen bg-base-200 p-4 md:p-6 lg:p-8 font-sans">
       
       {/* ── Header ── */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 bg-base-100 p-5 rounded-xl border border-base-300 shadow-sm">
-        <div>
-          <h1 className="text-2xl font-bold text-base-content tracking-tight">{orderId ? "Edit Sales Order" : "Create Sales Order"}</h1>
-          <div className="text-sm text-base-content/60 breadcrumbs mt-1">
-            <ul>
-              <li>Dashboard</li>
-              <li>Sales</li>
-              <li>Orders</li>
-              <li className="font-semibold text-primary">{orderId ? "Edit Order" : "Create Order"}</li>
-            </ul>
-          </div>
+      <PageHeader
+        title={orderId ? "Edit Sales Order" : "Create Sales Order"}
+        breadcrumbs={[
+          { label: "Dashboard" },
+          { label: "Sales" },
+          { label: "Orders" },
+          { label: orderId ? "Edit Order" : "Create Order", active: true },
+        ]}
+        cancel
+        actions={[
+          {
+            label: "Save Draft",
+            icon: <MdSave size={16} />,
+            variant: "outline",
+          },
+        ]}
+      >
+        <div className="dropdown dropdown-end">
+          <button
+            tabIndex={0}
+            type="button"
+            className="btn btn-outline btn-sm gap-2 bg-base-100"
+          >
+            <MdContentCopy size={16} /> Load Template
+          </button>
+          <ul
+            tabIndex={0}
+            className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-40 mt-1 border border-base-200"
+          >
+            <li>
+              <a onClick={() => loadTemplate("Retail")}>Retail Order</a>
+            </li>
+            <li>
+              <a>Wholesale Order</a>
+            </li>
+          </ul>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <div className="dropdown dropdown-end">
-            <button tabIndex={0} type="button" className="btn btn-outline btn-sm gap-2"><MdContentCopy size={16} /> Load Template</button>
-            <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-40 mt-1 border border-base-200">
-              <li><a onClick={() => loadTemplate("Retail")}>Retail Order</a></li>
-              <li><a>Wholesale Order</a></li>
-            </ul>
-          </div>
-          <button type="button" className="btn btn-outline btn-sm gap-2"><MdSave size={16} /> Save Draft</button>
-          <button type="button" onClick={() => navigate(-1)} className="btn btn-ghost btn-sm">Cancel</button>
-        </div>
-      </div>
+      </PageHeader>
 
       <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         
@@ -627,7 +765,11 @@ export default function NewOrderForm() {
                 </div>
               </div>
               
-              <div className="border-2 border-dashed border-base-300 rounded-xl p-6 text-center hover:bg-base-200/50 transition-colors">
+              <div 
+                onDragOver={handleDragOver}
+                onDrop={handleDrop}
+                className="border-2 border-dashed border-base-300 rounded-xl p-6 text-center hover:bg-base-200/50 transition-colors"
+              >
                 <MdAttachment className="mx-auto text-base-content/40 mb-2" size={32} />
                 <p className="text-sm font-medium">Drag & Drop files or click to upload</p>
                 <p className="text-xs text-base-content/50 mt-1">PDF, DOCX, XLSX, JPG, PNG</p>

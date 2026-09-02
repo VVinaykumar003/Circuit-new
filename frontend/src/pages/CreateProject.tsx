@@ -4,7 +4,7 @@ import { AddParticipant } from "@/components/projects/AddParticipant";
 import CreateProjectForm from "@/components/projects/CreateProjectForm";
 import { createProject } from "@/services/projectServices";
 import { useState } from "react";
-import Breadcrumbs from "@/components/ui/Breadcrumbs";
+import { PageHeader } from "@/components/common";
 import { toast } from "react-toastify";
 import { MdOutlineWorkspaces, MdInfoOutline, MdPeopleAlt } from "react-icons/md";
 import { FaCalendarAlt, FaTag } from "react-icons/fa";
@@ -152,20 +152,15 @@ const handleCreateProject = async () => {
       )}
 
       <div className="max-w-7xl mx-auto space-y-6 lg:space-y-8">
-        <Breadcrumbs />
-
-        {/* Page Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <div className="p-3 bg-primary/10 text-primary rounded-2xl shadow-sm border border-primary/20 hidden sm:block">
-              <MdOutlineWorkspaces size={18} />
-            </div>
-            <div>
-              <h1 className="text-xl sm:text-lg font-bold text-base-content tracking-tight">Create New Project</h1>
-              <p className="text-base-content/60 text-xs sm:text-sm mt-1">Configure project details, assign members, and set tracking parameters.</p>
-            </div>
-          </div>
-        </div>
+        <PageHeader
+          title="Create New Project"
+          breadcrumbs={[
+            { label: "Dashboard" },
+            { label: "Projects" },
+            { label: "Create Project", active: true },
+          ]}
+          cancel
+        />
 
         <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 items-start">
           {/* Left Column: Form & Steps */}

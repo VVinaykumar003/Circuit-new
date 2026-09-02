@@ -1,6 +1,6 @@
 
 import { useEffect, useState } from "react";
-import StatCard from "@/components/ui/StatCard";
+import { StatsGrid } from "@/components/common";
 import LeaveRequestTable from "@/components/Leave/LeaveRequestTable";
 // import LeaveFilters from "@/components/Leave/LeaveFilters";
 import {
@@ -28,7 +28,28 @@ import { useAuth } from "@/auth/useAuth";
 import { data } from "react-router-dom";
 import LeaveDrawer from "./LeaveDrawer";
 
-
+const normalizeAttachments = (raw: any): string[] => {
+  if (!raw) return [];
+  if (Array.isArray(raw)) {
+    return raw
+      .map((item) => (typeof item === "string" ? item : item?.url || item?.secure_url || item?.fileUrl || ""))
+      .filter(Boolean);
+  }
+  if (typeof raw === "string") {
+    try {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) {
+        return parsed
+          .map((item) => (typeof item === "string" ? item : item?.url || item?.secure_url || item?.fileUrl || ""))
+          .filter(Boolean);
+      }
+      return [raw];
+    } catch {
+      return [raw];
+    }
+  }
+  return [];
+};
 
 export default function AdminLeaveDashboard() {
   const {auth } = useAuth();
@@ -61,7 +82,7 @@ const [selectedLeave, setSelectedLeave] = useState<LeaveRequest | null>(null);
 
          
           
-          const fetchedLeaves: LeaveRequest[] = leavesRes.data.leaves.map((leave: any) => ({
+          const fetchedLeaves: LeaveRequest[] = (leavesRes.data.leaves || []).map((leave: any) => ({
             id: leave._id,
             employee: leave.name || leave.user?.name || "Employee",
             type: leave.leaveType,
@@ -69,7 +90,7 @@ const [selectedLeave, setSelectedLeave] = useState<LeaveRequest | null>(null);
             toDate: leave.endDate ? leave.endDate.split("T")[0] : "",
             reason: leave.reason,
             status: leave.status,
-            attachments: leave.attachments || [],
+            attachments: normalizeAttachments(leave.attachments || leave.attachment),
           }));
           
           setRequests(fetchedLeaves);
@@ -192,14 +213,37 @@ const [selectedLeave, setSelectedLeave] = useState<LeaveRequest | null>(null);
   };
 
   return (
-    <div className="space-y-6 pb-20 md:pb-0">
+    <div className="space-y-4 pb-20 md:pb-0">
       {/* STATS */}
-      <section className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <StatCard title="Total Requests" value={total} icon={<MdBeachAccess />} />
-        <StatCard title="Pending" value={pending} variant="warning" icon={<MdPendingActions />} />
-        <StatCard title="Approved" value={approved} variant="success" icon={<MdCheckCircle />} />
-        <StatCard title="Rejected" value={rejected} variant="error" icon={<MdCancel />} />
-      </section>
+      <StatsGrid
+        columns={{ default: 2, sm: 2, md: 4 }}
+        stats={[
+          {
+            label: "Total Requests",
+            value: total,
+            icon: <MdBeachAccess size={18} />,
+            color: "text-base-content",
+          },
+          {
+            label: "Pending",
+            value: pending,
+            icon: <MdPendingActions size={18} />,
+            color: "text-warning",
+          },
+          {
+            label: "Approved",
+            value: approved,
+            icon: <MdCheckCircle size={18} />,
+            color: "text-success",
+          },
+          {
+            label: "Rejected",
+            value: rejected,
+            icon: <MdCancel size={18} />,
+            color: "text-error",
+          },
+        ]}
+      />
 
       {/* FILTERS */}
       {/* <LeaveFilters /> */}

@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
-import { useForm, Watch } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import {useNavigate} from 'react-router-dom'
 import * as z from "zod";
-import { useNavigate } from "react-router-dom";
-import { MdSave, MdContentCopy, MdDelete } from "react-icons/md";
+import { MdSave } from "react-icons/md";
 import { toast } from "react-toastify";
 import { getSalesEmployees } from "@/services/memberService";
 import { useAuth } from "@/auth/useAuth";
 import { createLead } from "@/services/leadServices";
+import { PageHeader } from "@/components/common";
 
 /* ─────────────────────────── Zod Schema ─────────────────────────── */
 
@@ -18,24 +19,22 @@ const leadSchema = z.object({
   customLeadSource: z.string().optional(),
   industry: z.string().optional(),
   customIndustry: z.string().optional(),
-  leadStatus: z
-    .enum([
-      "New",
-      "Contacted",
-      "Qualified",
-      "Proposal Sent",
-      "Negotiation",
-      "Won",
-      "Lost",
-    ])
-    .default("New"),
-  priority: z.enum(["Low", "Medium", "High", "Urgent"]).default("Medium"),
+  leadStatus: z.enum([
+    "New",
+    "Contacted",
+    "Qualified",
+    "Proposal Sent",
+    "Negotiation",
+    "Won",
+    "Lost",
+  ]),
+  priority: z.enum(["Low", "Medium", "High", "Urgent"]),
 
   // Contact Info
   firstName: z.string().min(1, "First Name is required"),
   lastName: z.string().min(1, "Last Name is required"),
   email: z.string().email("Valid email is required"),
-  countryCode: z.string().default("+1"),
+  countryCode: z.string(),
   customCountryCode: z.string().optional(),
   phoneNumber: z.string().min(5, "Valid phone number is required"),
   gender: z.string().optional(),
@@ -54,6 +53,31 @@ const leadSchema = z.object({
 });
 
 type LeadFormValues = z.infer<typeof leadSchema>;
+
+const defaultLeadValues: LeadFormValues = {
+  leadOwner: "",
+  leadSource: "",
+  customLeadSource: "",
+  industry: "",
+  customIndustry: "",
+  leadStatus: "New",
+  priority: "Medium",
+  firstName: "",
+  lastName: "",
+  email: "",
+  countryCode: "+1",
+  customCountryCode: "",
+  phoneNumber: "",
+  gender: "",
+  companyName: "",
+  addressLine1: "",
+  addressLine2: "",
+  city: "",
+  state: "",
+  postalCode: "",
+  country: "",
+  description: "",
+};
 
 /* ─────────────────────────── static data ───────────────────── */
 const PHONE_CODES = [
@@ -95,14 +119,14 @@ const FormRow = ({
   error?: string;
   children: React.ReactNode;
 }) => (
-  <div className="grid grid-cols-1 md:grid-cols-[180px_1fr] items-start gap-4">
-    <label className="text-sm font-medium text-base-content/80 pt-2.5">
+  <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] items-start gap-3">
+    <label className="text-xs font-medium text-base-content/80 pt-1.5">
       {label}
       {required && <span className="text-error ml-0.5">*</span>}
     </label>
     <div className="w-full">
       {children}
-      {error && <p className="text-error text-xs mt-1">{error}</p>}
+      {error && <p className="text-error text-[11px] mt-1">{error}</p>}
     </div>
   </div>
 );
@@ -111,6 +135,10 @@ const FormRow = ({
 export default function Leads() {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [owners, setOwners] = useState<any[]>([]);
+
+  const { auth } = useAuth();
+  const slug = auth?.slug;
 
   const {
     register,
@@ -120,33 +148,27 @@ export default function Leads() {
     formState: { errors },
   } = useForm<LeadFormValues>({
     resolver: zodResolver(leadSchema),
-    defaultValues: {
-      leadStatus: "New",
-      priority: "Medium",
-      countryCode: "+1",
-    },
+    defaultValues: defaultLeadValues,
   });
-  const watchLeadSource = watch("leadSource");
-  const watchIndustry = watch("industry");
-  const watchCountryCode = watch("countryCode");
-  const { auth } = useAuth();
-  const slug = auth?.slug;
-  const [owners, setOwners] = useState([]);
-  if (!slug) return null;
 
   useEffect(() => {
+    if (!slug) return;
     const fetchOwners = async () => {
       try {
         const res = await getSalesEmployees(slug);
-        setOwners(res.data.data);
+        setOwners(res.data?.data || res.data || []);
       } catch (err) {
-        console.log(err);
+        console.error(err);
       }
     };
 
     fetchOwners();
-  }, []);
-  console.log(owners);
+  }, [slug]);
+
+  const watchLeadSource = watch("leadSource");
+  const watchIndustry = watch("industry");
+  const watchCountryCode = watch("countryCode");
+
   // Live Watches for Sidebar Summary
   const wFirstName = watch("firstName");
   const wLastName = watch("lastName");
@@ -158,6 +180,10 @@ export default function Leads() {
 
   /* ── Submit Handler ── */
   const onSubmit = async (data: LeadFormValues) => {
+    if (!slug) {
+      toast.error("Organization slug not found.");
+      return;
+    }
     setIsSubmitting(true);
 
     try {
@@ -183,56 +209,63 @@ export default function Leads() {
       await createLead(slug, payload);
 
       toast.success("Lead created successfully!");
+      reset(defaultLeadValues);
+      navigate('/sales/leads');
     } catch (err) {
+      console.error(err);
       toast.error("Failed to create lead.");
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const selectedOwner = owners.find((o: any) => o._id === wOwner);
-  console.log(selectedOwner);
-  return (
-    <div className="min-h-screen bg-base-200 p-4 md:p-6 lg:p-8 font-sans">
-      {/* ── Page Header ── */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 bg-base-100 p-5 rounded-xl border border-base-300 shadow-sm">
-        <div>
-          <h1 className="text-2xl font-bold text-base-content tracking-tight">
-            Create New Lead
-          </h1>
-          <div className="text-sm text-base-content/60 breadcrumbs mt-1 font-medium">
-            <ul>
-              <li>Dashboard</li>
-              <li>Sales</li>
-              <li>Leads</li>
-              <li className="text-primary">Create Lead</li>
-            </ul>
-          </div>
-        </div>
-        <div className="flex gap-2 flex-wrap">
-          <button
-            type="button"
-            className="btn btn-outline btn-sm gap-2 bg-base-100"
-            onClick={() => navigate(-1)}
-          >
-            Cancel
-          </button>
-        </div>
+  const submitLead = handleSubmit(onSubmit);
+  const selectedOwner = owners.find((o: any) => o._id === wOwner || o.id === wOwner);
+
+  if (!slug) {
+    return (
+      <div className="min-h-screen bg-base-200 p-4 flex items-center justify-center font-sans">
+        <div className="text-base-content/60 text-xs">Loading organization details...</div>
       </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-base-200 p-3 md:p-4 lg:p-6 font-sans">
+      {/* ── Page Header ── */}
+
+              <PageHeader
+  title="Create New Lead"
+  breadcrumbs={[
+    { label: "Dashboard" },
+    { label: "Sales" },
+    { label: "Leads", active: true },
+  ]}
+  cancel
+   actions={[
+    {
+      label: "Save Lead",
+      variant: "primary",
+      onClick: submitLead,
+    },
+  ]}
+ 
+/>
+     
 
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="grid grid-cols-1 lg:grid-cols-4 gap-6"
+        className="grid grid-cols-1 lg:grid-cols-4 gap-4"
       >
         {/* ── Left Column (Form Sections) ── */}
-        <div className="lg:col-span-3 space-y-4">
+        <div className="lg:col-span-3 space-y-3">
           {/* 1. Lead Ownership & Details */}
-          <div className="collapse collapse-arrow bg-base-100 border border-base-300 rounded-xl shadow-sm">
+          <div className="collapse collapse-arrow bg-base-100 border border-base-300 rounded-lg shadow-xs">
             <input type="checkbox" defaultChecked />
-            <div className="collapse-title text-lg font-semibold border-b border-base-200 bg-base-200/30">
+            <div className="collapse-title text-sm font-semibold py-2.5 px-3.5 border-b border-base-200 bg-base-200/30">
               1. Lead Ownership & Details
             </div>
-            <div className="collapse-content pt-5 space-y-4">
+            <div className="collapse-content pt-3 px-3.5 space-y-3">
               <FormRow
                 label="Lead Owner"
                 required
@@ -254,7 +287,7 @@ export default function Leads() {
                 </select>
               </FormRow>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <FormRow label="Lead Source">
                   <select
                     {...register("leadSource")}
@@ -272,7 +305,7 @@ export default function Leads() {
                   {watchLeadSource === "Other" && (
                     <input
                       {...register("customLeadSource")}
-                      className="input input-bordered w-full mt-2"
+                      className="input input-bordered w-full mt-1.5"
                       placeholder="Enter custom source"
                     />
                   )}
@@ -299,14 +332,14 @@ export default function Leads() {
                   {watchIndustry === "Other" && (
                     <input
                       {...register("customIndustry")}
-                      className="input input-bordered w-full mt-2"
+                      className="input input-bordered w-full mt-1.5"
                       placeholder="Enter custom industry"
                     />
                   )}
                 </FormRow>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <FormRow label="Lead Status" required>
                   <select
                     {...register("leadStatus")}
@@ -337,17 +370,17 @@ export default function Leads() {
           </div>
 
           {/* 2. Contact Information */}
-          <div className="collapse collapse-arrow bg-base-100 border border-base-300 rounded-xl shadow-sm">
+          <div className="collapse collapse-arrow bg-base-100 border border-base-300 rounded-lg shadow-xs">
             <input type="checkbox" defaultChecked />
-            <div className="collapse-title text-lg font-semibold border-b border-base-200 bg-base-200/30">
+            <div className="collapse-title text-sm font-semibold py-2.5 px-3.5 border-b border-base-200 bg-base-200/30">
               2. Contact Information
             </div>
-            <div className="collapse-content pt-5 space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-[180px_1fr] items-start gap-4">
-                <label className="text-sm font-medium text-base-content/80 pt-2.5">
-                  Name <span className="text-error">*</span>
+            <div className="collapse-content pt-3 px-3.5 space-y-3">
+              <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] items-start gap-3">
+                <label className="text-xs font-medium text-base-content/80 pt-1.5">
+                  Name <span className="text-error ml-0.5">*</span>
                 </label>
-                <div className="flex gap-3">
+                <div className="flex gap-2.5">
                   <div className="flex-1">
                     <input
                       {...register("firstName")}
@@ -355,7 +388,7 @@ export default function Leads() {
                       placeholder="First Name"
                     />
                     {errors.firstName && (
-                      <p className="text-xs text-error mt-1">
+                      <p className="text-[11px] text-error mt-1">
                         {errors.firstName.message}
                       </p>
                     )}
@@ -367,7 +400,7 @@ export default function Leads() {
                       placeholder="Last Name"
                     />
                     {errors.lastName && (
-                      <p className="text-xs text-error mt-1">
+                      <p className="text-[11px] text-error mt-1">
                         {errors.lastName.message}
                       </p>
                     )}
@@ -375,7 +408,7 @@ export default function Leads() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <FormRow
                   label="Email Address"
                   required
@@ -413,7 +446,7 @@ export default function Leads() {
                 >
                   <select
                     {...register("countryCode")}
-                    className="select select-sm select-ghost w-24 rounded-none border-r border-base-300 focus:bg-transparent"
+                    className="select select-sm select-ghost w-24 rounded-none border-r border-base-300 focus:bg-transparent text-xs"
                   >
                     {PHONE_CODES.map((p) => (
                       <option key={p.code} value={p.code}>
@@ -424,19 +457,19 @@ export default function Leads() {
                   {watchCountryCode === "Other" && (
                     <input
                       {...register("customCountryCode")}
-                      className="input input-sm w-32"
+                      className="input input-sm w-28"
                       placeholder="+999"
                     />
                   )}
                   <input
                     type="tel"
-                      maxLength={10}
-  inputMode="numeric"
+                    maxLength={10}
+                    inputMode="numeric"
                     {...register("phoneNumber", {
-    onChange: (e) => {
-      e.target.value = e.target.value.replace(/[^0-9]/g, "").slice(0, 10);
-    }
-  })}
+                      onChange: (e) => {
+                        e.target.value = e.target.value.replace(/[^0-9]/g, "").slice(0, 10);
+                      }
+                    })}
                     className="input input-sm border-none w-full focus:outline-none"
                     placeholder="81234 56789"
                   />
@@ -446,12 +479,12 @@ export default function Leads() {
           </div>
 
           {/* 3. Company & Address */}
-          <div className="collapse collapse-arrow bg-base-100 border border-base-300 rounded-xl shadow-sm">
+          <div className="collapse collapse-arrow bg-base-100 border border-base-300 rounded-lg shadow-xs">
             <input type="checkbox" defaultChecked />
-            <div className="collapse-title text-lg font-semibold border-b border-base-200 bg-base-200/30">
+            <div className="collapse-title text-sm font-semibold py-2.5 px-3.5 border-b border-base-200 bg-base-200/30">
               3. Company & Address
             </div>
-            <div className="collapse-content pt-5 space-y-4">
+            <div className="collapse-content pt-3 px-3.5 space-y-3">
               <FormRow
                 label="Company Name"
                 required
@@ -479,7 +512,7 @@ export default function Leads() {
                 />
               </FormRow>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <FormRow label="City">
                   <input
                     {...register("city")}
@@ -518,17 +551,17 @@ export default function Leads() {
           </div>
 
           {/* 4. Additional Info */}
-          <div className="collapse collapse-arrow bg-base-100 border border-base-300 rounded-xl shadow-sm">
+          <div className="collapse collapse-arrow bg-base-100 border border-base-300 rounded-lg shadow-xs">
             <input type="checkbox" defaultChecked />
-            <div className="collapse-title text-lg font-semibold border-b border-base-200 bg-base-200/30">
+            <div className="collapse-title text-sm font-semibold py-2.5 px-3.5 border-b border-base-200 bg-base-200/30">
               4. Additional Notes
             </div>
-            <div className="collapse-content pt-5">
+            <div className="collapse-content pt-3 px-3.5">
               <FormRow label="Description">
                 <textarea
                   {...register("description")}
                   className="textarea textarea-bordered w-full bg-warning/5"
-                  rows={4}
+                  rows={3}
                   placeholder="Internal notes and lead requirements..."
                 ></textarea>
               </FormRow>
@@ -537,25 +570,25 @@ export default function Leads() {
         </div>
 
         {/* ── Right Column (Sidebar Summary Card) ── */}
-        <div className="lg:col-span-1 space-y-4">
-          <div className="bg-base-100 border border-base-300 rounded-xl p-5 sticky top-24 shadow-sm">
-            <h3 className="font-bold text-lg mb-4 pb-2 border-b border-base-200">
+        <div className="lg:col-span-1 space-y-3">
+          <div className="bg-base-100 border border-base-300 rounded-lg p-3.5 sticky top-20 shadow-xs">
+            <h3 className="font-bold text-sm mb-3 pb-2 border-b border-base-200">
               Lead Summary
             </h3>
 
-            <div className="space-y-4">
+            <div className="space-y-3">
               <div>
-                <span className="text-xs text-base-content/60 uppercase font-semibold">
+                <span className="text-[10px] text-base-content/60 uppercase font-semibold">
                   Status & Priority
                 </span>
-                <div className="mt-1 flex gap-2">
+                <div className="mt-1 flex gap-1.5">
                   <div
-                    className={`badge font-bold ${wStatus === "New" ? "badge-info" : "badge-primary"}`}
+                    className={`badge badge-sm font-bold ${wStatus === "New" ? "badge-info" : "badge-primary"}`}
                   >
                     {wStatus || "New"}
                   </div>
                   <div
-                    className={`badge badge-outline font-bold ${wPriority === "Urgent" ? "badge-error" : wPriority === "High" ? "badge-warning" : ""}`}
+                    className={`badge badge-sm badge-outline font-bold ${wPriority === "Urgent" ? "badge-error" : wPriority === "High" ? "badge-warning" : ""}`}
                   >
                     {wPriority || "Medium"}
                   </div>
@@ -563,10 +596,10 @@ export default function Leads() {
               </div>
 
               <div>
-                <span className="text-xs text-base-content/60 uppercase font-semibold">
+                <span className="text-[10px] text-base-content/60 uppercase font-semibold">
                   Lead Name
                 </span>
-                <p className="font-medium text-base-content mt-1 truncate">
+                <p className="font-medium text-xs text-base-content mt-0.5 truncate">
                   {wFirstName || wLastName
                     ? `${wFirstName || ""} ${wLastName || ""}`
                     : "—"}
@@ -574,49 +607,49 @@ export default function Leads() {
               </div>
 
               <div>
-                <span className="text-xs text-base-content/60 uppercase font-semibold">
+                <span className="text-[10px] text-base-content/60 uppercase font-semibold">
                   Company
                 </span>
-                <p className="font-medium mt-1 truncate">{wCompany || "—"}</p>
+                <p className="font-medium text-xs mt-0.5 truncate">{wCompany || "—"}</p>
               </div>
 
               <div>
-                <span className="text-xs text-base-content/60 uppercase font-semibold">
+                <span className="text-[10px] text-base-content/60 uppercase font-semibold">
                   Email
                 </span>
-                <p className="font-medium mt-1 truncate text-primary">
+                <p className="font-medium text-xs mt-0.5 truncate text-primary">
                   {wEmail || "—"}
                 </p>
               </div>
 
               <div>
-                <span className="text-xs text-base-content/60 uppercase font-semibold">
+                <span className="text-[10px] text-base-content/60 uppercase font-semibold">
                   Lead Owner
                 </span>
-                <p className="font-medium mt-1 truncate">
+                <p className="font-medium text-xs mt-0.5 truncate">
                   {selectedOwner ? selectedOwner.name : "—"}
                 </p>
               </div>
             </div>
 
-            <div className="mt-6 pt-4 border-t border-base-200 space-y-2">
+            <div className="mt-4 pt-3 border-t border-base-200 space-y-2">
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="btn btn-primary w-full shadow-sm"
+                className="btn btn-primary btn-sm w-full shadow-xs"
               >
                 {isSubmitting ? (
-                  <span className="loading loading-spinner loading-sm"></span>
+                  <span className="loading loading-spinner loading-xs"></span>
                 ) : (
                   <>
-                    <MdSave size={18} /> Save Lead
+                    <MdSave size={16} /> Save Lead
                   </>
                 )}
               </button>
               <button
                 type="button"
-                onClick={() => reset()}
-                className="btn btn-outline w-full bg-base-100 shadow-sm"
+                onClick={() => reset(defaultLeadValues)}
+                className="btn btn-outline btn-sm w-full bg-base-100 shadow-xs"
               >
                 Reset Form
               </button>

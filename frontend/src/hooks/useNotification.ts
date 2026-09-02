@@ -17,6 +17,20 @@ const getNotificationLink = (notification: Notification) => {
   return "/notifications"; // Fallback to main notifications page
 };
 
+const extractUserId = (r: any): string => {
+  if (!r) return "";
+  if (typeof r === "string") return r;
+  if (r.user) {
+    if (typeof r.user === "string") return r.user;
+    if (r.user._id) return String(r.user._id);
+    if (r.user.id) return String(r.user.id);
+  }
+  if (r.userId) return String(r.userId);
+  if (r._id) return String(r._id);
+  if (r.id) return String(r.id);
+  return "";
+};
+
 interface UseNotificationsProps {
   authSlug: string | null;
   currentUserId: string;
@@ -39,7 +53,7 @@ export const useNotifications = ({ authSlug, currentUserId }: UseNotificationsPr
       }).catch(() => {}); // Ignore silent failure
       
       document.removeEventListener("click", unlockAudio);
-    document.removeEventListener("keydown", unlockAudio);
+      document.removeEventListener("keydown", unlockAudio);
     };
 
     document.addEventListener("click", unlockAudio);
@@ -54,22 +68,25 @@ export const useNotifications = ({ authSlug, currentUserId }: UseNotificationsPr
   useEffect(() => {
     if (!authSlug) return;
     
-    socket.emit("joinUserRoom", currentUserId);
+    if (currentUserId) {
+      socket.emit("joinUserRoom", currentUserId);
+    }
 
     const fetchNotifs = async () => {
       try {
         const res = await getNotifications(authSlug);
-        const formatted = (res.data?.data || []).map((n: any) => ({
-          id: n._id,
+        const rawList = Array.isArray(res.data) ? res.data : (res.data?.data || []);
+        const formatted = rawList.map((n: any) => ({
+          id: n._id || n.id,
           title: n.title,
           message: n.message,
           priority: n.priority,
-          targetUserIds: n.recipients || [],
-          createdBy: n.createdBy?._id,
+          targetUserIds: (n.recipients || []).map((r: any) => typeof r === "string" ? r : (r._id || r.id || String(r))),
+          createdBy: n.createdBy?._id || n.createdBy,
           createdAt: n.createdAt,
-          readBy: n.readBy?.map((r: any) => typeof r === 'string' ? r : (r.user?.id || r.user || r.userId || r._id)) || [],
+          readBy: (n.readBy || []).map(extractUserId).filter(Boolean),
           attachments: n.attachments || [],
-          sendTo: n.sendTo,
+          sendTo: n.sendTo || "all",
         }));
         setNotifications(formatted);
       } catch (err) {
@@ -79,21 +96,21 @@ export const useNotifications = ({ authSlug, currentUserId }: UseNotificationsPr
 
     fetchNotifs();
 
-   const handleNewNotification = (data: any) => {
-     if (audioRef.current) {
-       audioRef.current.currentTime = 0;
-       audioRef.current.play().catch(() => {});
-     }
-     const newNotif: Notification = {
-       id: data._id || Math.random().toString(),
-       title: data.title || data.action || "New Notification",
-       message: data.message,
-       priority: data.priority || "normal",
-       targetUserIds: data.recipients || [],
-       createdBy: data.createdBy?._id || "system",
-       createdAt: data.createdAt || new Date().toISOString(),
-       readBy: data.readBy?.map((r: any) => typeof r === 'string' ? r : (r.user?.id || r.user || r.userId || r._id)) || [],
-       attachments: data.attachments || [],
+    const handleNewNotification = (data: any) => {
+      if (audioRef.current) {
+        audioRef.current.currentTime = 0;
+        audioRef.current.play().catch(() => {});
+      }
+      const newNotif: Notification = {
+        id: data._id || data.id || Math.random().toString(),
+        title: data.title || data.action || "New Notification",
+        message: data.message,
+        priority: data.priority || "normal",
+        targetUserIds: (data.recipients || []).map((r: any) => typeof r === "string" ? r : (r._id || r.id || String(r))),
+        createdBy: data.createdBy?._id || data.createdBy || "system",
+        createdAt: data.createdAt || new Date().toISOString(),
+        readBy: (data.readBy || []).map(extractUserId).filter(Boolean),
+        attachments: data.attachments || [],
         sendTo: data.sendTo || "all",
       };
       setNotifications((prev) => [newNotif, ...prev]);
@@ -101,22 +118,27 @@ export const useNotifications = ({ authSlug, currentUserId }: UseNotificationsPr
 
     socket.on("new_notification", handleNewNotification);
     return () => {
-     socket.off("new_notification", handleNewNotification);
+      socket.off("new_notification", handleNewNotification);
     };
   }, [authSlug, currentUserId]);
 
-  const visibleNotifications = notifications.filter(
-    (n) => (n.sendTo === "all" || 
-         (n.targetUserIds && n.targetUserIds.includes(currentUserId))) &&
-         !n.readBy.includes(currentUserId)
-  );
+  const visibleNotifications = notifications.filter((n) => {
+    const isTarget =
+      n.sendTo === "all" ||
+      !n.targetUserIds ||
+      n.targetUserIds.length === 0 ||
+      (currentUserId ? n.targetUserIds.includes(currentUserId) : true);
+    const isRead = currentUserId ? n.readBy.includes(currentUserId) : false;
+    return isTarget && !isRead;
+  });
 
   const unreadCount = visibleNotifications.length;
 
   const handleMarkAsRead = async (id: string) => {
+    if (!id) return;
     setNotifications((prev) =>
       prev.map((n) =>
-        n.id === id && !n.readBy.includes(currentUserId)
+        n.id === id && currentUserId && !n.readBy.includes(currentUserId)
           ? { ...n, readBy: [...n.readBy, currentUserId] }
           : n
       )
@@ -132,14 +154,15 @@ export const useNotifications = ({ authSlug, currentUserId }: UseNotificationsPr
   };
 
   const handleMarkAllAsRead = async () => {
-    const unreadIds = visibleNotifications
-      .filter((n) => !n.readBy.includes(currentUserId))
-      .map((n) => n.id);
+    if (!currentUserId) return;
 
-    if (unreadIds.length === 0) return;
-
-    // Optimistically mark all visible notifications as read
-    setNotifications((prev) => prev.map((n) => ({ ...n, readBy: [...new Set([...n.readBy, currentUserId])] })));
+    // Optimistically mark all notifications as read
+    setNotifications((prev) =>
+      prev.map((n) => ({
+        ...n,
+        readBy: n.readBy.includes(currentUserId) ? n.readBy : [...n.readBy, currentUserId],
+      }))
+    );
 
     try {
       if (authSlug) await markAllAsRead(authSlug);

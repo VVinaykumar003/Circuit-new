@@ -1,6 +1,6 @@
 import Button from "../ui/Button";
 import AttendanceFilters from "./AttendanceFilter";
-import  StatusPills  from "./FilertByStatus";
+import StatusPills, { type Status } from "./FilertByStatus";
 
 interface Props {
   open: boolean;
@@ -10,9 +10,13 @@ interface Props {
     fromDate?: string;
     toDate?: string;
   };
-  status: "all" | "approved" | "pending" | "absent";
-  onFilterChange: (v: any) => void;
-  onStatusChange: (v: any) => void;
+  status: Status;
+  onFilterChange: (v: {
+    name?: string;
+    fromDate?: string;
+    toDate?: string;
+  }) => void;
+  onStatusChange: (v: Status) => void;
   isAdmin: boolean;
 }
 

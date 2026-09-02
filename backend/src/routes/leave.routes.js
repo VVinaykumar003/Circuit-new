@@ -63,6 +63,7 @@ router.put(
   "/:slug/leaves/:leaveId",
   auth,
   tenant,
+  upload.array("attachments"),
   leaveController.updateLeave
 )
 router.delete(

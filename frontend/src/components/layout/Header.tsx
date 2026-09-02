@@ -16,7 +16,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
   const { theme, setTheme } = useTheme();
   const { auth, logout } = useAuth();
   const user = auth?.user as OrganizationMember | undefined;
-  const currentUserId = user?.userId  || ""; // Define currentUserId before calling the hook
+  const currentUserId = user?.userId || user?._id || (user as any)?.id || ""; // Define currentUserId before calling the hook
   const {
     visibleNotifications,
     unreadCount,

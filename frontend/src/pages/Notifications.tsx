@@ -13,7 +13,7 @@ import {
 } from "@/services/notificationService";
 import Swal from "sweetalert2";
 import Button from "@/components/ui/Button";
-import Breadcrumbs from "@/components/ui/Breadcrumbs";
+import { PageHeader } from "@/components/common";
 
 export default function Notifications() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -113,26 +113,26 @@ export default function Notifications() {
   };
   return (
     <div className="p-4 sm:p-6 text-base-content ">
-      <div className="max-w-6xl mx-auto space-y-6  ">
-        <Breadcrumbs />
-
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <h1 className="text-xl sm:text-lg font-bold">Notifications</h1>
-
-          {["admin", "owner"].includes(currentUserRole) && (
-            <Button
-              className="flex items-center justify-center gap-2 px-4 py-2.5
-              rounded-xl bg-primary text-primary-content
-              text-sm font-medium hover:bg-primary/90
-              transition shadow-sm w-full sm:w-auto"
-              onClick={() => setOpen(true)}
-            >
-              <MdSend size={18} />
-              Send Notification
-            </Button>
-          )}
-        </div>
+      <div className="max-w-6xl mx-auto space-y-4">
+        <PageHeader
+          title="Notifications"
+          breadcrumbs={[
+            { label: "Dashboard" },
+            { label: "Notifications", active: true },
+          ]}
+          actions={
+            ["admin", "owner"].includes(currentUserRole)
+              ? [
+                  {
+                    label: "Send Notification",
+                    icon: <MdSend size={16} />,
+                    variant: "primary",
+                    onClick: () => setOpen(true),
+                  },
+                ]
+              : []
+          }
+        />
 
         {/* Notification Content */}
         {notifications.length === 0 ? (

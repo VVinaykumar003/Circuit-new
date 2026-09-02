@@ -15,6 +15,7 @@ import { MdRefresh, MdBarChart, MdShare, MdSort, MdError } from "react-icons/md"
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/auth/useAuth";
 import { getSalesDashboardData } from "@/services/salesService";
+import { PageHeader, StatsGrid } from "@/components/common";
 
 /* ─────────────────────────── types ─────────────────────────── */
 interface StatCard {
@@ -270,22 +271,27 @@ export default function SalesDashboard({
   return (
     <div className="min-h-screen bg-base-200">
       {/* ── top padding spacer (topbar is fixed in your layout) ── */}
-      <div className="p-5 space-y-6 max-w-[1600px] mx-auto">
+      <div className="p-4 md:p-6 space-y-4 max-w-[1600px] mx-auto">
+        {/* ── Page Header ── */}
+        <PageHeader
+          title="Sales Dashboard"
+          breadcrumbs={[
+            { label: "Dashboard" },
+            { label: "Sales", active: true },
+          ]}
+          showRefresh
+          onRefresh={() => refetch()}
+        />
 
         {/* ── STAT CARDS ── */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-          {stats.map((card) => (
-            <div
-              key={card.label}
-              className="bg-base-100 border border-base-300 rounded-xl px-4 py-5 flex flex-col items-center gap-1 shadow-sm"
-            >
-              <span className="text-2xl font-bold text-primary">{card.value}</span>
-              <span className="text-xs text-base-content/60 text-center leading-tight">
-                {card.label}
-              </span>
-            </div>
-          ))}
-        </div>
+        <StatsGrid
+          columns={{ default: 2, sm: 3, md: 3, lg: 5 }}
+          stats={stats.map((card) => ({
+            label: card.label,
+            value: card.value,
+            color: "text-primary",
+          }))}
+        />
 
         {/* ── SALES BY PRODUCT / EMPLOYEE / REGION ── */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">

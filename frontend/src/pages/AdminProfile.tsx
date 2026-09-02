@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
-import AdminRightSection from '@/components/admin/AdminRightSection';
+// import AdminRightSection from '@/components/admin/AdminRightSection';
 import ProfileSidebar from '@/components/members/ProfileSidebar'
 import { useAuth } from '@/auth/useAuth';
 import { getMemberById } from '@/services/memberService';
-import Breadcrumbs from "@/components/ui/Breadcrumbs";
+import { PageHeader } from "@/components/common";
 import type { Member } from "@/type/member";
 import MemberRightSection from '@/components/members/MemberRightSection';
 
@@ -40,8 +40,16 @@ const AdminProfile = () => {
   if (!admin) return <div className="p-6 flex justify-center text-gray-500">Admin not found</div>;
 
   return (
-    <div className="p-4 sm:p-6 space-y-6">
-      <Breadcrumbs />
+    <div className="p-4 sm:p-6 space-y-4">
+      <PageHeader
+        title={admin.name || "Admin Profile"}
+        breadcrumbs={[
+          { label: "Dashboard" },
+          { label: "Team Members" },
+          { label: "Profile", active: true },
+        ]}
+        cancel
+      />
       <div className='flex flex-col md:flex-row gap-6'>
         <ProfileSidebar member={admin} />
                <MemberRightSection memberId={id} />

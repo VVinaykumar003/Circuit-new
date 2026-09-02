@@ -14,11 +14,12 @@ import ProjectMembers from "../components/projects/ProjectMembers";
 import ProjectActivity from "../components/projects/ProjectActivity";
 import ProjectChat from "@/components/projects/ProjectChat";
 
+
 import { useAuth } from "@/auth/useAuth";
 import { getProjectById } from "@/services/projectService";
 import { getTasksByProjectId } from "@/services/taskService"; // renamed service
-import Breadcrumbs from "@/components/ui/Breadcrumbs";
 import WorkUpdate from "./WorkUpdate";
+import { PageHeader, StatsGrid } from "@/components/common";
 
 type ProjectTab = "overview" | "tasks" | "members" | "activity" | "chat" | "workUpdates";
 
@@ -31,11 +32,11 @@ export default function ProjectWorkspace() {
   );
 
   const [project, setProject] = useState<any>(null);
-  const [tasks, setTasks] = useState<any[]>([]);
+  const [tasks, setTasks] = useState<any>([]);
   const [loading, setLoading] = useState(true);
 
   const { auth } = useAuth();
-  const slug = auth.slug;
+  const slug = auth.slug || '';
 
   useEffect(() => {
     if (!id) return;
@@ -98,20 +99,19 @@ export default function ProjectWorkspace() {
   const projectRole = project?.participants?.find(
     (p) => p.user._id === auth.user?.userId,
   )?.role;
-  console.log("User's role in project:", projectRole);
-  console.log("Project Data:", project);
+  // console.log("User's role in project:", projectRole);
+  // console.log("Project Data:", project);
 
   return (
-    
-    <PageContainer >
-      <div className="mb-4">
-        <Breadcrumbs />
-      </div>
-
-    <PageContainer
-      title={project.projectName}
-      subtitle={`Managed by ${manager?.user.name || "Unknown"}`}
-    >
+    <PageContainer>
+      <PageHeader
+        title={project.projectName}
+        breadcrumbs={[
+          { label: "Dashboard" },
+          { label: "Projects" },
+          { label: project.projectName, active: true },
+        ]}
+      />
       {/* Tabs */}
       <div className="mb-6 overflow-x-auto">
   <div className="bg-base-200 p-1 rounded-xl inline-flex gap-1 min-w-max">
@@ -139,29 +139,41 @@ export default function ProjectWorkspace() {
       {/* Tab Content */}
       {activeTab === "overview" && (
         <>
-          <div className="grid grid-cols-[repeat(auto-fit,minmax(160px,1fr))] gap-4 mb-6">
-            <StatCard label="Total Tasks" color="black" value={totalTasks}
-            icon={<ClipboardList className="w-4 h-4" />} />
-            <StatCard
-              label="Completed"
-              value={completedTasks}
-              color="green-600"
-              borderColor="border-success"
-              icon={<CheckCircle2 className="w-4 h-4" />} />
-            <StatCard
-              label="In Progress"
-              value={inProgressTasks}
-              color="primary"
-              borderColor="border-primary"
-              icon={<LoaderCircle className="w-4 h-4" />} />
-            <StatCard label="Pending" value={pendingTasks} color="yellow-600" borderColor="border-warning" icon={<Clock3 className="w-4 h-4 " />} />
-            <StatCard
-              label="High Priority"
-              value={highPriorityTasks.length}
-              color="red-600"
-              borderColor="border-error"
-              icon={<AlertTriangle className="w-4 h-4" />} />
-          </div>
+          <StatsGrid
+            columns={{ default: 2, sm: 3, md: 5 }}
+            stats={[
+              {
+                label: "Total Tasks",
+                value: totalTasks,
+                icon: <ClipboardList className="w-4 h-4" />,
+                color: "text-base-content",
+              },
+              {
+                label: "Completed",
+                value: completedTasks,
+                icon: <CheckCircle2 className="w-4 h-4" />,
+                color: "text-success",
+              },
+              {
+                label: "In Progress",
+                value: inProgressTasks,
+                icon: <LoaderCircle className="w-4 h-4" />,
+                color: "text-primary",
+              },
+              {
+                label: "Pending",
+                value: pendingTasks,
+                icon: <Clock3 className="w-4 h-4" />,
+                color: "text-warning",
+              },
+              {
+                label: "High Priority",
+                value: highPriorityTasks.length,
+                icon: <AlertTriangle className="w-4 h-4" />,
+                color: "text-error",
+              },
+            ]}
+          />
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* LEFT */}
@@ -184,7 +196,7 @@ export default function ProjectWorkspace() {
         </>
       )}
 
-      {activeTab === "tasks" && <ProjectTasks projectId={id!} />}
+      {activeTab === "tasks" && <ProjectTasks projectId={id! } projectRole={projectRole} />}
       {activeTab === "members" && (
         <ProjectMembers 
           project={project} 
@@ -197,35 +209,10 @@ export default function ProjectWorkspace() {
       
       {activeTab === "workUpdates" && <WorkUpdate slug={auth.slug} projectId={id!} />}
     </PageContainer>
-    </PageContainer>
-
   );
 }
 
 /* ====== Small Reusable Components ====== */
-const StatCard = ({
-  label,
-  value,
-  color,
-  borderColor,
-  icon,
-}: {
-  label: string;
-  value: number;
-  color?: string;
-  borderColor?: string;
-  icon?: React.ReactNode;
-}) => (
-  <div
-    className={`flex flex-col items-start bg-white/70 border ${borderColor || "border-primary"} rounded-lg p-3 text-center ${color ? `text-${color}` : ""}`}
-  >
-    <div className="flex justify-between  w-full ">
-    <p className="text-sm font-bold ">{label}</p>
-    {icon && <div className="bg-primary/50 text-primary-content rounded-lg p-1">{icon}</div>}
-    </div>
-    <p className="text-md font-semibold">{value}</p>
-  </div>
-);
 
 const DescriptionCard = ({ description }: { description: string }) => (
   <div className="bg-white/70 border border-primary/30 rounded-lg p-4">

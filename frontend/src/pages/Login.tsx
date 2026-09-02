@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react"; // 1. Added useEffect
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, Link } from "react-router-dom";
 import Lottie from "lottie-react";
 import { LockIcon, User2Icon, AlertCircleIcon, Loader2Icon } from "lucide-react";
 // import loginAnimation from "@/assets/LoginAnimation.json";
@@ -18,7 +18,7 @@ interface LoginProps {
 const Login = ({ setToken }: LoginProps) => {
   const navigate = useNavigate();
   const { login: contextLogin } = useAuth();
-  const animationUrl = "/login-animation.json";
+  // const animationUrl = "/login-animation.json";
 
 
    // 2. State management for the animation file
@@ -182,7 +182,15 @@ if (dept === "sales") {
 
             {/* Password */}
             <div>
-              <label className="text-sm text-primary-content mb-4">Password</label>
+              <div className="flex justify-between items-center mb-1">
+                <label className="text-sm text-primary-content">Password</label>
+                <Link
+                  to="/forgot-password"
+                  className="text-xs text-blue-200 hover:text-white hover:underline transition-colors"
+                >
+                  Forgot password?
+                </Link>
+              </div>
               <div className="relative">
                 <LockIcon
                   size={18}

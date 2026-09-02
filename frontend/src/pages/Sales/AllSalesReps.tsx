@@ -52,6 +52,7 @@ import { useAuth } from "@/auth/useAuth";
 import { getSalesReps, updateSalesRep, deleteSalesRep, createSalesRep, type SalesRep } from "@/services/salesRepServices";
 import ImportExportActions from "@/components/import-export/ImportExportActions";
 import type { ColumnConfig } from "@/type/importExport.types";
+import { PageHeader, StatsGrid } from "@/components/common";
 
 const salesRepColumns: ColumnConfig[] = [
   { key: "employeeCode", label: "Employee Code", required: true, type: "string" },
@@ -452,33 +453,37 @@ const stats = useMemo(() => {
     <div className="min-h-screen bg-base-200 p-4 md:p-6 font-sans flex flex-col h-full overflow-hidden relative">
 
       {/* ── Header ── */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 bg-base-100 p-5 rounded-xl border border-base-300 shadow-sm">
-        <div>
-          <h1 className="text-2xl font-bold text-base-content tracking-tight">Sales Representatives</h1>
-          <div className="text-sm text-base-content/60 breadcrumbs mt-1 font-medium">
-            <ul>
-              <li>Dashboard</li>
-              <li>Sales</li>
-              <li className="text-primary">Representatives</li>
-            </ul>
-          </div>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <ImportExportActions
-            moduleName="Sales Representatives"
-            columns={salesRepColumns}
-            data={filteredReps}
-            selectedData={getSelectedReps()}
-            onImportSubmit={handleImportSubmit}
-          />
-          <button onClick={() => refetch()} className="btn btn-outline btn-sm btn-square bg-base-100"><MdRefresh size={16} /></button>
-          <button onClick={() => navigate("/sales/representatives/new")} className="btn btn-primary btn-sm gap-2 shadow-sm"><MdAdd size={16} /> Add Rep</button>
-        </div>
-      </div>
+      <PageHeader
+        title="Sales Representatives"
+        breadcrumbs={[
+          { label: "Dashboard" },
+          { label: "Sales" },
+          { label: "Representatives", active: true },
+        ]}
+        showRefresh
+        onRefresh={() => refetch()}
+        actions={[
+          {
+            label: "Add Rep",
+            icon: <MdAdd size={16} />,
+            variant: "primary",
+            onClick: () => navigate("/sales/representatives/new"),
+          },
+        ]}
+      >
+        <ImportExportActions
+          moduleName="Sales Representatives"
+          columns={salesRepColumns}
+          data={filteredReps}
+          selectedData={getSelectedReps()}
+          onImportSubmit={handleImportSubmit}
+        />
+      </PageHeader>
 
       {/* ── Dashboard Stats ── */}
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4 mb-6">
-        {[
+      <StatsGrid
+        columns={{ default: 2, sm: 4, md: 4, lg: 8 }}
+        stats={[
           { label: "Total Reps", value: stats.total, color: "text-base-content" },
           { label: "Active", value: stats.active, color: "text-primary" },
           { label: "On Leave / Inactive", value: stats.onLeave + stats.inactive, color: "text-warning" },
@@ -486,13 +491,8 @@ const stats = useMemo(() => {
           { label: "Total Achieved", value: `₹${(stats.totalAchievement/1000).toFixed(1)}k`, color: "text-success" },
           { label: "Avg Conversion", value: `${stats.avgConv.toFixed(1)}%`, color: "text-secondary" },
           { label: "Total Revenue", value: `₹${(stats.totalRevenue/1000).toFixed(1)}k`, color: "text-success" },
-        ].map((stat, idx) => (
-          <div key={idx} className="bg-base-100 border border-base-300 rounded-xl p-4 flex flex-col justify-center items-center shadow-sm hover:shadow-md transition-shadow relative overflow-hidden">
-            <span className={`text-xl font-black mt-1 ${stat.color}`}>{stat.value}</span>
-            <span className="text-[10px] text-base-content/60 font-bold uppercase tracking-wider text-center mt-1">{stat.label}</span>
-          </div>
-        ))}
-      </div>
+        ]}
+      />
 
       {/* ── Toolbar ── */}
       <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-4 bg-base-100 p-3 rounded-xl border border-base-300 shadow-sm">

@@ -34,6 +34,7 @@ import { getOrders, updateOrder, deleteOrder, emailCustomerOrder, createOrder, t
 import { getSalesReps } from "@/services/salesRepServices";
 import ImportExportActions from "@/components/import-export/ImportExportActions";
 import type { ColumnConfig } from "@/type/importExport.types";
+import { PageHeader, StatsGrid } from "@/components/common";
 
 const orderColumns: ColumnConfig[] = [
   { key: "orderNumber", label: "Order Number", required: true, type: "string" },
@@ -207,6 +208,7 @@ export default function PendingOrders() {
       setSuccessModalOpen(true);
       setBulkDeleteModalOpen(false);
     } catch (error) {
+      console.error(error);
       toast.error("Failed to delete some orders.");
     }
   };
@@ -258,7 +260,7 @@ export default function PendingOrders() {
         <div className="flex items-center gap-2">
           <div className="avatar placeholder">
             <div className="bg-neutral text-neutral-content rounded-full w-6">
-              <span className="text-[10px]">{info.getValue().charAt(0)}</span>
+              <span className="text-[5px] m-2">{info.getValue().charAt(0)}</span>
             </div>
           </div>
           <span className="text-xs">{info.getValue()}</span>
@@ -415,56 +417,57 @@ export default function PendingOrders() {
     <div className="min-h-screen bg-base-200 p-4 md:p-6 font-sans flex flex-col h-full overflow-hidden relative">
       
       {/* ── Header ── */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 bg-base-100 p-5 rounded-xl border border-base-300 shadow-sm">
-        <div>
-          <h1 className="text-2xl font-bold text-base-content tracking-tight">Pending Orders</h1>
-          <div className="text-sm text-base-content/60 breadcrumbs mt-1">
-            <ul>
-              <li>Dashboard</li>
-              <li>Sales</li>
-              <li>Orders</li>
-              <li className="font-semibold text-primary">Pending Orders</li>
-            </ul>
-          </div>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <ImportExportActions
-            moduleName="Pending Orders"
-            columns={orderColumns}
-            data={filteredOrders}
-            selectedData={getSelectedOrders()}
-            onImportSubmit={handleImportSubmit}
-          />
-          <button onClick={() => refetch()} className="btn btn-outline btn-sm btn-square">
-            <MdRefresh size={16} />
-          </button>
-          <button onClick={() => navigate("/sales/orders")} className="btn btn-primary btn-sm gap-2">
-            <MdAdd size={16} /> Create New Order
-          </button>
-        </div>
-      </div>
+      <PageHeader
+        title="Pending Orders"
+        breadcrumbs={[
+          { label: "Dashboard" },
+          { label: "Sales" },
+          { label: "Orders" },
+          { label: "Pending Orders", active: true },
+        ]}
+        showRefresh
+        onRefresh={() => refetch()}
+        actions={[
+          {
+            label: "Create New Order",
+            icon: <MdAdd size={16} />,
+            variant: "primary",
+            size: "xs",
+            onClick: () => navigate("/sales/orders"),
+          },
+        ]}
+      >
+        <ImportExportActions
+          moduleName="Pending Orders"
+          columns={orderColumns}
+          data={filteredOrders}
+          selectedData={getSelectedOrders()}
+          onImportSubmit={handleImportSubmit}
+        />
+      </PageHeader>
 
       {/* ── Active Alerts ── */}
-      <div className="flex flex-col gap-2 mb-4">
+      <div className="flex flex-col gap-2 mb-1">
         {stats.overdue > 0 && (
           <div className="alert alert-error shadow-sm py-2">
             <MdWarning size={20} />
             <span className="text-sm font-medium">You have {stats.overdue} overdue order(s) requiring immediate attention!</span>
-            <button className="btn btn-sm btn-ghost">Review Overdue</button>
+            <button className="btn btn-xs btn-ghost">Review Overdue</button>
           </div>
         )}
         {stats.awaitingApproval > 0 && (
           <div className="alert alert-warning shadow-sm py-2">
             <MdWarning size={20} />
             <span className="text-sm font-medium">{stats.awaitingApproval} order(s) are waiting for management approval.</span>
-            <button className="btn btn-sm btn-ghost">Review Approvals</button>
+            <button className="btn btn-xs btn-ghost">Review Approvals</button>
           </div>
         )}
       </div>
 
       {/* ── Stats Dashboard ── */}
-      <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4 mb-6">
-        {[
+      <StatsGrid
+        columns={{ default: 2, sm: 4, md: 4, lg: 8 }}
+        stats={[
           { label: "Total Pending", value: stats.total, color: "text-base-content" },
           { label: "Pending Value", value: `₹${(stats.value/1000).toFixed(1)}k`, color: "text-primary" },
           { label: "Due Today", value: stats.dueToday, color: "text-warning" },
@@ -473,16 +476,11 @@ export default function PendingOrders() {
           { label: "Needs Payment", value: stats.awaitingPayment, color: "text-error" },
           { label: "To Dispatch", value: stats.awaitingDispatch, color: "text-secondary" },
           { label: "High Priority", value: stats.highPriority, color: "text-error" },
-        ].map((stat, idx) => (
-          <div key={idx} className="bg-base-100 border border-base-300 rounded-xl p-4 flex flex-col justify-center items-center shadow-sm hover:shadow-md transition-shadow">
-            <span className={`text-xl font-bold ${stat.color}`}>{stat.value}</span>
-            <span className="text-[10px] text-base-content/60 mt-1 text-center font-medium uppercase tracking-wider leading-tight">{stat.label}</span>
-          </div>
-        ))}
-      </div>
+        ]}
+      />
 
       {/* ── Toolbar ── */}
-      <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-4 bg-base-100 p-3 rounded-xl border border-base-300 shadow-sm">
+      <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-4 bg-base-100 p-2 rounded-xl border border-base-300 shadow-sm">
         <div className="flex items-center gap-3 w-full md:w-auto">
           <div className="relative w-full md:w-72">
             <MdSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-base-content/50" size={18} />
@@ -491,22 +489,22 @@ export default function PendingOrders() {
               placeholder="Search orders, customers..."
               value={search}
               onChange={e => setSearch(e.target.value)}
-              className="input input-sm input-bordered w-full pl-9 focus:outline-none focus:border-primary"
+              className="input input-xs input-bordered w-full pl-9 focus:outline-none focus:border-primary"
             />
           </div>
-          <button onClick={() => setShowFilters(!showFilters)} className={`btn btn-sm ${showFilters ? "btn-primary" : "btn-outline"} gap-2`}>
+          <button onClick={() => setShowFilters(!showFilters)} className={`btn btn-xs ${showFilters ? "btn-primary" : "btn-outline"} gap-2`}>
             <MdFilterList size={16} /> Filters
           </button>
         </div>
 
-        <div className="flex bg-base-200 p-1 rounded-lg border border-base-300">
-          <button onClick={() => setView("table")} className={`btn btn-sm btn-ghost px-3 ${view === "table" ? "bg-base-100 shadow-sm" : ""}`}>
+        <div className="flex  p-1 rounded-sm gap-2 ">
+          <button onClick={() => setView("table")} className={`btn btn-xs btn-outline px-3 ${view === "table" ? "bg-base-100 shadow-sm" : ""}`}>
             <MdViewList size={18} /> Table
           </button>
-          <button onClick={() => setView("kanban")} className={`btn btn-sm btn-ghost px-3 ${view === "kanban" ? "bg-base-100 shadow-sm" : ""}`}>
+          <button onClick={() => setView("kanban")} className={`btn btn-xs btn-outline px-3 ${view === "kanban" ? "bg-base-100 shadow-sm" : ""}`}>
             <MdViewKanban size={18} /> Kanban
           </button>
-          <button onClick={() => setView("calendar")} className={`btn btn-sm btn-ghost px-3 ${view === "calendar" ? "bg-base-100 shadow-sm" : ""}`}>
+          <button onClick={() => setView("calendar")} className={`btn btn-xs btn-outline px-3 ${view === "calendar" ? "bg-base-100 shadow-sm" : ""}`}>
             <MdCalendarMonth size={18} /> Calendar
           </button>
         </div>
@@ -514,53 +512,115 @@ export default function PendingOrders() {
 
       {/* ── Advanced Filters Panel ── */}
       {showFilters && (
-        <div className="bg-base-100 border border-base-300 rounded-xl p-5 mb-4 grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 shadow-sm animate-fade-in-down">
-          <div>
-            <label className="text-xs font-semibold text-base-content/70 mb-1 block">Order Status</label>
-            <select className="select select-sm select-bordered w-full" value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}>
-              <option value="All Statuses">All Statuses</option>
-              <option value="Draft">Draft</option>
-              <option value="Pending">Pending</option>
-              <option value="Approved">Approved</option>
-              <option value="Processing">Processing</option>
-              <option value="Shipped">Shipped</option>
-            </select>
-          </div>
-          <div>
-            <label className="text-xs font-semibold text-base-content/70 mb-1 block">Sales Owner</label>
-            <select className="select select-sm select-bordered w-full" value={filterSalesRep} onChange={(e) => setFilterSalesRep(e.target.value)}>
-              <option value="All Reps">All Reps</option>
-              {uniqueSalesReps.map(rep => <option key={rep} value={rep}>{rep}</option>)}
-            </select>
-          </div>
-          <div>
-            <label className="text-xs font-semibold text-base-content/70 mb-1 block">Priority</label>
-            <select className="select select-sm select-bordered w-full" value={filterPriority} onChange={(e) => setFilterPriority(e.target.value)}>
-              <option value="All">All</option>
-              <option value="Urgent">Urgent</option>
-              <option value="High">High</option>
-              <option value="Medium">Medium</option>
-              <option value="Low">Low</option>
-            </select>
-          </div>
-          <div>
-            <label className="text-xs font-semibold text-base-content/70 mb-1 block">Quick Toggles</label>
-            <div className="flex gap-4 items-center h-8">
-              <label className="cursor-pointer label gap-2 p-0"><input type="checkbox" className="checkbox checkbox-xs" checked={filterOverdue} onChange={(e) => setFilterOverdue(e.target.checked)} /><span className="label-text text-xs">Overdue</span></label>
-              <label className="cursor-pointer label gap-2 p-0"><input type="checkbox" className="checkbox checkbox-xs" checked={filterDueToday} onChange={(e) => setFilterDueToday(e.target.checked)} /><span className="label-text text-xs">Due Today</span></label>
-            </div>
-          </div>
-          <div className="col-span-1 md:col-span-3 lg:col-span-4 flex justify-end gap-2 mt-2 border-t border-base-200 pt-4">
-            <button className="btn btn-sm btn-ghost" onClick={() => {
-              setFilterStatus("All Statuses");
-              setFilterSalesRep("All Reps");
-              setFilterPriority("All");
-              setFilterOverdue(false);
-              setFilterDueToday(false);
-            }}>Reset Filters</button>
-            <button className="btn btn-sm btn-primary" onClick={() => setShowFilters(false)}>Apply Filters</button>
-          </div>
-        </div>
+       <div className="bg-base-100 border border-base-300 rounded-xl p-2 mb-4 flex items-end gap-10 shadow-sm animate-fade-in-down overflow-x-auto">
+  {/* Order Status */}
+  <div className="shrink-0 w-1/8">
+    <label className="text-xs font-semibold text-base-content/70 mb-3.5 block">
+      Order Status
+    </label>
+    <select
+      className="select select-xs select-bordered w-full"
+      value={filterStatus}
+      onChange={(e) => setFilterStatus(e.target.value)}
+    >
+      <option value="All Statuses">All Statuses</option>
+      <option value="Draft">Draft</option>
+      <option value="Pending">Pending</option>
+      <option value="Approved">Approved</option>
+      <option value="Processing">Processing</option>
+      <option value="Shipped">Shipped</option>
+    </select>
+  </div>
+
+  {/* Sales Owner */}
+  <div className="shrink-0 w-1/8">
+    <label className="text-xs font-semibold text-base-content/70 mb-3.5 block">
+      Sales Owner
+    </label>
+    <select
+      className="select select-xs select-bordered w-full"
+      value={filterSalesRep}
+      onChange={(e) => setFilterSalesRep(e.target.value)}
+    >
+      <option value="All Reps">All Reps</option>
+      {uniqueSalesReps.map((rep) => (
+        <option key={rep} value={rep}>
+          {rep}
+        </option>
+      ))}
+    </select>
+  </div>
+
+  {/* Priority */}
+  <div className="shrink-0  w-1/8 " >
+    <label className="text-xs font-semibold text-base-content/70 mb-3.5 block ">
+      Priority
+    </label>
+    <select
+      className="select select-xs select-bordered w-full"
+      value={filterPriority}
+      onChange={(e) => setFilterPriority(e.target.value)}
+    >
+      <option value="All">All</option>
+      <option value="Urgent">Urgent</option>
+      <option value="High">High</option>
+      <option value="Medium">Medium</option>
+      <option value="Low">Low</option>
+    </select>
+  </div>
+
+  {/* Quick Toggles */}
+  <div className="shrink-0 ">
+    <label className="text-xs font-semibold text-base-content/70 mb-1 block">
+      Quick Toggles
+    </label>
+
+    <div className="flex gap-4 items-center h-8">
+      <label className="cursor-pointer label gap-2 p-0">
+        <input
+          type="checkbox"
+          className="checkbox checkbox-xs"
+          checked={filterOverdue}
+          onChange={(e) => setFilterOverdue(e.target.checked)}
+        />
+        <span className="label-text text-xs">Overdue</span>
+      </label>
+
+      <label className="cursor-pointer label gap-2 p-0">
+        <input
+          type="checkbox"
+          className="checkbox checkbox-xs"
+          checked={filterDueToday}
+          onChange={(e) => setFilterDueToday(e.target.checked)}
+        />
+        <span className="label-text text-xs">Due Today</span>
+      </label>
+    </div>
+  </div>
+
+  {/* Actions */}
+  <div className="shrink-0 flex items-center gap-2 ml-auto">
+    <button
+      className="btn btn-xs btn-ghost"
+      onClick={() => {
+        setFilterStatus("All Statuses");
+        setFilterSalesRep("All Reps");
+        setFilterPriority("All");
+        setFilterOverdue(false);
+        setFilterDueToday(false);
+      }}
+    >
+      Reset Filters
+    </button>
+
+    <button
+      className="btn btn-xs btn-primary"
+      onClick={() => setShowFilters(false)}
+    >
+      Apply Filters
+    </button>
+  </div>
+</div>
       )}
 
       {/* ── Bulk Actions (Visible when rows selected) ── */}
@@ -587,12 +647,12 @@ export default function PendingOrders() {
         {view === "table" && (
           <div className="flex-1 overflow-auto">
             {filteredOrders.length > 0 ? (
-              <table className="table table-pin-rows table-pin-cols w-full text-sm">
+              <table className="table table-pin-rows table-pin-cols w-full text-xs">
                 <thead>
                   {table.getHeaderGroups().map(headerGroup => (
                     <tr key={headerGroup.id} className="bg-base-200/50 text-base-content/70">
                       {headerGroup.headers.map(header => (
-                        <th key={header.id} className="font-semibold py-3 cursor-pointer select-none" onClick={header.column.getToggleSortingHandler()}>
+                        <th key={header.id} className="font-semibold py-2 cursor-pointer select-none" onClick={header.column.getToggleSortingHandler()}>
                           {flexRender(header.column.columnDef.header, header.getContext())}
                           {{ asc: " 🔼", desc: " 🔽" }[header.column.getIsSorted() as string] ?? null}
                         </th>
@@ -604,11 +664,11 @@ export default function PendingOrders() {
                   {table.getRowModel().rows.map(row => (
                     <tr 
                       key={row.id} 
-                      className="hover:bg-base-200/50 transition-colors cursor-pointer border-b border-base-200"
+                      className="hover:bg-base-200/50 transition-colors cursor-pointer border-b border-base-200 "
                       onClick={() => setSelectedOrder(row.original)}
                     >
                       {row.getVisibleCells().map(cell => (
-                        <td key={cell.id} className="py-3">
+                        <td key={cell.id} className="py-3 text-xs">
                           {flexRender(cell.column.columnDef.cell, cell.getContext())}
                         </td>
                       ))}
@@ -621,7 +681,7 @@ export default function PendingOrders() {
                 <MdLocalShipping size={64} className="mb-4 text-base-content/20" />
                 <h3 className="text-lg font-bold">No Pending Orders Found</h3>
                 <p className="text-sm mt-1 mb-4">All orders are up to date or do not match your filters.</p>
-                <button onClick={() => navigate("/sales/orders")} className="btn btn-primary btn-sm">Create New Order</button>
+                <button onClick={() => navigate("/sales/orders")} className="btn btn-primary btn-xs">Create New Order</button>
               </div>
             )}
           </div>
@@ -698,7 +758,7 @@ export default function PendingOrders() {
             </span>
             <div className="flex items-center gap-2">
               <select 
-                className="select select-sm select-bordered"
+                className="select select-xs select-bordered"
                 value={table.getState().pagination.pageSize}
                 onChange={e => table.setPageSize(Number(e.target.value))}
               >
@@ -707,9 +767,9 @@ export default function PendingOrders() {
                 ))}
               </select>
               <div className="join">
-                <button className="join-item btn btn-sm" onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}>«</button>
-                <button className="join-item btn btn-sm">Page {table.getState().pagination.pageIndex + 1}</button>
-                <button className="join-item btn btn-sm" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>»</button>
+                <button className="join-item btn btn-xs" onClick={() => table.previousPage()} disabled={!table.getCanPreviousPage()}>«</button>
+                <button className="join-item btn btn-xs">Page {table.getState().pagination.pageIndex + 1}</button>
+                <button className="join-item btn btn-xs" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>»</button>
               </div>
             </div>
           </div>
@@ -734,8 +794,8 @@ export default function PendingOrders() {
               <h2 className="text-xl font-bold text-base-content leading-tight">{selectedOrder?.customerName}</h2>
             </div>
             <div className="flex gap-2">
-              <button className="btn btn-outline btn-sm gap-2"><MdDownload /> PDF</button>
-              <button onClick={() => setSelectedOrder(null)} className="btn btn-ghost btn-circle btn-sm">
+              <button className="btn btn-outline btn-xs gap-2"><MdDownload /> PDF</button>
+              <button onClick={() => setSelectedOrder(null)} className="btn btn-ghost btn-circle btn-xs">
                 <MdClose size={20} />
               </button>
             </div>
@@ -748,21 +808,21 @@ export default function PendingOrders() {
             <div className="flex flex-wrap gap-2 pb-6 border-b border-base-200">
               {selectedOrder?.orderStatus === "Pending" && (
                 <>
-                  <button className="btn btn-sm btn-success text-white gap-2" onClick={() => {if(selectedOrder) handleStatusChange(selectedOrder.id, "Approved");}}><MdCheckCircle /> Approve</button>
-                  <button className="btn btn-sm btn-error text-white gap-2" onClick={() => {if(selectedOrder) handleStatusChange(selectedOrder.id, "Cancelled");}}><MdClose /> Reject</button>
+                  <button className="btn btn-xs btn-success text-white gap-2" onClick={() => {if(selectedOrder) handleStatusChange(selectedOrder.id, "Approved");}}><MdCheckCircle /> Approve</button>
+                  <button className="btn btn-xs btn-error text-white gap-2" onClick={() => {if(selectedOrder) handleStatusChange(selectedOrder.id, "Cancelled");}}><MdClose /> Reject</button>
                 </>
               )}
               {selectedOrder?.orderStatus === "Approved" && (
-                <button className="btn btn-sm btn-info text-white gap-2" onClick={() => {if(selectedOrder) handleStatusChange(selectedOrder.id, "Processing");}}>Mark Processing</button>
+                <button className="btn btn-xs btn-info text-white gap-2" onClick={() => {if(selectedOrder) handleStatusChange(selectedOrder.id, "Processing");}}>Mark Processing</button>
               )}
               {(selectedOrder?.orderStatus === "Processing" || selectedOrder?.orderStatus === "Approved") && (
-                <button className="btn btn-sm btn-primary gap-2" onClick={() => {if(selectedOrder) handleStatusChange(selectedOrder.id, "Shipped");}}><MdLocalShipping /> Mark Dispatched</button>
+                <button className="btn btn-xs btn-primary gap-2" onClick={() => {if(selectedOrder) handleStatusChange(selectedOrder.id, "Shipped");}}><MdLocalShipping /> Mark Dispatched</button>
               )}
               {selectedOrder?.paymentStatus === "Unpaid" && (
-                <button className="btn btn-sm btn-outline btn-warning gap-2" onClick={(e) => { if (selectedOrder) handleSendEmail(e, selectedOrder.id); }}><MdPayment /> Send Reminder</button>
+                <button className="btn btn-xs btn-outline btn-warning gap-2" onClick={(e) => { if (selectedOrder) handleSendEmail(e, selectedOrder.id); }}><MdPayment /> Send Reminder</button>
               )}
-              <button className="btn btn-sm btn-outline" onClick={(e) => { e.stopPropagation(); if (selectedOrder) { setOrderToEdit(selectedOrder); setEditModalOpen(true); } }}><MdEdit /> Edit Order</button>
-              <button className="btn btn-sm btn-outline btn-error ml-auto" onClick={(e) => { e.stopPropagation(); if(selectedOrder) initiateDelete(selectedOrder.id); }}><MdDelete /> Delete Order</button>
+              <button className="btn btn-xs btn-outline" onClick={(e) => { e.stopPropagation(); if (selectedOrder) { setOrderToEdit(selectedOrder); setEditModalOpen(true); } }}><MdEdit /> Edit Order</button>
+              <button className="btn btn-xs btn-outline btn-error ml-auto" onClick={(e) => { e.stopPropagation(); if(selectedOrder) initiateDelete(selectedOrder.id); }}><MdDelete /> Delete Order</button>
             </div>
 
             {/* Basic Info */}

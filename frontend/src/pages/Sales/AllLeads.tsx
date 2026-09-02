@@ -12,10 +12,7 @@ import {
 import {
   MdSearch,
   MdFilterList,
-  MdAdd,
   MdMoreVert,
-  MdDownload,
-  MdRefresh,
   MdClose,
   MdEdit,
   MdDelete,
@@ -25,10 +22,12 @@ import {
   MdTimeline,
   MdNotes,
   MdPerson,
+  MdAdd,
 } from "react-icons/md";
-import { deleteLead, getLeads, updateLead, convertLeadToCustomer } from "@/services/leadServices";
+import { deleteLead, getLeads, updateLead, convertLeadToCustomer, bulkDeleteLeads } from "@/services/leadServices";
 import { useAuth } from "@/auth/useAuth";
 import { toast } from "react-toastify";
+import {PageHeader ,StatsGrid,} from "@/components/common";
 
 /* ─────────────────────────── types ─────────────────────────── */
 export interface Lead {
@@ -75,7 +74,7 @@ const [ownerFilter, setOwnerFilter] = useState("All");
   const [editData, setEditData] = useState<Partial<Lead>>({});
   const [leads, setLeads] = useState<Lead[]>([]);
   const [search, setSearch] = useState("");
-  const [showSearch, setShowSearch] = useState(false);
+  // const [showSearch, setShowSearch] = useState(false);
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null);
   const [rowSelection, setRowSelection] = useState({});
   const [sorting, setSorting] = useState<SortingState>([]);
@@ -83,6 +82,8 @@ const [ownerFilter, setOwnerFilter] = useState("All");
     "overview",
   );
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [bulkDeleteModalOpen, setBulkDeleteModalOpen] = useState(false);
+  const [isBulkDeleting, setIsBulkDeleting] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const { auth } = useAuth();
   const slug = auth?.slug;
@@ -91,7 +92,7 @@ const [ownerFilter, setOwnerFilter] = useState("All");
       try {
         const res = await getLeads(slug || "");
         
-        setLeads(res.data);
+        setLeads(res?.data);
       } catch (error) {
         console.log(error);
       }
@@ -120,6 +121,29 @@ const [ownerFilter, setOwnerFilter] = useState("All");
     } catch (error) {
       toast.error("Failed to delete lead");
       console.error(error);
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    const selectedRows = table.getSelectedRowModel().rows;
+    const idsToDelete = selectedRows.map((r) => r.original._id);
+
+    if (idsToDelete.length === 0) return;
+
+    setIsBulkDeleting(true);
+    try {
+      await bulkDeleteLeads(idsToDelete, slug || "");
+
+      toast.success(`${idsToDelete.length} lead(s) deleted successfully`);
+
+      setLeads((prev) => prev.filter((lead) => !idsToDelete.includes(lead._id)));
+      setRowSelection({});
+      setBulkDeleteModalOpen(false);
+    } catch (error: any) {
+      console.error("Bulk delete error:", error);
+      toast.error(error.message || "Failed to delete selected leads");
+    } finally {
+      setIsBulkDeleting(false);
     }
   };
 
@@ -278,7 +302,7 @@ const [ownerFilter, setOwnerFilter] = useState("All");
       //   header: "Owner",
 
       //   cell: (info) => (
-      //     <span className="text-sm">{info.getValue()?.name || "N/A"}</span>
+      //     <span className="text-xs">{info.getValue()?.name || "N/A"}</span>
       //   ),
       // }),
       
@@ -289,7 +313,7 @@ const [ownerFilter, setOwnerFilter] = useState("All");
     const owner = info.getValue();
 
     return (
-      <span className="text-sm">
+      <span className="text-xs">
         {typeof owner === "string" ? owner : owner?.name || "N/A"}
       </span>
     );
@@ -299,7 +323,7 @@ const [ownerFilter, setOwnerFilter] = useState("All");
       columnHelper.accessor("createdAt", {
         header: "Created",
         cell: (info) => (
-          <span className="text-sm text-base-content/70">
+          <span className="text-xs text-base-content/70">
             {" "}
             {new Date(info.getValue() as string).toLocaleDateString("en-GH")}
           </span>
@@ -356,15 +380,6 @@ const [ownerFilter, setOwnerFilter] = useState("All");
     [navigate],
   );
 
-  // const filteredLeads = useMemo(() => {
-  //   return leads.filter(
-  //     (l) =>
-  //       l.firstName.toLowerCase().includes(search.toLowerCase()) ||
-  //       l.lastName.toLowerCase().includes(search.toLowerCase()) ||
-  //       l.companyName.toLowerCase().includes(search.toLowerCase()) ||
-  //       l.email.toLowerCase().includes(search.toLowerCase()),
-  //   );
-  // }, [leads, search]);
   const filteredLeads = useMemo(() => {
   const searchValue = search.toLowerCase();
 
@@ -408,54 +423,64 @@ const [ownerFilter, setOwnerFilter] = useState("All");
     state: { rowSelection, sorting },
     onRowSelectionChange: setRowSelection,
     onSortingChange: setSorting,
+    getRowId: (row) => row._id,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
   });
 
-  const exportCSV = () => {
-    console.log("Exporting CSV...");
-    // Implementation for CSV export
+
+
+  // ─────────────────────────────────────────────
+  // Export CSV
+  // ─────────────────────────────────────────────
+  const handleExport = () => {
+    console.log("Exporting Leads CSV...");
+
+    // Add your actual CSV export logic here.
   };
+  const handleImport = () => {
+    console.log("Importing Leads CSV...");
+
+    // Add your actual CSV export logic here.
+  };
+
+
+  const handleRefresh = () => {
+    window.location.reload();
+  };
+
+
 
   return (
     <div className="min-h-screen bg-base-200 p-4 md:p-6 font-sans flex flex-col h-full overflow-hidden relative">
-      {/* ── Header ── */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 bg-base-100 p-5 rounded-xl border border-base-300 shadow-sm">
-        <div>
-          <h1 className="text-2xl font-bold text-base-content tracking-tight">
-            Leads Management
-          </h1>
-          <div className="text-sm text-base-content/60 breadcrumbs mt-1 font-medium">
-            <ul>
-              <li>Dashboard</li>
-              <li>Sales</li>
-              <li className="text-primary">Leads</li>
-            </ul>
-          </div>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <button
-            className="btn btn-outline btn-sm gap-2 bg-base-100"
-            onClick={exportCSV}
-          >
-            <MdDownload size={16} /> Export CSV
-          </button>
-          <button className="btn btn-outline btn-sm btn-square bg-base-100">
-            <MdRefresh size={16} />
-          </button>
-          <button
-            onClick={() => navigate("/sales/leads/new")}
-            className="btn btn-primary btn-sm gap-2 shadow-sm"
-          >
-            <MdAdd size={16} /> Create Lead
-          </button>
-        </div>
-      </div>
 
-      {/* ── Dashboard Stats ── */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        {[
+      <PageHeader
+      title="All Leads"
+      breadcrumbs={[
+        { label: "Dashboard" },
+        { label: "Sales" },
+        { label: "Leads", active: true },
+      ]}
+      showExport
+      showImport
+      onImport={handleImport}
+      onExport={handleExport}
+      showRefresh
+      onRefresh={handleRefresh}
+      actions={[
+        {
+          label: "Add Leadas",
+          icon: <MdAdd size={16} />,
+          variant: "primary",
+          onClick: () => navigate("/sales/leads/new"),
+        },
+      ]}
+    />
+
+
+    <StatsGrid 
+    stats={[
           {
             label: "Total Leads",
             value: stats.total,
@@ -472,21 +497,11 @@ const [ownerFilter, setOwnerFilter] = useState("All");
             value: `₹${stats.totalValue.toLocaleString()}`,
             color: "text-success",
           },
-        ].map((stat, idx) => (
-          <div
-            key={idx}
-            className="bg-base-100 border border-base-300 rounded-xl p-5 flex flex-col justify-center shadow-sm hover:shadow-md transition-shadow relative overflow-hidden"
-          >
-            <div className="absolute top-0 left-0 w-1 h-full bg-base-300"></div>
-            <span className="text-xs text-base-content/60 font-bold uppercase tracking-wider">
-              {stat.label}
-            </span>
-            <span className={`text-3xl font-black mt-1 ${stat.color}`}>
-              {stat.value}
-            </span>
-          </div>
-        ))}
-      </div>
+        ]}
+    />
+      
+
+      
 
       {/* ── Toolbar ── */}
       <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-4 bg-base-100 p-3 rounded-xl border border-base-300 shadow-sm">
@@ -520,104 +535,105 @@ const [ownerFilter, setOwnerFilter] = useState("All");
             <label className="text-xs font-bold text-base-content/70 mb-1 block uppercase">
               Lead Status
             </label>
-        <select
-  className="select select-sm select-bordered w-full"
-  value={statusFilter}
-  onChange={(e) => setStatusFilter(e.target.value)}
->
-  <option value="All">All</option>
-  <option value="New">New</option>
-  <option value="Contacted">Contacted</option>
-  <option value="Qualified">Qualified</option>
-  <option value="Proposal Sent">Proposal Sent</option>
-  <option value="Negotiation">Negotiation</option>
-  <option value="Won">Won</option>
-  <option value="Lost">Lost</option>
-</select>
+                        <select
+                  className="select select-sm select-bordered w-full"
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                >
+                  <option value="All">All</option>
+                  <option value="New">New</option>
+                  <option value="Contacted">Contacted</option>
+                  <option value="Qualified">Qualified</option>
+                  <option value="Proposal Sent">Proposal Sent</option>
+                  <option value="Negotiation">Negotiation</option>
+                  <option value="Won">Won</option>
+                  <option value="Lost">Lost</option>
+                </select>
           </div>
           <div>
             <label className="text-xs font-bold text-base-content/70 mb-1 block uppercase">
               Lead Source
             </label>
            <select
-  className="select select-sm select-bordered w-full"
-  value={sourceFilter}
-  onChange={(e) => setSourceFilter(e.target.value)}
->
-  <option value="All">All</option>
-  <option value="Website">Website</option>
-  <option value="Referral">Referral</option>
-  <option value="Cold Call">Cold Call</option>
-  <option value="Trade Show">Trade Show</option>
-</select>
-          </div>
-          <div>
-            <label className="text-xs font-bold text-base-content/70 mb-1 block uppercase">
-              Lead Owner
-            </label>
-          <select
-  className="select select-sm select-bordered w-full"
-  value={ownerFilter}
-  onChange={(e) => setOwnerFilter(e.target.value)}
->
-  <option value="All">All</option>
+                    className="select select-sm select-bordered w-full"
+                    value={sourceFilter}
+                    onChange={(e) => setSourceFilter(e.target.value)}
+                  >
+                    <option value="All">All</option>
+                    <option value="Website">Website</option>
+                    <option value="Referral">Referral</option>
+                    <option value="Cold Call">Cold Call</option>
+                    <option value="Trade Show">Trade Show</option>
+                  </select>
+                            </div>
+                            <div>
+                              <label className="text-xs font-bold text-base-content/70 mb-1 block uppercase">
+                                Lead Owner
+                              </label>
+                            <select
+                    className="select select-sm select-bordered w-full"
+                    value={ownerFilter}
+                    onChange={(e) => setOwnerFilter(e.target.value)}
+                  >
+                    <option value="All">All</option>
 
-  {Array.from(
-    new Map(
-      leads
-        .filter(
-          (lead) =>
-            typeof lead.leadOwner !== "string" && lead.leadOwner?._id
-        )
-        .map((lead) => [
-          lead.leadOwner._id,
-          lead.leadOwner.name,
-        ])
-    ).entries()
-  ).map(([id, name]) => (
-    <option key={id} value={id}>
-      {name}
-    </option>
-  ))}
-</select>
-          </div>
-          <div className="flex items-end gap-2">
-          
-          <button
-  className="btn btn-sm flex-1 "
-  onClick={() => {
-    setStatusFilter("All");
-    setSourceFilter("All");
-    setOwnerFilter("All");
-    setSearch("");
-  }}
->
-  Reset
-</button>
-          </div>
-        </div>
-      )}
+                    {Array.from(
+                      new Map(
+                        leads
+                          .filter(
+                            (lead) =>
+                              typeof lead.leadOwner !== "string" && lead.leadOwner?._id
+                          )
+                          .map((lead) => [
+                            lead.leadOwner._id,
+                            lead.leadOwner.name,
+                          ])
+                      ).entries()
+                    ).map(([id, name]) => (
+                      <option key={id} value={id}>
+                        {name}
+                      </option>
+                    ))}
+                  </select>
+                            </div>
+                            <div className="flex items-end gap-2">
+                            
+                            <button
+                    className="btn btn-sm flex-1 "
+                    onClick={() => {
+                      setStatusFilter("All");
+                      setSourceFilter("All");
+                      setOwnerFilter("All");
+                      setSearch("");
+                    }}
+                  >
+                    Reset
+                  </button>
+                            </div>
+                          </div>
+                        )}
 
-      {/* ── Bulk Actions ── */}
-      {Object.keys(rowSelection).length > 0 && (
-        <div className="bg-primary/10 border border-primary/20 rounded-xl p-3 mb-4 flex items-center justify-between shadow-sm animate-fade-in-up">
-          <span className="text-sm font-semibold text-primary">
-            {Object.keys(rowSelection).length} leads selected
-          </span>
-          <div className="flex gap-2">
-            <button className="btn btn-xs btn-primary">Update Status</button>
-            <button className="btn btn-xs btn-outline bg-base-100">
-              Assign Owner
-            </button>
-            <button className="btn btn-xs btn-error text-white">Delete</button>
-          </div>
-        </div>
-      )}
+                {/* ── Bulk Actions ── */}
+                {Object.keys(rowSelection).length > 0 && (
+                  <div className="bg-primary/10 border border-primary/20 rounded-xl p-3 mb-4 flex items-center justify-between shadow-sm animate-fade-in-up">
+                    <span className="text-xs font-semibold text-primary">
+                      {Object.keys(rowSelection).length} lead(s) selected
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <button
+                        className="btn btn-xs btn-error text-white flex items-center gap-1"
+                        onClick={() => setBulkDeleteModalOpen(true)}
+                      >
+                        <MdDelete size={14} /> Delete Selected
+                      </button>
+                    </div>
+                  </div>
+                )}
 
       {/* ── Main Content Area ── */}
       <div className="flex-1 bg-base-100 border border-base-300 rounded-xl overflow-hidden shadow-sm flex flex-col relative">
         <div className="flex-1 overflow-auto">
-          <table className="table table-pin-rows w-full text-sm">
+          <table className="table table-pin-rows w-full text-xs">
             <thead>
               {table.getHeaderGroups().map((headerGroup) => (
                 <tr
@@ -682,7 +698,7 @@ const [ownerFilter, setOwnerFilter] = useState("All");
         </div>
 
         {/* Table Pagination Footer */}
-        <div className="border-t border-base-300 p-3 bg-base-100 flex items-center justify-between text-sm">
+        <div className="border-t border-base-300 p-3 bg-base-100 flex items-center justify-between text-xs">
           <span className="text-base-content/60 font-medium">
             Showing {table.getRowModel().rows.length} of {filteredLeads.length}{" "}
             leads
@@ -747,7 +763,7 @@ const [ownerFilter, setOwnerFilter] = useState("All");
                   <h2 className="text-2xl font-bold text-base-content leading-tight">
                     {selectedLead?.firstName} {selectedLead?.lastName}
                   </h2>
-                  <p className="text-sm font-medium text-base-content/60 mt-0.5">
+                  <p className="text-xs font-medium text-base-content/60 mt-0.5">
                     {selectedLead?.companyName}
                   </p>
                 </div>
@@ -780,13 +796,13 @@ const [ownerFilter, setOwnerFilter] = useState("All");
                 >
                   <li>
                    <a
-  onClick={() => {
-    setEditData(selectedLead || {});
-    setIsEditing(true);
-  }}
->
-  Edit Lead
-</a>
+                    onClick={() => {
+                      setEditData(selectedLead || {});
+                      setIsEditing(true);
+                    }}
+                  >
+                    Edit Lead
+                  </a>
                   </li>
                   <li>
                 <a onClick={() => handleConvertToCustomer(selectedLead)}>
@@ -833,7 +849,7 @@ const [ownerFilter, setOwnerFilter] = useState("All");
           <div className="flex-1 overflow-y-auto p-6 bg-base-100">
             {activeTab === "overview" && (
               <div className="space-y-8 animate-fade-in">
-                <div className="grid grid-cols-2 gap-y-4 gap-x-6 text-sm">
+                <div className="grid grid-cols-2 gap-y-4 gap-x-6 text-xs">
                   {/* First Name */}
                   <div>
                     <p className="text-base-content/50 mb-1">First Name</p>
@@ -920,22 +936,22 @@ const [ownerFilter, setOwnerFilter] = useState("All");
                     {isEditing ? (
                       <input
                        type="tel"
-  maxLength={10}
-  inputMode="numeric"
-  pattern="[0-9]{10}"
-                        
+                        maxLength={10}
+                        inputMode="numeric"
+                        pattern="[0-9]{10}"
+                                              
                         className="input input-bordered input-sm w-full"
                         value={editData.phoneNumber || ""}
                          onChange={(e) => {
-    const value = e.target.value.replace(/[^0-9]/g, "");
+                        const value = e.target.value.replace(/[^0-9]/g, "");
 
-    if (value.length <= 10) {
-      setEditData((prev) => ({
-        ...prev,
-        phoneNumber: value,
-      }));
-    }
-  }}
+                        if (value.length <= 10) {
+                          setEditData((prev) => ({
+                            ...prev,
+                            phoneNumber: value,
+                          }));
+                        }
+                      }}
                       />
                     ) : (
                       <p className="font-medium">{selectedLead?.phoneNumber}</p>
@@ -1036,90 +1052,90 @@ const [ownerFilter, setOwnerFilter] = useState("All");
 
                 <div className="divider my-0"></div>
 
-          <section>
-  <h3 className="text-xs font-bold uppercase tracking-wider text-base-content/50 mb-4 flex items-center gap-2">
-    <MdBusiness /> Contact Details
-  </h3>
+                  <section>
+                  <h3 className="text-xs font-bold uppercase tracking-wider text-base-content/50 mb-4 flex items-center gap-2">
+                    <MdBusiness /> Contact Details
+                  </h3>
 
-  <div className="grid grid-cols-1 gap-y-4 text-sm bg-base-200/50 p-4 rounded-xl border border-base-200">
+                  <div className="grid grid-cols-1 gap-y-4 text-xs bg-base-200/50 p-4 rounded-xl border border-base-200">
 
-    <div>
-      <p className="text-base-content/50 mb-1">Email</p>
-      {isEditing ? (
-        <input
-          type="email"
-          className="input input-bordered input-sm w-full"
-          value={editData.email || ""}
-          onChange={(e) =>
-            setEditData((prev) => ({
-              ...prev,
-              email: e.target.value,
-            }))
-          }
-        />
-      ) : (
-        <div className="flex items-center gap-3">
-          <MdEmail className="text-base-content/40" size={18} />
-          <a
-            href={`mailto:${selectedLead?.email}`}
-            className="text-primary hover:underline"
-          >
-            {selectedLead?.email}
-          </a>
-        </div>
-      )}
-    </div>
-
-    <div>
-      <p className="text-base-content/50 mb-1">Phone Number</p>
-      {isEditing ? (
-        <input
-          type="tel"
-    maxLength={10}
-    inputMode="numeric"
-          className="input input-bordered input-sm w-full"
-          value={editData.phoneNumber || ""}
-          onChange={(e) => {
-    const value = e.target.value.replace(/[^0-9]/g, "");
-
-    if (value.length <= 10) {
-      setEditData((prev) => ({
-        ...prev,
-        phoneNumber: value,
-      }));
-    }
-  }}
-        />
-      ) : (
-        <div className="flex items-center gap-3">
-          <MdPhone className="text-base-content/40" size={18} />
-          <a
-            href={`tel:${selectedLead?.phoneNumber}`}
-            className="text-primary hover:underline"
-          >
-            {selectedLead?.phoneNumber}
-          </a>
-        </div>
-      )}
-    </div>
-
-  </div>
-</section>
-
-                <section className="bg-base-200/30 p-4 rounded-xl border border-base-200 text-xs">
-                  <div className="grid grid-cols-2 gap-2 text-base-content/60">
-                    <p>
-                      Created:{" "}
-                      {selectedLead?.createdAt &&
-                        new Date(selectedLead?.createdAt).toLocaleDateString(
-                          "en-GH",
-                        )}
-                    </p>
-                    {/* <p>Last Contact: {selectedLead?.lastContacted}</p> */}
+                  <div>
+                    <p className="text-base-content/50 mb-1">Email</p>
+                    {isEditing ? (
+                      <input
+                        type="email"
+                        className="input input-bordered input-sm w-full"
+                        value={editData.email || ""}
+                        onChange={(e) =>
+                          setEditData((prev) => ({
+                            ...prev,
+                            email: e.target.value,
+                          }))
+                        }
+                      />
+                    ) : (
+                      <div className="flex items-center gap-3">
+                        <MdEmail className="text-base-content/40" size={18} />
+                        <a
+                          href={`mailto:${selectedLead?.email}`}
+                          className="text-primary hover:underline"
+                        >
+                          {selectedLead?.email}
+                        </a>
+                      </div>
+                    )}
                   </div>
-                </section>
-              </div>
-            )}
+
+                  <div>
+                    <p className="text-base-content/50 mb-1">Phone Number</p>
+                    {isEditing ? (
+                      <input
+                        type="tel"
+                  maxLength={10}
+                  inputMode="numeric"
+                        className="input input-bordered input-sm w-full"
+                        value={editData.phoneNumber || ""}
+                        onChange={(e) => {
+                  const value = e.target.value.replace(/[^0-9]/g, "");
+
+                  if (value.length <= 10) {
+                    setEditData((prev) => ({
+                      ...prev,
+                      phoneNumber: value,
+                    }));
+                  }
+                }}
+                      />
+                    ) : (
+                      <div className="flex items-center gap-3">
+                        <MdPhone className="text-base-content/40" size={18} />
+                        <a
+                          href={`tel:${selectedLead?.phoneNumber}`}
+                          className="text-primary hover:underline"
+                        >
+                          {selectedLead?.phoneNumber}
+                        </a>
+                      </div>
+                    )}
+                  </div>
+
+                </div>
+              </section>
+
+                      <section className="bg-base-200/30 p-4 rounded-xl border border-base-200 text-xs">
+                        <div className="grid grid-cols-2 gap-2 text-base-content/60">
+                          <p>
+                            Created:{" "}
+                            {selectedLead?.createdAt &&
+                              new Date(selectedLead?.createdAt).toLocaleDateString(
+                                "en-GH",
+                              )}
+                          </p>
+                          {/* <p>Last Contact: {selectedLead?.lastContacted}</p> */}
+                        </div>
+                      </section>
+                    </div>
+                  )}
 
             {activeTab === "timeline" && (
               <div className="animate-fade-in">
@@ -1133,7 +1149,7 @@ const [ownerFilter, setOwnerFilter] = useState("All");
                       <div className="text-xs text-base-content/50">
                         {selectedLead?.lastContacted}
                       </div>
-                      <div className="text-sm font-medium">
+                      <div className="text-xs font-medium">
                         Status changed to {selectedLead?.leadStatus}
                       </div>
                     </div>
@@ -1151,7 +1167,7 @@ const [ownerFilter, setOwnerFilter] = useState("All");
                             "en-GH",
                           )}
                       </div>
-                      <div className="text-sm font-medium">
+                      <div className="text-xs font-medium">
                         Lead Created by System
                       </div>
                     </div>
@@ -1229,6 +1245,52 @@ const [ownerFilter, setOwnerFilter] = useState("All");
             </button>
           </div>
         </div>
+      </dialog>
+
+      {/* ── Bulk Delete Confirmation Modal ── */}
+      <dialog className={`modal ${bulkDeleteModalOpen ? "modal-open" : ""}`}>
+        <div className="modal-box max-w-sm p-5">
+          <h3 className="font-bold text-base text-error flex items-center gap-2">
+            <MdDelete size={20} /> Delete Selected Leads
+          </h3>
+          <p className="py-4 text-base-content/80 text-xs">
+            Are you sure you want to delete{" "}
+            <strong>{Object.keys(rowSelection).length}</strong> selected lead(s)?
+            This action cannot be undone.
+          </p>
+          <div className="modal-action mt-4 flex justify-end gap-2">
+            <button
+              type="button"
+              className="btn btn-ghost btn-sm text-xs"
+              onClick={() => setBulkDeleteModalOpen(false)}
+              disabled={isBulkDeleting}
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              className="btn btn-error btn-sm text-xs text-white flex items-center gap-1"
+              disabled={isBulkDeleting}
+              onClick={handleBulkDelete}
+            >
+              {isBulkDeleting ? (
+                <>
+                  <span className="loading loading-spinner loading-xs"></span>
+                  Deleting...
+                </>
+              ) : (
+                "Yes, Delete Selected"
+              )}
+            </button>
+          </div>
+        </div>
+        <form
+          method="dialog"
+          className="modal-backdrop"
+          onClick={() => !isBulkDeleting && setBulkDeleteModalOpen(false)}
+        >
+          <button>close</button>
+        </form>
       </dialog>
     </div>
   );

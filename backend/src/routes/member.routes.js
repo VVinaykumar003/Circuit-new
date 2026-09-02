@@ -11,7 +11,7 @@ const memberController = require("../controllers/member.controller");
 router.post("/:slug/members", auth, tenant, memberController.createEmployee);
 router.get("/:slug/members", auth, tenant, memberController.getMembers);
 router.get("/:slug/members/sales", auth, tenant, memberController.getSalesEmployees);
-router.get("/:slug/members/:userId", auth, tenant, memberController.getEmployeeById);
+router.get("/:slug/members/:userId", auth, tenant, memberController.getEmployeeById); 
 
 router.delete("/:slug/members/:userId", auth, tenant, memberController.deleteEmployee);
 router.patch("/:slug/members/:userId", auth, tenant, memberController.updateEmployee); 

@@ -246,8 +246,8 @@ const MemberTask = ({ memberId }: MemberTaskProps) => {
   //   [tasks, activeStatus],
   // );
   const filteredTasks = useMemo(() => {
-  console.log("Active Status:", activeStatus);
-  console.log("All Tasks:", tasks);
+  // console.log("Active Status:", activeStatus);
+  // console.log("All Tasks:", tasks);
 
   return tasks.filter((t) => {
     console.log(t.status, activeStatus, t.status === activeStatus);

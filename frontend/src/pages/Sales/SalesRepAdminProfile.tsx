@@ -3,6 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { getSalesRepById } from "@/services/salesRepServices";
 import { useAuth } from "@/auth/useAuth";
+import { PageHeader, StatsGrid } from "@/components/common";
 import {
   MdEdit,
   MdPeople,
@@ -206,40 +207,91 @@ export default function SalesRepAdminProfile() {
     <div className="min-h-screen bg-base-200 font-sans flex flex-col pb-10">
       
       {/* ── Page Header ── */}
-      <div className="bg-base-100 border-b border-base-300 sticky top-0 z-20 shadow-sm">
-        <div className="px-6 py-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-          <div className="flex items-center gap-3">
-            <button onClick={() => navigate(-1)} className="btn btn-sm btn-circle btn-ghost text-base-content/60 hover:bg-base-200">
-              <MdArrowBack size={20} />
+      <div className="bg-base-100 border-b border-base-300 sticky top-0 z-20 shadow-sm px-6 py-4">
+        <PageHeader
+          title={`${rep.firstName} ${rep.lastName}`}
+          breadcrumbs={[
+            { label: "Dashboard" },
+            { label: "Sales" },
+            { label: "Representatives" },
+            { label: "Representative Details", active: true },
+          ]}
+          cancel
+          actions={[
+            {
+              label: "Edit Profile",
+              icon: <MdEdit size={16} />,
+              variant: "outline",
+              onClick: () => navigate(`/sales/representatives/edit/${rep.id}`),
+            },
+            {
+              label: "Assign Customers",
+              icon: <MdPeople size={16} />,
+              variant: "outline",
+              onClick: () =>
+                (
+                  document.getElementById(
+                    "modal_assign_customer",
+                  ) as HTMLDialogElement
+                )?.showModal(),
+            },
+            {
+              label: "Assign Leads",
+              icon: <MdOutlineAssignmentTurnedIn size={16} />,
+              variant: "outline",
+              onClick: () =>
+                (
+                  document.getElementById(
+                    "modal_assign_lead",
+                  ) as HTMLDialogElement
+                )?.showModal(),
+            },
+          ]}
+        >
+          <div className="dropdown dropdown-end">
+            <button tabIndex={0} className="btn btn-primary btn-sm gap-2">
+              Actions <MdVisibility size={16} />
             </button>
-            <div>
-              <h1 className="text-xl font-bold text-base-content tracking-tight">{rep.firstName} {rep.lastName}</h1>
-              <div className="text-xs text-base-content/60 breadcrumbs mt-0.5 font-medium">
-                <ul>
-                  <li>Dashboard</li>
-                  <li>Sales</li>
-                  <li><a onClick={() => navigate("/sales/representatives")}>Representatives</a></li>
-                  <li className="text-primary">Representative Details</li>
-                </ul>
-              </div>
-            </div>
+            <ul
+              tabIndex={0}
+              className="dropdown-content menu p-2 shadow-lg bg-base-100 rounded-box w-52 z-50 border border-base-200 mt-1"
+            >
+              <li>
+                <a onClick={() => setActiveTab("Performance")}>
+                  <MdBarChart size={18} /> View Performance
+                </a>
+              </li>
+              <li>
+                <a
+                  onClick={() =>
+                    (
+                      document.getElementById(
+                        "modal_reset_pwd",
+                      ) as HTMLDialogElement
+                    )?.showModal()
+                  }
+                >
+                  <MdLockReset size={18} /> Reset Password
+                </a>
+              </li>
+              <div className="divider my-1"></div>
+              <li>
+                <a
+                  className="text-error"
+                  onClick={() =>
+                    (
+                      document.getElementById(
+                        "modal_disable",
+                      ) as HTMLDialogElement
+                    )?.showModal()
+                  }
+                >
+                  <MdBlock size={18} /> Disable Representative
+                </a>
+              </li>
+            </ul>
           </div>
-          
-          <div className="flex gap-2 flex-wrap">
-            <button className="btn btn-outline btn-sm gap-2 bg-base-100" onClick={() => navigate(`/sales/representatives/edit/${rep.id}`)}><MdEdit size={16} /> Edit Profile</button>
-            <button className="btn btn-outline btn-sm gap-2 bg-base-100" onClick={() => (document.getElementById('modal_assign_customer') as HTMLDialogElement)?.showModal()}><MdPeople size={16} /> Assign Customers</button>
-            <button className="btn btn-outline btn-sm gap-2 bg-base-100" onClick={() => (document.getElementById('modal_assign_lead') as HTMLDialogElement)?.showModal()}><MdOutlineAssignmentTurnedIn size={16} /> Assign Leads</button>
-            <div className="dropdown dropdown-end">
-              <button tabIndex={0} className="btn btn-primary btn-sm gap-2">Actions <MdVisibility size={16} /></button>
-              <ul tabIndex={0} className="dropdown-content menu p-2 shadow-lg bg-base-100 rounded-box w-52 z-50 border border-base-200 mt-1">
-                <li><a onClick={() => setActiveTab("Performance")}><MdBarChart size={18} /> View Performance</a></li>
-                <li><a onClick={() => (document.getElementById('modal_reset_pwd') as HTMLDialogElement)?.showModal()}><MdLockReset size={18} /> Reset Password</a></li>
-                <div className="divider my-1"></div>
-                <li><a className="text-error" onClick={() => (document.getElementById('modal_disable') as HTMLDialogElement)?.showModal()}><MdBlock size={18} /> Disable Representative</a></li>
-              </ul>
-            </div>
-          </div>
-        </div>
+        </PageHeader>
       </div>
 
       <div className="flex flex-col lg:flex-row gap-6 px-6 pt-6 flex-1 max-w-[1600px] mx-auto w-full">
@@ -325,16 +377,45 @@ export default function SalesRepAdminProfile() {
           </div>
 
           {/* Dashboard Summary Cards */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <StatCard title="Monthly Target" value={`₹${rep.monthlyTarget.toLocaleString()}`} />
-            <StatCard title="Monthly Achievement" value={`₹${rep.monthlyAchievement.toLocaleString()}`} alert={rep.monthlyAchievement < rep.monthlyTarget} subtitle={`${((rep.monthlyAchievement/rep.monthlyTarget)*100).toFixed(1)}% Completed`} />
-            <StatCard title="Conversion Rate" value={`${rep.conversionRate}%`} />
-            <StatCard title="Commission Earned" value={`₹${rep.commissionEarned.toLocaleString()}`} />
-            <StatCard title="Total Customers" value={rep.totalCustomers} />
-            <StatCard title="Active Leads" value={rep.activeLeads} />
-            <StatCard title="Orders This Month" value={rep.ordersThisMonth} />
-            <StatCard title="Revenue Generated" value={`₹${rep.revenueGenerated.toLocaleString()}`} />
-          </div>
+          <StatsGrid
+            columns={{ default: 2, md: 4 }}
+            stats={[
+              {
+                label: "Monthly Target",
+                value: `₹${rep.monthlyTarget.toLocaleString()}`,
+              },
+              {
+                label: "Monthly Achievement",
+                value: `₹${rep.monthlyAchievement.toLocaleString()}`,
+                color: rep.monthlyAchievement < rep.monthlyTarget ? "text-error" : "text-success",
+                description: `${((rep.monthlyAchievement / rep.monthlyTarget) * 100).toFixed(1)}% Completed`,
+              },
+              {
+                label: "Conversion Rate",
+                value: `${rep.conversionRate}%`,
+              },
+              {
+                label: "Commission Earned",
+                value: `₹${rep.commissionEarned.toLocaleString()}`,
+              },
+              {
+                label: "Total Customers",
+                value: rep.totalCustomers,
+              },
+              {
+                label: "Active Leads",
+                value: rep.activeLeads,
+              },
+              {
+                label: "Orders This Month",
+                value: rep.ordersThisMonth,
+              },
+              {
+                label: "Revenue Generated",
+                value: `₹${rep.revenueGenerated.toLocaleString()}`,
+              },
+            ]}
+          />
 
           {/* Tabs Section */}
           <div className="bg-base-100 rounded-xl shadow-sm border border-base-300 flex-1 flex flex-col overflow-hidden min-h-[600px]">

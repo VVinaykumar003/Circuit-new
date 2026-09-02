@@ -1,5 +1,5 @@
-import React, { useState, useMemo, useEffect } from "react";
-const EmptyState = React.lazy(() => import("../ui/EmptyState"));
+import React, { useState, useEffect } from "react";
+// const EmptyState = React.lazy(() => import("../ui/EmptyState"));
 const AttendanceFilters = React.lazy(() => import("./AttendanceFilter"));
 const StatusPills = React.lazy(() => import("./FilertByStatus"));
 const AttendanceTable = React.lazy(
@@ -8,9 +8,9 @@ const AttendanceTable = React.lazy(
 const MarkAttendanceCard = React.lazy(
   () => import("../attendance/MarkAttendanceCard"),
 );
-const CenteredContainer = React.lazy(
-  () => import("@/components/ui/CenteredContainer"),
-);
+// const CenteredContainer = React.lazy(
+//   () => import("@/components/ui/CenteredContainer"),
+// );
 const AttendanceTabs = React.lazy(() => import("../attendance/AttendanceTab"));
 import useAttendanceFilters from "../attendance/UseAttendanceFilter";
 import type {
@@ -21,10 +21,28 @@ import type {
 import { useAuth } from "@/auth/useAuth";
 import { getMyAttendance } from "@/services/attendanceService";
 import { useNotificationSocket } from "@/hooks/notifiaction";
-import { usePagination } from "@/hooks/usePagination";
+import type { Status } from "./FilertByStatus";
 
 type AttendanceTab = "records" | "mark";
-type Status = "all" | "approved" | "pending" | "rejected";
+
+interface MyAttendanceItem {
+  attendanceId?: string;
+  _id?: string;
+  date: string;
+  status?: string;
+  mode?: string;
+  checkIn?: string;
+  checkOut?: string;
+  employee?: string | { _id?: string; name?: string };
+  record?: {
+    _id?: string;
+    status?: string;
+    mode?: string;
+    checkIn?: string;
+    checkOut?: string;
+    employee?: string | { _id?: string; name?: string };
+  };
+}
 
 const EmployeeAttendance = () => {
   const { auth } = useAuth();
@@ -39,9 +57,7 @@ const EmployeeAttendance = () => {
     name?: string;
     fromDate?: string;
     toDate?: string;
-  }>({fromDate: new Date().toISOString().split("T")[0],
-  toDate: new Date().toISOString().split("T")[0],
-});
+  }>({});
 
   const [records, setRecords] = useState<
     (AttendanceRecord & {
@@ -56,17 +72,23 @@ const EmployeeAttendance = () => {
 
   const refetch = () => setRefetchIndex((prev) => prev + 1);
 
-  useNotificationSocket(user?._id || user?.userId, refetch);
+  useNotificationSocket(user?.userId || user?._id, refetch);
 
   useEffect(() => {
     if (!slug) return;
 
     const fetchAttendance = (isSilent = false) => {
       if (!isSilent) setLoading(true);
-      getMyAttendance(slug, filters)
+      getMyAttendance(slug, {
+        ...filters,
+        startDate: filters.fromDate,
+        endDate: filters.toDate,
+      })
         .then((res) => {
           const responseData = res.data?.data || res.data || [];
-          const arr = Array.isArray(responseData) ? responseData : [];
+          const arr: MyAttendanceItem[] = Array.isArray(responseData)
+            ? responseData
+            : [];
 
           const formattedRecords: (AttendanceRecord & {
             attendanceDocId: string;
@@ -74,8 +96,9 @@ const EmployeeAttendance = () => {
             mode?: string;
             rawDate: string;
           })[] = [];
-          arr.forEach((doc: any) => {
-            if (!doc.record) return;
+          arr.forEach((doc: MyAttendanceItem) => {
+            const record = doc.record || doc;
+            if (!record) return;
 
             const formattedDate = new Date(doc.date).toLocaleDateString(
               "en-IN",
@@ -86,8 +109,8 @@ const EmployeeAttendance = () => {
               },
             );
 
-            const checkInTime = doc.record.checkIn
-              ? new Date(doc.record.checkIn).toLocaleTimeString("en-IN", {
+            const checkInTime = record.checkIn
+              ? new Date(record.checkIn).toLocaleTimeString("en-IN", {
                   hour: "2-digit",
                   minute: "2-digit",
                 })
@@ -97,8 +120,11 @@ const EmployeeAttendance = () => {
                 });
 
             let mappedStatus: AttendanceStatus = "pending";
-            const backendStatus = (doc.record.status || "").toUpperCase();
-            if (backendStatus === "PRESENT" || backendStatus === "HALF_DAY") {
+            const backendStatus = (record.status || "").toUpperCase();
+            if (
+              backendStatus === "PRESENT" ||
+              backendStatus === "HALF_DAY"
+            ) {
               mappedStatus = "approved";
             } else if (
               backendStatus === "REJECTED" ||
@@ -107,18 +133,29 @@ const EmployeeAttendance = () => {
               mappedStatus = "rejected";
             } // PENDING is the default
 
+            const employeeObj =
+              typeof record.employee === "object" && record.employee !== null
+                ? record.employee
+                : null;
+            const employeeStr =
+              typeof record.employee === "string" ? record.employee : undefined;
+
+            const empId =
+              employeeObj?._id || employeeStr || user?.userId || user?._id || "";
+            const empName = employeeObj?.name || user?.name || "Unknown";
+
             formattedRecords.push({
-              id: doc.record._id,
-              attendanceDocId: doc.attendanceId,
-              employeeId: doc.record.employee,
-              employee: user?.name || "Unknown",
+              id: record._id || doc.attendanceId || "",
+              attendanceDocId: doc.attendanceId || doc._id || "",
+              employeeId: empId,
+              employee: empName,
               date: formattedDate,
 
               // filtering ke liye
               rawDate: doc.date,
               checkIn: checkInTime,
               status: mappedStatus,
-              mode: doc.record.mode || "office",
+              mode: record.mode || "office",
             });
           });
 
@@ -139,29 +176,7 @@ const EmployeeAttendance = () => {
     return () => clearInterval(intervalId);
   }, [slug, filters, user?.name, refetchIndex]);
 
-  const monthlySummary = useMemo(() => {
-    const present = records.filter((r) => r.status === "approved").length;
-    const pending = records.filter((r) => r.status === "pending").length;
-    const rejected = records.filter((r) => r.status === "rejected").length;
-
-    return {
-      totalDays: records.length,
-      present,
-      pending,
-      rejected,
-      wfh: Math.floor(records.length * 0.2),
-      halfDay: Math.floor(records.length * 0.1),
-      attendancePercentage:
-        records.length > 0 ? Math.round((present / records.length) * 100) : 0,
-    };
-  }, [records]);
-
   const filteredRecords = useAttendanceFilters(records, filters, statusFilter);
-
-  const { page, setPage, totalPages, paginatedData } = usePagination(
-    filteredRecords,
-    10,
-  );
 
   if (loading) {
     return (

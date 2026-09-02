@@ -8,11 +8,17 @@ import { getMemberById } from "@/services/memberService";
 import { useAuth } from "@/auth/useAuth";
 import { ArrowLeft } from "lucide-react";
 
+// 1. Define the shape of your route parameters
+interface RouteParams {
+  id: string;
+  [key: string]: string | undefined; // Optional: handles extra params safely
+}
 const MemberDetails = () => {
-  const { id } = useParams();
+  const { id } = useParams<RouteParams>();
   const {auth} = useAuth();
   const slug = auth.slug;
   const [member, setMember] = useState<Member | null>(null);
+
  
 const navigate = useNavigate();
   useEffect(() => {

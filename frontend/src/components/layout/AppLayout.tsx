@@ -1,20 +1,20 @@
-
-import { useEffect,useRef,  useState, type ReactNode } from "react";
-import Header from "./Header";
-import Sidebar from "./Sidebar";
+import React, { useState, useRef, useEffect, type ReactNode } from "react";
 import { useLocation } from "react-router-dom";
+import Sidebar from "./Sidebar";
+import Navbar from "./Navbar";
+import MobileSidebar from "./MobileSidebar";
 
-
-interface Props {
-  children: ReactNode;
+interface AppLayoutProps {
+  children?: ReactNode;
 }
 
-export default function AppLayout({ children }: Props) {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-   const scrollRef = useRef<HTMLDivElement>(null);
+export default function AppLayout({ children }: AppLayoutProps) {
+  const [collapsed, setCollapsed] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
 
- useEffect(() => {
+  useEffect(() => {
     scrollRef.current?.scrollTo({
       top: 0,
       left: 0,
@@ -23,16 +23,29 @@ export default function AppLayout({ children }: Props) {
   }, [location.pathname]);
 
   return (
-    <div className="flex h-screen bg-base-100 overflow-hidden  ">
-      
-      {/* Sidebar */}
-      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
- 
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <Header onMenuClick={() => setSidebarOpen(true)} />
+    <div className="flex h-screen bg-base-200/50 overflow-hidden font-sans">
+      {/* Desktop Sidebar */}
+      <div className="hidden lg:flex shrink-0">
+        <Sidebar
+          collapsed={collapsed}
+          onToggleCollapse={() => setCollapsed((prev) => !prev)}
+        />
+      </div>
 
-        <main className="flex-1 overflow-y-auto p-2 sm:p-4">
+      {/* Mobile Drawer Sidebar */}
+      <MobileSidebar
+        isOpen={mobileOpen}
+        onClose={() => setMobileOpen(false)}
+      />
+
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col min-w-0 overflow-visible">
+        <Navbar onMenuClick={() => setMobileOpen(true)} />
+
+        <main
+          ref={scrollRef}
+          className="flex-1 overflow-y-auto overflow-x-hidden bg-base-200/50"
+        >
           {children}
         </main>
       </div>

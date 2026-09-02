@@ -50,6 +50,10 @@ export interface Order {
   totalQuantity: number;
   orderValue: number;
   paymentStatus: "Unpaid" | "Partially Paid" | "Paid" | "Refunded";
+  paymentTerms?: string;
+  paymentMethod?: string;
+  advancePayment?: number;
+  deliveryMethod?: string;
   deliveryStatus: "Pending" | "Packed" | "Shipped" | "Delivered";
   orderStatus: "Draft" | "Pending" | "Approved" | "Processing" | "Shipped" | "Delivered" | "Completed" | "Cancelled";
   priority: "Low" | "Medium" | "High" | "Urgent";

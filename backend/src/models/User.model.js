@@ -63,11 +63,13 @@ const userSchema = new mongoose.Schema({
   aadhaar: {
     type: String,
     unique: true,
+    sparse: true,
     trim: true
   },
   pan: {
     type: String,
     unique: true,
+    sparse: true,
     trim: true,
     uppercase: true
   },
@@ -80,6 +82,7 @@ const userSchema = new mongoose.Schema({
   employeeId: {
     type: String,
     unique: true,
+    sparse: true,
     trim: true
   },
   organization: {
@@ -91,7 +94,7 @@ const userSchema = new mongoose.Schema({
  
   role: {
     type: String,
-    enum: ['owner', 'admin', 'manager', 'employee'],
+    enum: ['owner', 'admin', 'manager', 'employee', 'member'],
     default: 'employee'
   },
   status: {
@@ -104,22 +107,14 @@ const userSchema = new mongoose.Schema({
     trim: true
   },
   department: {
-  type: String,
-  enum: [
-    "sales",
-    "marketing",
-    "customer-support",
-    "it",
-    "human-resource and administration",
-    
-    "other",
-  ],
-  
-},
-customDepartment: {
-  type: String,
-  default: "",
-},
+    type: String,
+    trim: true,
+    default: "",
+  },
+  customDepartment: {
+    type: String,
+    default: "",
+  },
   joiningDate: {
     type: Date
   },

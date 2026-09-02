@@ -15,6 +15,7 @@ import { getSalesReps } from "@/services/salesRepServices";
 import { getAllProducts } from "@/services/productServices";
 import { getAllAccounts } from "@/services/salesService";
 import { useQuery } from "@tanstack/react-query";
+import { PageHeader } from "@/components/common";
 
 // const productsData = [
 //   { id: "PRD-101", name: "Wireless Headphones Pro", sku: "WHP-BLK-01", retail: 4999, cost: 2500, stock: 145 },
@@ -152,7 +153,7 @@ export default function NewOrderForm() {
     queryFn: () => getAllProducts(auth?.slug || "default-tenant"),
   });
 
-  console.log("Product : ", productsData)
+  // console.log("Product : ", productsData)
 
   useEffect(() => {
     if (products?.data) {
@@ -563,30 +564,44 @@ export default function NewOrderForm() {
     <div className="min-h-screen bg-base-200 p-4 md:p-6 lg:p-8 font-sans">
       
       {/* ── Header ── */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 bg-base-100 p-5 rounded-xl border border-base-300 shadow-sm">
-        <div>
-          <h1 className="text-2xl font-bold text-base-content tracking-tight">{orderId ? "Edit Sales Order" : "Create Sales Order"}</h1>
-          <div className="text-sm text-base-content/60 breadcrumbs mt-1">
-            <ul>
-              <li>Dashboard</li>
-              <li>Sales</li>
-              <li>Orders</li>
-              <li className="font-semibold text-primary">{orderId ? "Edit Order" : "Create Order"}</li>
-            </ul>
-          </div>
+      <PageHeader
+        title={orderId ? "Edit Sales Order" : "Create Sales Order"}
+        breadcrumbs={[
+          { label: "Dashboard" },
+          { label: "Sales" },
+          { label: "Orders" },
+          { label: orderId ? "Edit Order" : "Create Order", active: true },
+        ]}
+        cancel
+        actions={[
+          {
+            label: "Save Draft",
+            icon: <MdSave size={16} />,
+            variant: "outline",
+          },
+        ]}
+      >
+        <div className="dropdown dropdown-end">
+          <button
+            tabIndex={0}
+            type="button"
+            className="btn btn-outline btn-sm gap-2 bg-base-100"
+          >
+            <MdContentCopy size={16} /> Load Template
+          </button>
+          <ul
+            tabIndex={0}
+            className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-40 mt-1 border border-base-200"
+          >
+            <li>
+              <a onClick={() => loadTemplate("Retail")}>Retail Order</a>
+            </li>
+            <li>
+              <a>Wholesale Order</a>
+            </li>
+          </ul>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <div className="dropdown dropdown-end">
-            <button tabIndex={0} type="button" className="btn btn-outline btn-sm gap-2"><MdContentCopy size={16} /> Load Template</button>
-            <ul tabIndex={0} className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-40 mt-1 border border-base-200">
-              <li><a onClick={() => loadTemplate("Retail")}>Retail Order</a></li>
-              <li><a>Wholesale Order</a></li>
-            </ul>
-          </div>
-          <button type="button" className="btn btn-outline btn-sm gap-2"><MdSave size={16} /> Save Draft</button>
-          <button type="button" onClick={() => navigate(-1)} className="btn btn-ghost btn-sm">Cancel</button>
-        </div>
-      </div>
+      </PageHeader>
 
       <form onSubmit={handleSubmit(onSubmit,(errors)=>{
         console.log("Form Errors: ", errors)

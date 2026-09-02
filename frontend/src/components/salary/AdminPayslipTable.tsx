@@ -123,7 +123,7 @@ const AdminPayslipTable = () => {
                    <td colSpan={7} className="text-center py-8">Loading payrolls...</td>
                  </tr>
                ) : (
-               {filtered.map((record) => (
+                 filtered.map((record) => (
                  <tr key={record._id} className="hover:bg-base-200">
    
                    <td>
@@ -168,7 +168,7 @@ const AdminPayslipTable = () => {
                    </td>
    
                  </tr>
-               )))}
+               )) )}
              </tbody>
            </table>
    

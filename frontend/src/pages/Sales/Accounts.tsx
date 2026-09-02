@@ -28,23 +28,9 @@ import {
 import Swal from "sweetalert2";
 import { toast } from "react-toastify";
 import EntityDrawer from "@/components/sales/EntityDrawer";
+import { PageHeader, StatsGrid } from "@/components/common";
 
-/* ─────────────────────────── types ─────────────────────────── */
-// export interface Account {
-//   id: string;
-//   accountOwner: string;
-//   accountName: string;
-//   industry: string;
-//   accountType: "Individual" | "Business" | "Enterprise" | "Partner";
-//   status: "Active" | "Inactive" | "Prospect" | "Customer" | "VIP" | "Blocked";
-//   contactName: string;
-//   contactEmail: string;
-//   contactNumber: string;
-//   territory: string;
-//   revenue: number;
-//   lastActivity: string;
-//   createdDate: string;
-// }
+
 export interface Account {
   _id: string;
   accountOwner:
@@ -80,69 +66,6 @@ export interface Account {
   lastActivity: string;
   createdDate: string;
 }
-/* ─────────────────────────── mock data ──────────────────────── */
-// const SAMPLE: Account[] = [
-//   {
-//     id: "ACC-1001",
-//     accountName: "Zager Digital Services",
-//     accountOwner: "V VINAY Kumar",
-//     industry: "Technology",
-//     accountType: "Enterprise",
-//     status: "VIP",
-//     contactName: "Alice Johnson",
-//     contactEmail: "alice@zager.com",
-//     contactNumber: "+91 9876543210",
-//     territory: "APAC",
-//     revenue: 1250000,
-//     lastActivity: "2026-06-02",
-//     createdDate: "2024-01-15",
-//   },
-//   {
-//     id: "ACC-1002",
-//     accountName: "Acme Corp",
-//     accountOwner: "Riya Sharma",
-//     industry: "Manufacturing",
-//     accountType: "Business",
-//     status: "Customer",
-//     contactName: "Bob Smith",
-//     contactEmail: "bob@acme.com",
-//     contactNumber: "+1 555-0198",
-//     territory: "North America",
-//     revenue: 450000,
-//     lastActivity: "2026-05-28",
-//     createdDate: "2025-11-20",
-//   },
-//   {
-//     id: "ACC-1003",
-//     accountName: "Stark Industries",
-//     accountOwner: "Arjun Mehta",
-//     industry: "Defense",
-//     accountType: "Enterprise",
-//     status: "Active",
-//     contactName: "Tony Stark",
-//     contactEmail: "tony@stark.com",
-//     contactNumber: "+1 555-0200",
-//     territory: "North America",
-//     revenue: 5500000,
-//     lastActivity: "2026-06-01",
-//     createdDate: "2023-08-10",
-//   },
-//   {
-//     id: "ACC-1004",
-//     accountName: "Global Retailers",
-//     accountOwner: "V VINAY Kumar",
-//     industry: "Retail",
-//     accountType: "Partner",
-//     status: "Prospect",
-//     contactName: "Sarah Connor",
-//     contactEmail: "sarah.c@global.com",
-//     contactNumber: "+44 20 7123 4567",
-//     territory: "EMEA",
-//     revenue: 0,
-//     lastActivity: "2026-05-30",
-//     createdDate: "2026-05-01",
-//   },
-// ];
 
 /* ─────────────────────────── component ─────────────────────── */
 export default function AccountsDashboard() {
@@ -409,15 +332,21 @@ export default function AccountsDashboard() {
     [navigate],
   );
 
-  // const filteredAccounts = useMemo(() => {
-  //   return accounts.filter(a =>
-  //     a.accountName.toLowerCase().includes(search.toLowerCase()) ||
-  //     a.primaryContact?.firstName.toLowerCase().includes(search.toLowerCase()) ||
-  //     a.primaryContact?.lastName.toLowerCase().includes(search.toLowerCase()) ||
-  //     a.primaryContact?.email.toLowerCase().includes(search.toLowerCase()) ||
-  //     a.accountOwner?.name.toLowerCase().includes(search.toLowerCase())
-  //   );
-  // }, [accounts, search]);
+  // ─────────────────────────────────────────────
+  // Refresh
+  // ─────────────────────────────────────────────
+  const handleRefresh = () => {
+    window.location.reload();
+  };
+
+  // ─────────────────────────────────────────────
+  // Export CSV
+  // ─────────────────────────────────────────────
+  const handleExport = () => {
+    console.log("Exporting Leads CSV...");
+
+    // Add your actual CSV export logic here.
+  };
 
   const filteredAccounts = useMemo(() => {
     const searchText = search.toLowerCase();
@@ -472,38 +401,32 @@ export default function AccountsDashboard() {
   return (
     <div className="min-h-screen bg-base-200 p-4 md:p-6 font-sans flex flex-col h-full overflow-hidden relative">
       {/* ── Header ── */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 bg-base-100 p-5 rounded-xl border border-base-300 shadow-sm">
-        <div>
-          <h1 className="text-2xl font-bold text-base-content tracking-tight">
-            Accounts Management
-          </h1>
-          <div className="text-sm text-base-content/60 breadcrumbs mt-1 font-medium">
-            <ul>
-              <li>Dashboard</li>
-              <li>Sales</li>
-              <li className="text-primary">Accounts</li>
-            </ul>
-          </div>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <button className="btn btn-outline btn-sm gap-2 bg-base-100">
-            <MdDownload size={16} /> Export CSV
-          </button>
-          <button className="btn btn-outline btn-sm btn-square bg-base-100">
-            <MdRefresh size={16} />
-          </button>
-          <button
-            onClick={() => navigate("/sales/accounts/new")}
-            className="btn btn-primary btn-sm gap-2 shadow-sm"
-          >
-            <MdAdd size={16} /> Add Account
-          </button>
-        </div>
-      </div>
+    
 
-      {/* ── Dashboard Stats ── */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-        {[
+      <PageHeader
+      title='Accounts Management'
+       breadcrumbs={[
+    { label: "Dashboard" },
+    { label: "Sales" },
+    { label: "Accounts", active: true },
+  ]}
+          showExport
+      onExport={handleExport}
+      showRefresh
+      onRefresh={handleRefresh}
+      actions={[
+        {
+          label: "Add Account",
+          icon: <MdAdd size={16} />,
+          variant: "primary",
+          onClick: () => navigate("/sales/leads/new"),
+        },
+      ]}
+      />
+
+
+      <StatsGrid
+      stats={[
           {
             label: "Total Accounts",
             value: stats.total,
@@ -519,22 +442,12 @@ export default function AccountsDashboard() {
             label: "Total Revenue",
             value: `₹${stats.annualRevenue.toLocaleString()}`,
             color: "text-success",
-          },
-        ].map((stat, idx) => (
-          <div
-            key={idx}
-            className="bg-base-100 border border-base-300 rounded-xl p-5 flex flex-col justify-center shadow-sm hover:shadow-md transition-shadow relative overflow-hidden"
-          >
-            <div className="absolute top-0 left-0 w-1 h-full bg-base-300"></div>
-            <span className="text-xs text-base-content/60 font-bold uppercase tracking-wider">
-              {stat.label}
-            </span>
-            <span className={`text-3xl font-black mt-1 ${stat.color}`}>
-              {stat.value}
-            </span>
-          </div>
-        ))}
-      </div>
+          }
+
+      ]}
+      
+      />
+  
 
       {/* ── Toolbar ── */}
       <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-4 bg-base-100 p-3 rounded-xl border border-base-300 shadow-sm">

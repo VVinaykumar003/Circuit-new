@@ -1,32 +1,13 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { BrowserRouter } from "react-router-dom";
-import { HelmetProvider } from "@dr.pogodin/react-helmet";
-import { NotificationProvider } from "@/context/NotificationContext";
-import App from "./App.tsx";
-import ScrollToTop from "./components/ScrollToTop.tsx";
-import { ThemeProvider } from "./context/theme-provider"; // ✅ corrected import
+import AppProviders from "./app/providers";
+import App from "./app/App";
 import "./index.css";
-import { AuthProvider } from "@/auth/authProvider.tsx";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-
-const queryClient = new QueryClient();
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <BrowserRouter>
-      <ScrollToTop />
-      <AuthProvider>
-        <HelmetProvider>
-          <ThemeProvider>
-            <NotificationProvider>
-              <QueryClientProvider client={queryClient}>
-                <App />
-              </QueryClientProvider>
-            </NotificationProvider>
-          </ThemeProvider>
-        </HelmetProvider>
-      </AuthProvider>
-    </BrowserRouter>
-  </StrictMode>,
+    <AppProviders>
+      <App />
+    </AppProviders>
+  </StrictMode>
 );

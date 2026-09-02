@@ -341,8 +341,11 @@ const orderSchema = new mongoose.Schema(
       enum: [
         "Cash",
         "Card",
+        "Credit Card",
         "UPI",
         "Bank Transfer",
+        "Cheque",
+        "Online",
         "Payment Gateway",
         "Other",
       ],

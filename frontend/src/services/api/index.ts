@@ -1,0 +1,14 @@
+export * from "./axios";
+export * as authApi from "./auth.api";
+export * as employeesApi from "./employees.api";
+export * as attendanceApi from "./attendance.api";
+export * as projectsApi from "./projects.api";
+export * as tasksApi from "./tasks.api";
+export * as leavesApi from "./leaves.api";
+export * as payrollApi from "./payroll.api";
+export * as productsApi from "./products.api";
+export * as ordersApi from "./orders.api";
+export * as crmApi from "./crm.api";
+export * as forecastsApi from "./forecasts.api";
+export * as notificationsApi from "./notifications.api";
+export * as organizationApi from "./organization.api";

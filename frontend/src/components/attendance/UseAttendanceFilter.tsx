@@ -50,15 +50,15 @@ type Status = "all" | "approved" | "pending" | "rejected" | "absent";
 type AttendanceRecordWithRawDate = AttendanceRecord & {
   rawDate: string;
 };
-function useAttendanceFilters(
-  records: AttendanceRecordWithRawDate[],
+function useAttendanceFilters<T extends AttendanceRecord & { rawDate?: string }>(
+  records: T[],
   filters: {
     name?: string;
     fromDate?: string;
     toDate?: string;
   },
   statusFilter: Status
-): AttendanceRecordWithRawDate[] {
+): T[] {
   return records.filter((r) => {
 
     if (filters.name) {
@@ -73,10 +73,11 @@ function useAttendanceFilters(
       }
     }
 
-    // ✅ अब clean hai, no 'any'
-   const recordDateStr = new Date(r.rawDate)
-  .toISOString()
-  .split("T")[0];
+    const recordDateObj = new Date(r.rawDate);
+    const year = recordDateObj.getFullYear();
+    const month = String(recordDateObj.getMonth() + 1).padStart(2, "0");
+    const day = String(recordDateObj.getDate()).padStart(2, "0");
+    const recordDateStr = `${year}-${month}-${day}`;
 
     if (filters.fromDate && recordDateStr < filters.fromDate) {
       return false;

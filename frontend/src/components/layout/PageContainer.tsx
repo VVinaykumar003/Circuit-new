@@ -1,41 +1,28 @@
-import type { ReactNode } from "react";
+import React, { type ReactNode } from "react";
 
-interface PageContainerProps {
-  title?: string;
-  subtitle?: string;
-  action?: ReactNode;
+export interface PageContainerProps {
   children: ReactNode;
+  className?: string;
+  maxWidth?: "sm" | "md" | "lg" | "xl" | "2xl" | "full";
 }
 
+const maxWidthClasses: Record<string, string> = {
+  sm: "max-w-screen-sm",
+  md: "max-w-screen-md",
+  lg: "max-w-screen-lg",
+  xl: "max-w-screen-xl",
+  "2xl": "max-w-screen-2xl",
+  full: "max-w-full",
+};
+
 export default function PageContainer({
-  title,
-  subtitle,
-  action,
   children,
+  className = "",
+  maxWidth = "full",
 }: PageContainerProps) {
   return (
-    <div className="space-y-4">
-      {(title || subtitle || action) && (
-        <div className="flex items-start justify-between">
-          <div>
-            {title && (
-              <h1 className="text-xl font-semibold text-base-content">
-                {title}
-              </h1>
-            )}
-            {subtitle && (
-              <p className="text-xs text-base-content/60 mt-1">
-                {subtitle}
-              </p>
-            )}
-          </div>
-
-          {action && <div>{action}</div>}
-        </div>
-      )}
-
-      {/* Page Content */}
-      <div>{children}</div>
+    <div className={`w-full mx-auto p-3 md:p-4 lg:p-6 animate-fade-in ${maxWidthClasses[maxWidth]} ${className}`}>
+      {children}
     </div>
   );
 }

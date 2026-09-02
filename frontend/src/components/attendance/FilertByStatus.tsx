@@ -1,6 +1,6 @@
 
 import  Button  from "../ui/Button";
-type Status = "all" | "approved" | "pending" | "absent";
+export type Status = "all" | "approved" | "pending" | "absent" | "rejected";
 
 
 interface Props {
