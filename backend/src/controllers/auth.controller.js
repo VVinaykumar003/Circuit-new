@@ -35,6 +35,7 @@ const tokenCookieOptions = {
   sameSite: isProduction ? "none" : "lax",
   maxAge: COOKIE_MAX_AGE,
   path: "/",
+  ...(isProduction ? { partitioned: true } : {}),
 };
 
 // Client-readable user information.
@@ -45,6 +46,7 @@ const userCookieOptions = {
   sameSite: isProduction ? "none" : "lax",
   maxAge: COOKIE_MAX_AGE,
   path: "/",
+  ...(isProduction ? { partitioned: true } : {}),
 };
 
 
@@ -693,22 +695,11 @@ exports.getMe = async (req, res) => {
 
 exports.logout = (req, res) => {
 
-  res.clearCookie(
-    "token",
-    {
-      ...tokenCookieOptions,
-      maxAge: undefined,
-    }
-  );
+  const { maxAge: _tokenMaxAge, ...clearTokenOptions } = tokenCookieOptions;
+  const { maxAge: _userMaxAge, ...clearUserOptions } = userCookieOptions;
 
-
-  res.clearCookie(
-    "user",
-    {
-      ...userCookieOptions,
-      maxAge: undefined,
-    }
-  );
+  res.clearCookie("token", clearTokenOptions);
+  res.clearCookie("user", clearUserOptions);
 
 
   return res.status(200).json({

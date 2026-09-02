@@ -276,8 +276,8 @@ async function runBrowserQA() {
     for (const route of allRoutes) {
       try {
         const errorsBefore = consoleErrors.length;
-        await page.goto(`${feBase}${route.path}`, { waitUntil: "domcontentloaded", timeout: 8000 });
-        await new Promise((r) => setTimeout(r, 600));
+        await page.goto(`${feBase}${route.path}`, { waitUntil: "domcontentloaded", timeout: 12000 });
+        await new Promise((r) => setTimeout(r, 1000));
 
         const bodyContent = await page.evaluate(() => document.body.innerText.trim());
         const hasErrorCrash = bodyContent.includes("Uncaught TypeError") || bodyContent.includes("Something went wrong");

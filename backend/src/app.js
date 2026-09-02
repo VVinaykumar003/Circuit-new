@@ -43,6 +43,9 @@ const cookieParser = require("cookie-parser");
 
 const app = express();
 
+// Trust reverse proxies (Render, Railway, AWS ALB, Vercel)
+app.set("trust proxy", 1);
+
 // ------------------------------------------------------------
 // MIDDLEWARE
 // ------------------------------------------------------------
@@ -51,28 +54,41 @@ const app = express();
 app.use(helmet());
 
 // CORS Configuration
-const allowedOrigins = [
+const rawOrigins = [
   process.env.CORS_ORIGIN,
   process.env.CLIENT_URL,
+  process.env.FRONTEND_URL,
   "http://localhost:5173",
   "http://localhost:5174",
+  "http://localhost:5179",
   "http://localhost:3000",
   "http://localhost:5000",
   "http://127.0.0.1:5173",
   "http://127.0.0.1:5174",
+  "http://127.0.0.1:5179",
   "http://127.0.0.1:3000",
-].filter(Boolean);
+];
+
+const allowedOrigins = rawOrigins
+  .filter(Boolean)
+  .flatMap((o) => o.split(",").map((s) => s.trim().replace(/\/+$/, "")))
+  .filter(Boolean);
 
 app.use(
   cors({
     origin: function (origin, callback) {
-      // allow requests with no origin (like mobile apps or curl requests)
+      // allow requests with no origin (like mobile apps, server-to-server or curl requests)
       if (!origin) return callback(null, true);
-      if (
-        allowedOrigins.indexOf(origin) !== -1 ||
-        process.env.NODE_ENV !== "production"
-      ) {
-        return callback(null, origin);
+
+      const cleanOrigin = origin.trim().replace(/\/+$/, "");
+
+      const isAllowed =
+        allowedOrigins.includes(cleanOrigin) ||
+        cleanOrigin.endsWith(".vercel.app") ||
+        process.env.NODE_ENV !== "production";
+
+      if (isAllowed) {
+        return callback(null, cleanOrigin);
       }
       return callback(new Error("Not allowed by CORS: " + origin));
     },

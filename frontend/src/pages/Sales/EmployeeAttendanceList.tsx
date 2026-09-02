@@ -32,7 +32,14 @@ const EmployeeAttendanceList = ({
           </thead>
 
           <tbody>
-            {employees.map((employee) => (
+            {employees.length === 0 ? (
+              <tr>
+                <td colSpan={5} className="py-8 text-center text-sm text-base-content/60">
+                  No attendance records recorded for today.
+                </td>
+              </tr>
+            ) : (
+              employees.map((employee) => (
               <tr key={employee._id}>
                 <td>
                   <div className="flex items-center gap-3">
@@ -101,7 +108,8 @@ const EmployeeAttendanceList = ({
                   )}
                 </td>
               </tr>
-            ))}
+            ))
+          )}
           </tbody>
         </table>
       </div>

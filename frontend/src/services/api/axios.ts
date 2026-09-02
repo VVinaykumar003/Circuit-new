@@ -1,9 +1,39 @@
 import axios from "axios";
 
-const API_BASE_URL =
-  import.meta.env.VITE_NODE_ENV === "production"
-    ? `${import.meta.env.VITE_BACKEND_URL || import.meta.env.VITE_PRODUCTION_URL || ""}/api`
-    : `${import.meta.env.VITE_DEVELOPMENT_URL || "http://localhost:5000"}/api`;
+const getBaseUrl = () => {
+  const isProd =
+    import.meta.env.PROD ||
+    import.meta.env.MODE === "production" ||
+    import.meta.env.VITE_NODE_ENV === "production";
+
+  const explicitUrl =
+    import.meta.env.VITE_API_URL ||
+    import.meta.env.VITE_BACKEND_URL ||
+    import.meta.env.VITE_PRODUCTION_URL;
+
+  if (explicitUrl && typeof explicitUrl === "string" && explicitUrl.trim() !== "") {
+    let clean = explicitUrl.trim().replace(/\/+$/, "");
+    if (!clean.endsWith("/api")) {
+      clean = `${clean}/api`;
+    }
+    return clean;
+  }
+
+  // In production builds without explicit URL, default to /api for same-origin Vercel rewrites
+  if (isProd) {
+    return "/api";
+  }
+
+  const devUrl =
+    import.meta.env.VITE_DEVELOPMENT_URL || "http://localhost:5000";
+  let cleanDev = typeof devUrl === "string" ? devUrl.trim().replace(/\/+$/, "") : "http://localhost:5000";
+  if (!cleanDev.endsWith("/api")) {
+    cleanDev = `${cleanDev}/api`;
+  }
+  return cleanDev;
+};
+
+const API_BASE_URL = getBaseUrl();
 
 export const API = axios.create({
   baseURL: API_BASE_URL,
