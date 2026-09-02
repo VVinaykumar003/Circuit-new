@@ -4,6 +4,8 @@ import { useAuth } from "@/auth/useAuth";
 // import API from "@/api/axios";
 import { getMembers } from "@/services/memberService";
 
+import { toast } from "react-toastify";
+
 interface Props {
   project: Project | null;
   open: boolean;
@@ -83,7 +85,7 @@ export default function EditProjectModal({
     setParticipants(
       (project.participants || []).map((p) => ({
         ...p,
-        user: typeof p.user === "object" ? p.user._id : p.user,
+        user: typeof p.user === "object" && p.user !== null ? p.user._id : (p.user || ""),
       })),
     );
   }, [project]);
@@ -92,7 +94,6 @@ export default function EditProjectModal({
     const fetchMembers = async () => {
       try {
         const res = await getMembers(auth.slug);
-        // API.get(`/${auth.slug}/getMembers`);
         setOrgUsers(res.data.members || res.data.users || []);
       } catch (err) {
         console.error(err);
@@ -108,18 +109,27 @@ export default function EditProjectModal({
     d ? new Date(d).toISOString().split("T")[0] : "";
 
   const addParticipant = () => {
-    if (
-      !newParticipant.user ||
-      !newParticipant.role ||
-      !newParticipant.responsibility
-    )
+    if (!newParticipant.user) {
+      toast.error("Please select a user");
       return;
+    }
+    if (!newParticipant.role) {
+      toast.error("Please select a role");
+      return;
+    }
+    if (!newParticipant.responsibility) {
+      toast.error("Please select a responsibility");
+      return;
+    }
 
     const alreadyExists = participants.some(
-      (p) => p.user === newParticipant.user,
+      (p) => String(p.user) === String(newParticipant.user),
     );
 
-    if (alreadyExists) return;
+    if (alreadyExists) {
+      toast.warning("This member is already added to the project");
+      return;
+    }
 
     setParticipants([
       ...participants,
@@ -129,6 +139,8 @@ export default function EditProjectModal({
       },
     ]);
 
+    toast.success("Member added to project list");
+
     setNewParticipant({
       user: "",
       role: "",
@@ -137,7 +149,8 @@ export default function EditProjectModal({
   };
 
   const removeParticipant = (userId: string) => {
-    setParticipants(participants.filter((p) => p.user !== userId));
+    setParticipants(participants.filter((p) => String(p.user) !== String(userId)));
+    toast.info("Member removed from project list");
   };
 
   return (
@@ -317,11 +330,16 @@ export default function EditProjectModal({
     outline-none"
             >
               <option value="">User</option>
-              {orgUsers.map((u) => (
-                <option key={u._id} value={u._id}>
-                  {u.name}
-                </option>
-              ))}
+              {orgUsers.map((u) => {
+                const isAdded = participants.some(
+                  (p) => String(p.user) === String(u._id)
+                );
+                return (
+                  <option key={u._id} value={u._id} disabled={isAdded}>
+                    {u.name} {isAdded ? "(Already Added)" : ""}
+                  </option>
+                );
+              })}
             </select>
 
             <select

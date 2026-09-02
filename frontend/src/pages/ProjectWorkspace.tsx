@@ -94,10 +94,10 @@ export default function ProjectWorkspace() {
     { key: "chat", label: "Chat" },
     {key: "workUpdates", label: "Work Updates" },
   ];
-  const manager = project.participants.find((p) => p.role === "Manager");
+  const manager = project?.participants?.find((p: any) => p.role === "Manager");
 
   const projectRole = project?.participants?.find(
-    (p) => p.user._id === auth.user?.userId,
+    (p: any) => (p.user?._id || p.user) === (auth.user?.userId || auth.user?._id),
   )?.role;
   // console.log("User's role in project:", projectRole);
   // console.log("Project Data:", project);
@@ -287,15 +287,19 @@ const TeamCard = ({ team }: { team: any[] }) => (
   <div className="bg-primary rounded-lg p-5">
     <h3 className="font-semibold text-primary-content mb-2">Team Members</h3>
     <ul className="space-y-2 text-[13px]">
-      {team.map((member: any) => (
-        <li
-          key={member.user._id}
-          className="flex justify-between text-primary-content"
-        >
-          <span>{member.user.name || "Unknown"}</span>
-          <span className="">{member.role}</span>
-        </li>
-      ))}
+      {(team || []).map((member: any, idx: number) => {
+        const userId = typeof member?.user === 'object' && member?.user !== null ? member.user._id : (member?.user || idx);
+        const userName = typeof member?.user === 'object' && member?.user !== null ? (member.user.name || "Unknown") : "Unknown";
+        return (
+          <li
+            key={userId || idx}
+            className="flex justify-between text-primary-content"
+          >
+            <span>{userName}</span>
+            <span className="">{member?.role || "Member"}</span>
+          </li>
+        );
+      })}
     </ul>
   </div>
 );

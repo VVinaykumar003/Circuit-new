@@ -3,19 +3,20 @@ const logger = require("../common/libs/logger");
 
 exports.addHoliday = async (req, res) => {
   try {
-    const { date, title, description } = req.body;
-    const slug = req.organization.slug;
+    const { date, title, name, description, type } = req.body;
+    const slug = req.organization?.slug || req.params.slug;
     const createdBy = req.user.userId || req.user._id;
+    const resolvedTitle = title || name || "Holiday";
 
     const holiday = await Holiday.create({
       slug,
       date,
-      title,
-      description,
+      title: resolvedTitle,
+      description: description || type || "",
       createdBy,
     });
 
-    logger.info("Holiday added successfully", { date, title });
+    logger.info("Holiday added successfully", { date, title: resolvedTitle });
     res.status(201).json({ message: "Holiday published successfully", holiday });
   } catch (error) {
     logger.error("Add holiday failed", { error: error.message });

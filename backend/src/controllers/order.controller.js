@@ -133,6 +133,18 @@ exports.createOrder = async (req, res) => {
       });
     }
 
+    if (!orderData.customerId) {
+      orderData.customerId = req.user?._id || req.user?.userId;
+    }
+
+    if (!orderData.salesOwner) {
+      orderData.salesOwner = req.user?.name || "Sales Admin";
+    }
+
+    if (!orderData.billingAddress) {
+      orderData.billingAddress = typeof req.body.address === 'string' ? req.body.address : "Company Headquarters";
+    }
+
     // --------------------------------------------------------
     // Validate Order Items
     // --------------------------------------------------------
@@ -141,6 +153,27 @@ exports.createOrder = async (req, res) => {
       orderData.items,
       organizationId
     );
+
+    let subtotal = 0;
+    let discountTotal = 0;
+    let taxTotal = 0;
+
+    for (const item of orderData.items) {
+      item.lineSubtotal = item.unitPrice * item.quantity;
+      item.lineDiscount = item.lineSubtotal * ((item.discountPct || 0) / 100);
+      item.lineTax = (item.lineSubtotal - item.lineDiscount) * ((item.taxPct || 0) / 100);
+      item.lineTotal = item.lineSubtotal - item.lineDiscount + item.lineTax;
+
+      subtotal += item.lineSubtotal;
+      discountTotal += item.lineDiscount;
+      taxTotal += item.lineTax;
+    }
+
+    if (orderData.subtotal === undefined) orderData.subtotal = subtotal;
+    if (orderData.discountTotal === undefined) orderData.discountTotal = discountTotal;
+    if (orderData.taxTotal === undefined) orderData.taxTotal = taxTotal;
+    if (orderData.grandTotal === undefined) orderData.grandTotal = subtotal - discountTotal + taxTotal;
+    if (orderData.totalAmount === undefined) orderData.totalAmount = orderData.grandTotal;
 
     // --------------------------------------------------------
     // Remove Physical Product Fields

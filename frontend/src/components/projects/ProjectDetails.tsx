@@ -105,6 +105,7 @@ import { useState } from "react";
 import EditProjectModal from "./EditProjectModal";
 import { useAuth } from "@/auth/useAuth";
 import { updateProject } from "@/services/projectServices";
+import { toast } from "react-toastify";
 
 interface Props {
   project: Project;
@@ -130,12 +131,14 @@ export default function ProjectDetails({ project, onClose, onUpdate }: Props) {
       };
 
       await updateProject(auth.slug, updated.id, payload);
+      toast.success("Project updated successfully");
 
       setEditProject(null);
       onUpdate(updated); // update parent list optimistically
       onClose();
-    } catch (err) {
+    } catch (err: any) {
       console.error("Failed to update project", err);
+      toast.error(err.response?.data?.message || "Failed to update project");
     }
   };
 

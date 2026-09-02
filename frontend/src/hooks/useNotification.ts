@@ -12,7 +12,7 @@ const getNotificationLink = (notification: Notification) => {
   if (combined.includes("leave")) return "/leaves";
   if (combined.includes("task")) return "/tasks";
   if (combined.includes("project")) return "/projects";
-  if (combined.includes("member") || combined.includes("user")) return "/members";
+  if (combined.includes("member") || combined.includes("user")) return "/employees";
   if (combined.includes("attendance")) return "/attendance";
   return "/notifications"; // Fallback to main notifications page
 };

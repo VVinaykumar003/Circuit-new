@@ -1,16 +1,9 @@
-import axios from 'axios';
+import API from "@/api/axios";
 import { useState, useEffect, useCallback } from 'react';
 import type { ForecastOverviewData } from '../type/salesForecast';
 
-const apiClient = axios.create({
-  baseURL: '/api',
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
-
 export const fetchSalesForecastOverview = async (): Promise<ForecastOverviewData> => {
-  const response = await apiClient.get<ForecastOverviewData>('/sales/forecast/overview');
+  const response = await API.get<ForecastOverviewData>('/sales/forecast/overview');
   return response.data;
 };
 

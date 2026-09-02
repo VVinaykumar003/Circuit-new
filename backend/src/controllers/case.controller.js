@@ -4,8 +4,33 @@ const mongoose = require('mongoose');
 exports.createCase = async (req, res) => {
   try {
     const tenantId = req.organization._id;
+    const caseData = { ...req.body };
+
+    if (!caseData.caseNumber) {
+      const count = await Case.countDocuments({ organization: tenantId });
+      caseData.caseNumber = `CASE-${new Date().getFullYear()}-${(count + 1).toString().padStart(4, "0")}`;
+    }
+
+    if (!caseData.type) {
+      caseData.type = caseData.caseType || "Support";
+    }
+
+    if (!caseData.customer) {
+      caseData.customer = caseData.company || caseData.accountName || req.user?.name || "General Customer";
+    }
+
+    if (caseData.priority) {
+      const p = String(caseData.priority).toLowerCase();
+      caseData.priority = p === "critical" ? "Critical" : p === "high" ? "High" : p === "low" ? "Low" : "Medium";
+    }
+
+    if (caseData.status) {
+      const s = String(caseData.status).toLowerCase();
+      caseData.status = s === "in progress" || s === "in-progress" ? "In Progress" : s === "closed" ? "Closed" : s === "resolved" ? "Resolved" : "Open";
+    }
+
     const newCase = new Case({
-      ...req.body,
+      ...caseData,
       organization: tenantId,
     });
     const savedCase = await newCase.save();

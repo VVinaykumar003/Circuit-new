@@ -70,8 +70,16 @@ export default function AllNotifications() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['notifications'] }),
   });
 
-  const filteredNotifications = notifications?.filter( n => {
-    const matchesSearch = n.title.toLowerCase().includes(search.toLowerCase()) || n.message.toLowerCase().includes(search.toLowerCase());
+  const notifsList: Notification[] = Array.isArray(notifications)
+    ? notifications
+    : Array.isArray(notifications?.data)
+    ? notifications.data
+    : [];
+
+  const filteredNotifications = notifsList.filter((n) => {
+    const title = n.title || "";
+    const message = n.message || "";
+    const matchesSearch = title.toLowerCase().includes(search.toLowerCase()) || message.toLowerCase().includes(search.toLowerCase());
     if (filter === 'Unread') return matchesSearch && !n.isRead;
     if (filter === 'Tasks') return matchesSearch && n.type === 'Task';
     if (filter === 'Orders') return matchesSearch && n.type === 'Order';

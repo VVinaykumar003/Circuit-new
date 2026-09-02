@@ -34,24 +34,40 @@ exports.applyLeave = async (req, res) => {
     // Frontend sends: type, fromDate, toDate, reason, attachments, session, emergency
     // const {name, type, fromDate, toDate, reason, attachments, session, emergency } = req.body;
     const {
-  name,
-  type,
-  fromDate,
-  toDate,
-  reason,
-  session,
-  emergency
-} = req.body;
-console.log("BODY:", req.body);
-console.log("FILES:", req.files);
-console.log("📂 Uploaded files:", req.files);
+      name,
+      type,
+      leaveType,
+      fromDate,
+      startDate,
+      toDate,
+      endDate,
+      reason,
+      session,
+      emergency
+    } = req.body;
+    console.log("BODY:", req.body);
+    console.log("FILES:", req.files);
+    console.log("📂 Uploaded files:", req.files);
 
-    // Assuming your auth middleware puts decoded JWT directly into req.user
     const userId = req.user.userId || req.user._id; 
-    const slug = req.organization.slug; // Set by tenant middleware
-     // 👉 Save leave in DB (your existing logic)
+    const slug = req.organization?.slug || req.params.slug;
+    
+    let rawType = (type || leaveType || "casual").toString().toLowerCase().trim();
+    let resolvedType = "casual";
+    if (rawType.includes("casual")) resolvedType = "casual";
+    else if (rawType.includes("sick")) resolvedType = "sick";
+    else if (rawType.includes("paid")) resolvedType = "paid";
+    else if (rawType.includes("maternity")) resolvedType = "maternity";
+    else if (rawType.includes("paternity")) resolvedType = "paternity";
+    else if (rawType.includes("half")) resolvedType = "half-day";
+    else if (["casual", "sick", "paid", "maternity", "paternity", "half-day", "other"].includes(rawType)) resolvedType = rawType;
+    else resolvedType = "other";
 
-  console.log("📩 Leave applied by:", userId);
+    const resolvedStartDate = fromDate || startDate || new Date();
+    const resolvedEndDate = resolvedType === "half-day" ? resolvedStartDate : (toDate || endDate || resolvedStartDate);
+    const resolvedName = name || req.user?.name || "Employee";
+
+    console.log("📩 Leave applied by:", userId);
 
 
     // let processedAttachments = [];
@@ -134,30 +150,34 @@ console.log("📂 Uploaded files:", req.files);
 
 
     const leave = await Leave.create({
-  user: userId,
-  slug,
-  name,
-  leaveType: type,
-  startDate: fromDate,
-  endDate: type === "half-day" ? fromDate : toDate,
-  reason,
-  attachments: uploadedAttachments,
-  session: type === "half-day" ? session : undefined,
-  emergency: emergency === "true",
-  status: "pending",
-});
-    console.log(chalk.green(`✔ Leave applied → User:${userId} for ${type}`));
-
-     // 2. Insert the Activity Log here!
-    await Activity.create({
-      organization: req.organization._id,
-      user: userId, 
-      action: "Leave Applied",
-      message: ` ${name} applied for leave: ${type}`,
-      referenceId: leave._id,
-      referenceModel: "Leave"
+      user: userId,
+      slug,
+      name: resolvedName,
+      leaveType: resolvedType,
+      startDate: resolvedStartDate,
+      endDate: resolvedEndDate,
+      reason: reason || "Leave application",
+      attachments: uploadedAttachments,
+      session: resolvedType === "half-day" ? session : undefined,
+      emergency: emergency === "true" || emergency === true,
+      status: "pending",
     });
-    logger.info("Leave application activity logged", { userId, leaveId: leave._id });
+    console.log(chalk.green(`✔ Leave applied → User:${userId} for ${resolvedType}`));
+
+    // 2. Insert the Activity Log safely
+    try {
+      await Activity.create({
+        organization: req.organization?._id || req.user?.organization,
+        user: userId, 
+        action: "Leave Applied",
+        message: ` ${resolvedName} applied for leave: ${resolvedType}`,
+        referenceId: leave._id,
+        referenceModel: "Leave"
+      });
+      logger.info("Leave application activity logged", { userId, leaveId: leave._id });
+    } catch (actErr) {
+      logger.warn("Leave activity logging skipped", { error: actErr.message });
+    }
     
     // 3. Emit Realtime Notification to Admins/Managers
     try {

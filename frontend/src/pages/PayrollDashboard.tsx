@@ -149,8 +149,6 @@ export default function PayrollDashboard() {
     { name: "Failed", value: monthlySlips.filter(s => s.paymentStatus === "FAILED").length, color: "#ef4444" },
   ].filter(d => d.value > 0);
 
-  if (loading) return <div>Loading Payroll Dashboard...</div>;
-
   return (
     <div className="p-4 sm:p-6 bg-base-50 min-h-screen flex flex-col gap-6">
 

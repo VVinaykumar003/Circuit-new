@@ -3,13 +3,14 @@ const SalesRep = require('../models/salesRep.model');
 // Create a new Sales Representative
 exports.createSalesRep = async (req, res) => {
   try {
-    const tenantId = req.tenantId || req.params.slug; // Fallback to slug if middleware maps differently
+    const tenantId = req.organization?._id?.toString() || req.tenantId || req.params.slug;
     const repData = { ...req.body, tenantId };
     
-    // Auto-generate employeeId if not provided
-    if (!repData.employeeId) {
-       const count = await SalesRep.countDocuments({ tenantId });
-       repData.employeeId = `SR-${new Date().getFullYear()}-${(count + 1).toString().padStart(4, '0')}`;
+    if (!repData.memberId) {
+      repData.memberId = req.body.userId || req.user?._id;
+    }
+    if (!repData.designation) {
+      repData.designation = req.body.role || req.body.title || "Sales Representative";
     }
 
     const salesRep = new SalesRep(repData);

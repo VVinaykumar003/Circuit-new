@@ -42,13 +42,28 @@ exports.createProduct = async (req, res) => {
     }
     console.log(imageUrls);
 
-    const newProduct = new Product({
-      ...productData,
-      images: imageUrls,
-      documents: documentUrls, // documents now stores objects { name, url }
-      organization: req.organization._id,
-    });
+    let normalizedType = productData.productType || productData.category || "ERP";
+    const validTypes = ["ERP", "CRM", "SaaS", "POS", "HRMS", "Other"];
+    if (!validTypes.includes(normalizedType)) {
+      const lower = normalizedType.toLowerCase();
+      if (lower.includes("software") || lower.includes("saas")) normalizedType = "SaaS";
+      else if (lower.includes("crm")) normalizedType = "CRM";
+      else if (lower.includes("pos")) normalizedType = "POS";
+      else if (lower.includes("hrm")) normalizedType = "HRMS";
+      else if (lower.includes("erp")) normalizedType = "ERP";
+      else normalizedType = "Other";
+    }
 
+    const productPayload = {
+      ...productData,
+      productCode: productData.productCode || productData.sku || `PRD-${Date.now()}`,
+      productType: normalizedType,
+      images: imageUrls,
+      documents: documentUrls,
+      organization: req.organization._id,
+    };
+
+    const newProduct = new Product(productPayload);
     await newProduct.save();
 
     res.status(201).json({

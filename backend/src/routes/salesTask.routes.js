@@ -8,11 +8,13 @@ const allowedRoles = ['admin','owner', 'manager', 'sales_rep','employee']
 console.log("ROUTE HIT");
 
 router.post('/:slug/create-sales-task', auth, tenant, requireRole(allowedRoles), createSalesTask);
-router.get("/:slug/get-task-by-empId",auth,tenant,getSalesTaskByEmpId);
-router.get('/:slug/get-all-sales-tasks', auth, tenant,getSalesTasks);
+router.get("/:slug/get-task-by-empId", auth, tenant, getSalesTaskByEmpId);
+router.get('/:slug/get-all-sales-tasks', auth, tenant, getSalesTasks);
+router.get('/:slug/sales-tasks/:id', auth, tenant, requireRole(allowedRoles), getSalesTaskById);
 router.get('/:slug/:id', auth, tenant, requireRole(allowedRoles), getSalesTaskById);
+router.put('/:slug/sales-tasks/:id', auth, tenant, requireRole(allowedRoles), updateSalesTask);
 router.put('/:slug/:id', auth, tenant, requireRole(allowedRoles), updateSalesTask);
-router.delete('/:slug/sales-tasks/:id', auth, tenant, requireRole(allowedRoles),  deleteSalesTask);
-
+router.delete('/:slug/sales-tasks/:id', auth, tenant, requireRole(allowedRoles), deleteSalesTask);
+router.delete('/:slug/:id', auth, tenant, requireRole(allowedRoles), deleteSalesTask);
 
 module.exports = router;

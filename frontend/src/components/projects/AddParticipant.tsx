@@ -4,6 +4,7 @@ import { MdDelete } from "react-icons/md";
 import { useAuth } from "@/auth/useAuth";
 import { useEffect, useState } from "react";
 import { getMembers } from "@/services/memberService";
+import { toast } from "react-toastify";
 
 
 interface User {
@@ -52,7 +53,7 @@ export const AddParticipant: React.FC<AddParticipantProps> = ({
         const slug = auth.slug; // get slug from auth context or utility
         const res = await getMembers(slug);
         // await api.get(`/${auth.slug}/getMembers`);
-        setUsers(res.data.members); 
+        setUsers(res.data.members || res.data.users || []); 
       } catch (err) {
         console.error("Failed to fetch org users", err);
       }
@@ -80,20 +81,21 @@ export const AddParticipant: React.FC<AddParticipantProps> = ({
   !form.responsibility ||
   (form.responsibility === "Other" && !form.customResponsibility)
 ) {
-  alert("Please fill all fields");
+  toast.error("Please fill all required fields");
   return;
 }
 
     const alreadyExists = participants.some(
-      (p) => p.userId === form.userId
+      (p) => String(p.userId) === String(form.userId)
     );
 
     if (alreadyExists) {
-      alert("User already added!");
+      toast.warning("This member is already added to the project");
       return;
     }
 
     setParticipants([...participants, form]);
+    toast.success("Member added to list");
  setForm({
   userId: "",
   role: "",
@@ -105,6 +107,7 @@ export const AddParticipant: React.FC<AddParticipantProps> = ({
   // Remove participant
   const handleDelete = (index: number) => {
     setParticipants(participants.filter((_, i) => i !== index));
+    toast.info("Member removed from list");
   };
 
   // Map userId to name for display
@@ -125,11 +128,16 @@ export const AddParticipant: React.FC<AddParticipantProps> = ({
         className="select text-[13px] w-full  rounded-lg bg-base-100 border border-base-content/10 focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-200 text-base-content"
       >
         <option value="">Select User</option>
-        {users?.map((user) => (
-          <option key={user._id} value={user._id}>
-            {user.name} - {user.role}
-          </option>
-        ))}
+        {users?.map((user) => {
+          const isAdded = participants.some(
+            (p) => String(p.userId) === String(user._id)
+          );
+          return (
+            <option key={user._id} value={user._id} disabled={isAdded}>
+              {user.name} - {user.role} {isAdded ? "(Already Added)" : ""}
+            </option>
+          );
+        })}
       </select>
 
       {/* Role */}

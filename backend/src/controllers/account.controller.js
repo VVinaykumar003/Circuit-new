@@ -23,49 +23,103 @@ const createAccount = async (req, res) => {
       description,
     
     } = req.body;
-    const finalShippingAddress =
-  shippingAddress?.sameAsBilling
-    ? {
-        sameAsBilling: true,
-        addressLine1: billingAddress.addressLine1,
-        addressLine2: billingAddress.addressLine2,
-        city: billingAddress.city,
-        state: billingAddress.state,
-        postalCode: billingAddress.postalCode,
-        country: billingAddress.country,
-        countryOther: billingAddress.countryOther,
-      }
-    : shippingAddress;
 
-      const formattedPhone = {
-      countryCode: primaryContact.phone.countryCode || "+91",
-      number: primaryContact.phone.number,
+    const mongoose = require("mongoose");
+    const resolvedOwner = (accountOwner && mongoose.Types.ObjectId.isValid(accountOwner)) ? accountOwner : (req.user?._id || req.user?.userId);
+
+    // Normalize accountType
+    const validAccountTypes = ["Individual", "Partner", "Business", "Retailer", "Distributor", "Enterprise"];
+    let resolvedAccountType = "Business";
+    if (validAccountTypes.includes(accountType)) resolvedAccountType = accountType;
+    else if (String(accountType).toLowerCase().includes("individual")) resolvedAccountType = "Individual";
+    else if (String(accountType).toLowerCase().includes("partner")) resolvedAccountType = "Partner";
+    else if (String(accountType).toLowerCase().includes("retail")) resolvedAccountType = "Retailer";
+    else if (String(accountType).toLowerCase().includes("distribut")) resolvedAccountType = "Distributor";
+    else if (String(accountType).toLowerCase().includes("enterprise")) resolvedAccountType = "Enterprise";
+
+    // Normalize industry
+    const validIndustries = ["Technology", "Finance", "Healthcare", "Education", "Manufacturing", "Retail", "Other"];
+    let resolvedIndustry = "Technology";
+    if (validIndustries.includes(industry)) resolvedIndustry = industry;
+    else if (String(industry).toLowerCase().includes("tech") || String(industry).toLowerCase().includes("it") || String(industry).toLowerCase().includes("software")) resolvedIndustry = "Technology";
+    else if (String(industry).toLowerCase().includes("fin")) resolvedIndustry = "Finance";
+    else if (String(industry).toLowerCase().includes("health") || String(industry).toLowerCase().includes("med")) resolvedIndustry = "Healthcare";
+    else if (String(industry).toLowerCase().includes("edu")) resolvedIndustry = "Education";
+    else if (String(industry).toLowerCase().includes("manuf")) resolvedIndustry = "Manufacturing";
+    else if (String(industry).toLowerCase().includes("retail")) resolvedIndustry = "Retail";
+    else resolvedIndustry = "Other";
+
+    // Normalize primaryContact
+    const contactObj = primaryContact || {};
+    let contactFirstName = contactObj.firstName;
+    let contactLastName = contactObj.lastName;
+    if (!contactFirstName && contactObj.name) {
+      const parts = contactObj.name.trim().split(" ");
+      contactFirstName = parts[0] || "Primary";
+      contactLastName = parts.slice(1).join(" ") || "Contact";
+    }
+    contactFirstName = contactFirstName || "Primary";
+    contactLastName = contactLastName || "Contact";
+    const contactEmail = contactObj.email || req.body.accountEmail || req.user?.email || "contact@account.com";
+    const rawPhoneNum = (typeof contactObj.phone === 'object' && contactObj.phone?.number) ? contactObj.phone.number : (contactObj.phone || req.body.phone || "9999999999");
+    const rawCountryCode = (typeof contactObj.phone === 'object' && contactObj.phone?.countryCode) ? contactObj.phone.countryCode : "+91";
+
+    const formattedPhone = {
+      countryCode: rawCountryCode,
+      number: rawPhoneNum,
     };
+
+    // Normalize billingAddress
+    const bObj = typeof billingAddress === 'object' && billingAddress !== null ? billingAddress : { addressLine1: String(billingAddress || "Main Office") };
+    const billingAddressFull = {
+      addressLine1: bObj.addressLine1 || "Main Office",
+      addressLine2: bObj.addressLine2 || "",
+      city: bObj.city || "Bengaluru",
+      state: bObj.state || "Karnataka",
+      postalCode: bObj.postalCode || "560001",
+      country: bObj.country || "India",
+    };
+
+    const finalShippingAddress =
+      shippingAddress?.sameAsBilling
+        ? {
+            sameAsBilling: true,
+            addressLine1: billingAddressFull.addressLine1,
+            addressLine2: billingAddressFull.addressLine2,
+            city: billingAddressFull.city,
+            state: billingAddressFull.state,
+            postalCode: billingAddressFull.postalCode,
+            country: billingAddressFull.country,
+            countryOther: billingAddressFull.countryOther,
+          }
+        : (typeof shippingAddress === 'object' && shippingAddress !== null ? shippingAddress : {});
 
     // 📦 Create account
     const account = await AccountModel.create({
-     organization: organizationId, // ⭐ multi-tenant key
-      accountOwner,
+      organization: organizationId,
+      accountOwner: resolvedOwner,
 
       accountName,
-      accountType,
-      industry,
+      accountType: resolvedAccountType,
+      industry: resolvedIndustry,
       website,
       annualRevenue,
 
-        primaryContact: {
-        ...primaryContact,
+      primaryContact: {
+        firstName: contactFirstName,
+        lastName: contactLastName,
+        email: contactEmail,
+        designation: contactObj.designation || "Manager",
         phone: formattedPhone,
       },
 
-      billingAddress,
+      billingAddress: billingAddressFull,
       shippingAddress: finalShippingAddress,
 
       gstNumber,
       panNumber,
       paymentTerms,
       description,
-     
     });
 
     return res.status(201).json({

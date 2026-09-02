@@ -8,6 +8,7 @@ import { useState } from "react";
 import EditProjectModal from "./EditProjectModal";
 import { updateProject } from "@/services/projectServices";
 import { useAuth } from "@/auth/useAuth";
+import { toast } from "react-toastify";
 import { Edit2 } from "lucide-react";
 
 interface Props {
@@ -69,6 +70,7 @@ export default function ProjectCard({
       };
 
       await updateProject(auth.slug, updated.id, payload);
+      toast.success("Project updated successfully");
       // console.log(payload);
       // 🔥 IMPORTANT: remap for UI
       const mappedUpdated = {
@@ -88,8 +90,9 @@ export default function ProjectCard({
 
       setEditProject(null);
       onUpdate?.(mappedUpdated); // 👈 use mapped data
-    } catch (err) {
+    } catch (err: any) {
       console.error("Failed to update project", err);
+      toast.error(err.response?.data?.message || "Failed to update project");
     }
   };
 

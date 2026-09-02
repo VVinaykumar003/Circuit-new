@@ -67,8 +67,8 @@ const router = express.Router();
 
 // --- Company Policy Routes ---
 router.route('/:slug/policy')
-  .get(getCompanyPayrollPolicy)
-  .post(updateCompanyPayrollPolicy);
+  .get(auth, tenant, getCompanyPayrollPolicy)
+  .post(auth, tenant, updateCompanyPayrollPolicy);
 
 // --- Dashboard & Summary Routes ---
 router.get('/:slug/summary', auth, tenant, getPayrollSummary);

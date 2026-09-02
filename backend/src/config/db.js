@@ -3,6 +3,10 @@ const mongoose = require("mongoose");
 const config = require("../config");
 const logger = require("../common/libs/logger");
 
+try {
+  require("dns").setServers(["1.1.1.1", "8.8.8.8"]);
+} catch (_) {}
+
 // Enable strictQuery for consistency
 mongoose.set("strictQuery", true);
 

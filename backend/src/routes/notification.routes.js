@@ -4,10 +4,20 @@ const auth=require("../middlewares/auth.middleware");
 const tenant=require("../middlewares/tenant.middleware");
 const notificationController=require("../controllers/notification.controller");
 const { upload } = require("../middlewares/upload");
-router.post("/:slug/notification",auth,tenant,upload.array("attachments") ,notificationController.sendNotification);
-router.get("/:slug/notification",auth,tenant,notificationController.getNotifications);
-router.put("/:slug/notification/:id",auth,tenant,upload.array("attachments"), notificationController.updateNotification);
-router.delete("/:slug/notification/:id",auth,tenant, notificationController.deleteNotification);
+router.post("/:slug/notification", auth, tenant, upload.array("attachments"), notificationController.sendNotification);
+router.post("/:slug/notifications", auth, tenant, upload.array("attachments"), notificationController.sendNotification);
+
+router.get("/:slug/notification", auth, tenant, notificationController.getNotifications);
+router.get("/:slug/notifications", auth, tenant, notificationController.getNotifications);
+router.get("/:slug/notifications/unread", auth, tenant, notificationController.getNotifications);
+router.get("/:slug/notifications/:id", auth, tenant, notificationController.getNotifications);
+
+router.put("/:slug/notification/:id", auth, tenant, upload.array("attachments"), notificationController.updateNotification);
+router.put("/:slug/notifications/:id", auth, tenant, upload.array("attachments"), notificationController.updateNotification);
+
+router.delete("/:slug/notification/:id", auth, tenant, notificationController.deleteNotification);
+router.delete("/:slug/notifications/:id", auth, tenant, notificationController.deleteNotification);
+
 // Mark as read routes (support multiple endpoint patterns)
 router.put("/:slug/read-all", auth, tenant, notificationController.markAllAsRead);
 router.put("/:slug/:id/read", auth, tenant, notificationController.markAsRead);

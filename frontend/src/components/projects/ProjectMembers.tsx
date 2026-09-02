@@ -180,11 +180,16 @@ export default function ProjectMembers({ project, onUpdateProject }: Props) {
                 onChange={(e) => setNewParticipant({ ...newParticipant, user: e.target.value })}
               >
                 <option value="">Select User</option>
-                {orgUsers.map((u) => (
-                  <option key={u._id} value={u._id}>
-                    {u.name} ({u.role})
-                  </option>
-                ))}
+                {orgUsers.map((u) => {
+                  const isAdded = participants.some(
+                    (p: any) => String(p.user?._id || p.user) === String(u._id)
+                  );
+                  return (
+                    <option key={u._id} value={u._id} disabled={isAdded}>
+                      {u.name} ({u.role}) {isAdded ? "(Already Added)" : ""}
+                    </option>
+                  );
+                })}
               </select>
               <select
                 className="select select-bordered w-full"

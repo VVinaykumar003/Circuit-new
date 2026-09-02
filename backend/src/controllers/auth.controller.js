@@ -27,33 +27,23 @@ const COOKIE_MAX_AGE =
 // COOKIE OPTIONS
 // ======================================================
 
+const isProduction = process.env.NODE_ENV === "production";
+
 const tokenCookieOptions = {
   httpOnly: true,
-
-  secure:
-    process.env.NODE_ENV === "production",
-
-  sameSite: "lax",
-
+  secure: isProduction,
+  sameSite: isProduction ? "none" : "lax",
   maxAge: COOKIE_MAX_AGE,
-
   path: "/",
 };
 
-
 // Client-readable user information.
-// IMPORTANT:
-// Never put the JWT/token inside this cookie.
+// IMPORTANT: Never put the JWT/token inside this cookie.
 const userCookieOptions = {
   httpOnly: false,
-
-  secure:
-    process.env.NODE_ENV === "production",
-
-  sameSite: "lax",
-
+  secure: isProduction,
+  sameSite: isProduction ? "none" : "lax",
   maxAge: COOKIE_MAX_AGE,
-
   path: "/",
 };
 
@@ -461,23 +451,19 @@ exports.login = async (req, res) => {
 
 
     if (!valid) {
-
       logger.warn(
         `Invalid password for: ${normalizedEmail}`
       );
 
-
       const key =
         `login_fail:${normalizedEmail}`;
 
-
-      await redis.incr(key);
-
-      await redis.expire(
-        key,
-        300
-      );
-
+      if (redis && typeof redis.incr === "function") {
+        try {
+          await redis.incr(key);
+          await redis.expire(key, 300);
+        } catch (_) {}
+      }
 
       return res.status(401).json({
         success: false,

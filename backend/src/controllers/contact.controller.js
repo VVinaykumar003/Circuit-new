@@ -24,22 +24,37 @@ const createContact = async (req, res) => {
       address,
     } = req.body;
 
+    let resolvedFirstName = firstName;
+    let resolvedLastName = lastName;
+    if (!resolvedFirstName && req.body.name) {
+      const parts = req.body.name.trim().split(" ");
+      resolvedFirstName = parts[0] || "Contact";
+      resolvedLastName = parts.slice(1).join(" ") || "Person";
+    }
+    if (!resolvedFirstName) resolvedFirstName = "Contact";
+    if (!resolvedLastName) resolvedLastName = "Person";
+
+    const resolvedRep = assignedRep || req.user?.userId || req.user?._id;
+
+    const rawPhoneNum = typeof phone === 'object' && phone !== null ? phone.number : (phone || req.body.phoneNumber || "9999999999");
+    const rawCountryCode = (typeof phone === 'object' && phone?.countryCode) ? phone.countryCode : "+91";
+
     const formattedPhone = {
-      countryCode: phone?.countryCode || "+91",
-      number: phone?.number,
+      countryCode: rawCountryCode,
+      number: rawPhoneNum,
     };
 
     const contact = await ContactModel.create({
       organization: organizationId,
 
-      assignedRep,
+      assignedRep: resolvedRep,
 
-      firstName,
-      lastName,
+      firstName: resolvedFirstName,
+      lastName: resolvedLastName,
       gender:
-  gender && gender !== "-Select-"
-    ? gender
-    : undefined,
+        gender && gender !== "-Select-"
+          ? gender
+          : undefined,
       dob,
 
       email,

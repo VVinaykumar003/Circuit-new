@@ -29,22 +29,55 @@
 const Organization = require("../models/Organization.model");
 const logger = require("../common/libs/logger");
 
-const divider = "----------------------------------------";
+module.exports = async (req, res, next) => {
+  try {
+    const { slug } = req.params;
 
-module.exports = async (req,res,next)=>{
-console.log("TENANT PASSED");
-  const { slug } = req.params;
-  logger.info("Resolving tenant for organization", { slug });
+    if (!slug) {
+      return res.status(400).json({
+        success: false,
+        message: "Organization slug is required",
+      });
+    }
 
-  const org = await Organization.findOne({ slug });
-  // logger.debug("Organization lookup result", { organization: org });
-  logger.info("Tenant resolved", { tenantId: org?.slug });
-  logger.info("Tenant resolved", { tenantId: org?._id });
-   divider && logger.info(divider);
+    const org = await Organization.findOne({ slug: slug.toLowerCase() });
 
-  if(!org) return res.status(404).json({msg:"Tenant not found"});
+    if (!org) {
+      logger.warn("Tenant not found for slug", { slug });
+      return res.status(404).json({
+        success: false,
+        message: "Organization not found",
+      });
+    }
 
-  req.organization = org;
-  req.tenantId = org._id; 
-  next();
+    // If request has an authenticated user, enforce tenant isolation
+    if (
+      req.user &&
+      req.user.organization &&
+      req.user.role !== "super_admin" &&
+      req.user.organization.toString() !== org._id.toString()
+    ) {
+      logger.warn("Tenant isolation violation attempt", {
+        userId: req.user._id,
+        userOrg: req.user.organization,
+        targetOrg: org._id,
+      });
+
+      return res.status(403).json({
+        success: false,
+        message: "Access denied: You do not have access to this organization",
+      });
+    }
+
+    req.organization = org;
+    req.tenantId = org._id;
+
+    next();
+  } catch (error) {
+    logger.error("Tenant middleware error", { error: error.message });
+    return res.status(500).json({
+      success: false,
+      message: "Server error resolving organization",
+    });
+  }
 };

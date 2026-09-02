@@ -35,9 +35,11 @@ const createLead = async (req, res) => {
       description,
     } = req.body;
 
+    const mongoose = require("mongoose");
+    const resolvedOwner = (leadOwner && mongoose.Types.ObjectId.isValid(leadOwner)) ? leadOwner : (req.user?._id || req.user?.userId);
+
     // Check required fields
     if (
-      !leadOwner ||
       !firstName ||
       !email ||
       !phoneNumber ||
@@ -45,15 +47,15 @@ const createLead = async (req, res) => {
     ) {
       return res.status(400).json({
         success: false,
-        message: "Please fill all required fields",
+        message: "Please fill all required fields (firstName, email, phoneNumber, companyName)",
       });
     }
 
     // Duplicate email check
-   const existingLead = await LeadModel.findOne({
-  organizationId,
-  email,
-});
+    const existingLead = await LeadModel.findOne({
+      organization: organizationId,
+      email,
+    });
 
     if (existingLead) {
       return res.status(409).json({
@@ -62,15 +64,18 @@ const createLead = async (req, res) => {
       });
     }
 
+    const validIndustries = ["IT", "Healthcare", "Education", "Finance", "Manufacturing", "Retail", "Real Estate", "Telecom", "Construction", "Other"];
+    const resolvedIndustry = validIndustries.includes(industry) ? industry : "IT";
+
     const lead = await LeadModel.create({
-        organization,
-      leadOwner,
-      leadSource,
+      organization: organizationId,
+      leadOwner: resolvedOwner,
+      leadSource: leadSource || "Website",
       customLeadSource,
-      industry,
+      industry: resolvedIndustry,
       customIndustry,
-      leadStatus,
-      priority,
+      leadStatus: leadStatus || "New",
+      priority: priority || "Medium",
       firstName,
       lastName,
       email,

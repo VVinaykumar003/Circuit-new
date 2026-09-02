@@ -2,8 +2,8 @@ import axios from "axios";
 
 const API_BASE_URL =
   import.meta.env.VITE_NODE_ENV === "production"
-    ? `${import.meta.env.VITE_BACKEND_URL}/api`
-    : "http://localhost:5000/api";
+    ? `${import.meta.env.VITE_BACKEND_URL || import.meta.env.VITE_PRODUCTION_URL || ""}/api`
+    : `${import.meta.env.VITE_DEVELOPMENT_URL || "http://localhost:5000"}/api`;
 
 export const API = axios.create({
   baseURL: API_BASE_URL,
@@ -16,8 +16,8 @@ export const API = axios.create({
 API.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("token");
-    if (token) {
-      config.headers["Authorization"] = `Bearer ${token}`;
+    if (token && token !== "undefined" && token !== "null" && token.trim() !== "") {
+      config.headers["Authorization"] = `Bearer ${token.trim()}`;
     }
     return config;
   },

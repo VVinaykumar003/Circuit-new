@@ -6,10 +6,25 @@ const Forecast = require('../models/forecast.model');
  */
 const createForecast = async (req, res) => {
   try {
-    const forecastData = req.body;
+    const raw = req.body || {};
+    const orgId = req.organization?._id || req.tenantId;
+    const now = new Date();
     
-    // If your app is multi-tenant, you can extract tenantId here
-    // forecastData.tenantId = req.organization?._id || req.tenantId;
+    const forecastData = {
+      ...raw,
+      tenantId: orgId,
+      forecastName: raw.forecastName || `Sales Forecast ${raw.period || now.getFullYear()}`,
+      forecastType: raw.forecastType || "Revenue",
+      period: {
+        startDate: raw.period?.startDate || raw.startDate || now,
+        endDate: raw.period?.endDate || raw.endDate || new Date(now.getTime() + 86400000 * 90),
+      },
+      forecastYear: raw.forecastYear || now.getFullYear(),
+      salesRegion: raw.salesRegion || "Global",
+      forecastRevenue: Number(raw.forecastRevenue || raw.projectedRevenue || 100000),
+      targetRevenue: Number(raw.targetRevenue || raw.forecastRevenue || raw.projectedRevenue || 100000),
+      forecastMethod: raw.forecastMethod || "Qualitative",
+    };
 
     const newForecast = new Forecast(forecastData);
     await newForecast.save();
@@ -31,14 +46,14 @@ const createForecast = async (req, res) => {
 
 /**
  * Retrieve all forecasts
- * GET /api/sales/forecast
+ * GET /api/forecast
  */
 const getForecasts = async (req, res) => {
   try {
-    // const tenantId = req.organization?._id || req.tenantId;
-    // const match = tenantId ? { tenantId } : {};
+    const orgId = req.organization?._id || req.tenantId;
+    const match = orgId ? { $or: [{ tenantId: orgId }, { tenantId: { $exists: false } }, { tenantId: null }] } : {};
     
-    const forecasts = await Forecast.find().sort({ createdAt: -1 });
+    const forecasts = await Forecast.find(match).sort({ createdAt: -1 });
     
     return res.status(200).json({
       success: true,

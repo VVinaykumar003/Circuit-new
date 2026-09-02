@@ -89,33 +89,32 @@ const Login = ({ setToken }: LoginProps) => {
 
       // Proceed if user data is successfully returned
       if (payload && payload.user) {
-        // ✅ Save the full user details so other components (like Dashboards) can access it
+        // Save the user details
         localStorage.setItem("user", JSON.stringify(payload.user || {}));
-        
-        // ✅ Only set token if it actually exists in the response (Fallback for non-cookie setups)
+
         if (payload.token) {
           localStorage.setItem("token", payload.token);
           if (setToken) setToken(payload.token);
+        } else {
+          localStorage.removeItem("token");
         }
 
-        socket.emit("joinUserRoom", payload.user.id); // Join the user's personal notification room
+        socket.emit("joinUserRoom", payload.user.id || payload.user.userId);
 
-        // ✅ Update AuthContext global state correctly
+        // Update AuthContext global state correctly
         contextLogin({ 
           user: payload.user,
           slug: payload.slug || payload.user?.slug || payload.user?.organization?.slug,
         });
 
         // Navigate to the dashboard upon successful login
-       const dept = payload.user.department?.trim().toLowerCase();
+        const dept = payload.user.department?.trim().toLowerCase();
 
-if (dept === "sales") {
-  navigate("/sales/dashboard", { replace: true });
-} else if (dept === "it") {
-  navigate("/", { replace: true });
-} else {
-  navigate("/", { replace: true });
-}
+        if (dept === "sales") {
+          navigate("/sales", { replace: true });
+        } else {
+          navigate("/", { replace: true });
+        }
       }
 
       
@@ -228,7 +227,7 @@ if (dept === "sales") {
             Don't have an account?{" "}
             <button
               type="button"
-              onClick={() => navigate("/organizationRegister")}
+              onClick={() => navigate("/organization-register")}
               className="text-white font-semibold hover:underline transition-all cursor-pointer"
             >
               Sign up

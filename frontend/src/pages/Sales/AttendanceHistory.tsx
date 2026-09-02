@@ -22,13 +22,13 @@ import AttendanceStats from "../../components/sales/AttendanceStats";
 import AttendanceFilters from "../../components/sales/AttendanceFilters";
 import AttendanceTable from "../../components/sales/AttendanceTable";
 import AttendanceDetailsDrawer from "../../components/sales/AttendanceDetailsDrawer";
-import { useAllAttendance, useApproveAttendance, useRejectAttendance } from "../../hooks/useAttendance";
+import { useAllAttendance, useAdminDashboardStats, useApproveAttendance, useRejectAttendance } from "../../hooks/useAttendance";
 import { defaultAttendanceFilters } from "../../type/attendance";
 import type { Attendance, AttendanceFilters as Filters } from "../../type/attendance";
 
 const DEPARTMENTS = ["Engineering", "Sales", "HR", "Finance", "Support"];
 
-export default function AdminAttendanceHistory() {
+export default function AttendanceHistory() {
   const [filters, setFilters] = useState<Filters>(defaultAttendanceFilters);
   const [page, setPage] = useState(1);
   const [selected, setSelected] = useState<Attendance | null>(null);
@@ -36,14 +36,13 @@ export default function AdminAttendanceHistory() {
   const pageSize = 10;
 
   const { data, isLoading, isError, refetch } = useAllAttendance(filters, page, pageSize);
-  const { data: stats, isLoading: statsLoading } = useAdminStats(filters.month ?? undefined);
-  const deleteMutation = useDeleteAttendance();
+  const { data: stats, isLoading: statsLoading } = useAdminDashboardStats();
   const approveMutation = useApproveAttendance();
   const rejectMutation = useRejectAttendance();
 
   const totalPages = data ? Math.max(1, Math.ceil(data.total / pageSize)) : 1;
-  const records = data?.data ?? [];
-  const allSelected = records.length > 0 && records.every((r) => selectedIds.has(r.id));
+  const records: Attendance[] = data?.data?.data ?? data?.data ?? [];
+  const allSelected = records.length > 0 && records.every((r) => selectedIds.has(r._id || r.id));
 
   function handleFiltersChange(next: Filters) {
     setFilters(next);
@@ -67,18 +66,19 @@ export default function AdminAttendanceHistory() {
     });
   }
 
-  function handleBulkDelete() {
-    selectedIds.forEach((id) => deleteMutation.mutate(id));
-    setSelectedIds(new Set());
-  }
-
   function handleBulkApprove() {
-    selectedIds.forEach((id) => approveMutation.mutate(id));
+    const recordsToApprove = records.filter(r => selectedIds.has(r._id || r.id));
+    recordsToApprove.forEach((record: any) => {
+      approveMutation.mutate({ attendanceId: record.attendanceDocId || record._id, employeeId: record.employee?._id || record.employee });
+    });
     setSelectedIds(new Set());
   }
 
   function handleBulkReject() {
-    selectedIds.forEach((id) => rejectMutation.mutate(id));
+    const recordsToReject = records.filter(r => selectedIds.has(r._id || r.id));
+    recordsToReject.forEach((record: any) => {
+      rejectMutation.mutate({ attendanceId: record.attendanceDocId || record._id, employeeId: record.employee?._id || record.employee });
+    });
     setSelectedIds(new Set());
   }
 

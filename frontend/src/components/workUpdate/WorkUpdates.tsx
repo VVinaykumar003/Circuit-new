@@ -15,16 +15,16 @@ import { useAuth } from "@/auth/useAuth";
 interface WorkUpdate {
   _id: string;
   description: string;
-  attachments: string[];
+  attachments?: string[];
   createdAt: string;
-  createdBy: {
-    name: string;
-    _id: string;
-  };
-  projectId: {
-    _id: string;
-    projectName: string;
-  };
+  createdBy?: {
+    name?: string;
+    _id?: string;
+  } | string | null;
+  projectId?: {
+    _id?: string;
+    projectName?: string;
+  } | string | null;
 }
 
 const WorkUpdate = ({
@@ -151,98 +151,116 @@ const WorkUpdate = ({
 
             {/* BODY */}
             <tbody>
-              {updates?.map((item) => (
-                <tr
-                  key={item._id}
-                  className="border-b border-primary/20 hover:bg-base-300/50 transition text-base-content text-[13px]"
-                >
-                  {/* Project */}
-                  <td className="py-3 px-4 font-medium">
-                    {item.projectId?.projectName}
-                  </td>
+              {updates?.map((item) => {
+                const currentUserId = auth?.user?.userId || auth?.user?._id || auth?.user?.id;
+                const itemCreatorId = typeof item.createdBy === 'object' && item.createdBy !== null
+                  ? item.createdBy._id
+                  : (typeof item.createdBy === 'string' ? item.createdBy : undefined);
+                const itemCreatorName = typeof item.createdBy === 'object' && item.createdBy !== null
+                  ? item.createdBy.name || "Member"
+                  : "Member";
+                const itemProjectName = typeof item.projectId === 'object' && item.projectId !== null
+                  ? item.projectId.projectName || "General"
+                  : (typeof item.projectId === 'string' ? "Project" : "General");
+                const isCreator = Boolean(currentUserId && itemCreatorId && String(currentUserId) === String(itemCreatorId));
+                const canDelete = isCreator || ["admin", "owner"].includes(auth?.user?.role || "");
 
-                  {/* Description */}
-                  <td className="py-3 px-4 max-w-[280px]">
-                    <p className="line-clamp-2">{item.description}</p>
-                  </td>
+                return (
+                  <tr
+                    key={item._id}
+                    className="border-b border-primary/20 hover:bg-base-300/50 transition text-base-content text-[13px]"
+                  >
+                    {/* Project */}
+                    <td className="py-3 px-4 font-medium">
+                      {itemProjectName}
+                    </td>
 
-                  {/* User */}
-                  <td className="py-3 px-4">
-                    <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-semibold">
-                        {item.createdBy?.name?.charAt(0)}
+                    {/* Description */}
+                    <td className="py-3 px-4 max-w-[280px]">
+                      <p className="line-clamp-2">{item.description}</p>
+                    </td>
+
+                    {/* User */}
+                    <td className="py-3 px-4">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-semibold">
+                          {itemCreatorName.charAt(0).toUpperCase()}
+                        </div>
+                        <span>{itemCreatorName}</span>
                       </div>
-                      <span>{item.createdBy?.name}</span>
-                    </div>
-                  </td>
+                    </td>
 
-                  {/* Files */}
-                  <td className="py-3 px-4">
-                    {item.attachments.length > 0 ? (
-                      <div className="flex flex-wrap gap-1">
-                        {item.attachments.map((file, i) => (
-                          <a
-                            key={i}
-                            href={file}
-                            target="_blank"
-                            className=" px-2 py-1 rounded-md bg-primary/10 hover:bg-primary/20 transition"
-                          >
-                            File {i + 1}
-                          </a>
-                        ))}
-                      </div>
-                    ) : (
-                      <span className=" text-base-content">
-                        No files
-                      </span>
-                    )}
-                  </td>
-
-                  {/* Date */}
-                  <td className="py-3 px-4  text-base-content whitespace-nowrap">
-                    {new Date(item.createdAt).toLocaleString("en-GB", {
-                      day: "2-digit",
-                      month: "short",
-                      year: "2-digit",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </td>
-
-                  {/* Actions */}
-                  <td className="py-3 ">
-                    <div className="flex ml-5 gap-3 min-w-[60px]">
-                      {/* EDIT */}
-                      {auth?.user?.userId === item.createdBy._id ? (
-                        <button
-                          onClick={() => {
-                            setEditingUpdate(item);
-                            setEditDescription(item.description);
-                            setEditProjectId(item.projectId?._id || "");
-                            setEditFiles([]);
-                          }}
-                          className="text-primary hover:scale-110 transition"
-                        >
-                          <MdEdit size={16} />
-                        </button>
+                    {/* Files */}
+                    <td className="py-3 px-4">
+                      {item.attachments && item.attachments.length > 0 ? (
+                        <div className="flex flex-wrap gap-1">
+                          {item.attachments.map((file, i) => (
+                            <a
+                              key={i}
+                              href={file}
+                              target="_blank"
+                              rel="noreferrer"
+                              className=" px-2 py-1 rounded-md bg-primary/10 hover:bg-primary/20 transition"
+                            >
+                              File {i + 1}
+                            </a>
+                          ))}
+                        </div>
                       ) : (
-                        <div className="w-[16px]" /> // 👈 placeholder
+                        <span className=" text-base-content">
+                          No files
+                        </span>
                       )}
+                    </td>
 
-                      {/* DELETE */}
-                      {(auth?.user?.userId === item.createdBy._id ||
-                        ["admin", "owner"].includes(auth?.user?.role)) && (
-                        <button
-                          onClick={() => handleDelete(item._id)}
-                          className="text-error hover:scale-110 transition"
-                        >
-                          <MdDelete size={16} />
-                        </button>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              ))}
+                    {/* Date */}
+                    <td className="py-3 px-4  text-base-content whitespace-nowrap">
+                      {item.createdAt ? new Date(item.createdAt).toLocaleString("en-GB", {
+                        day: "2-digit",
+                        month: "short",
+                        year: "2-digit",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      }) : "-"}
+                    </td>
+
+                    {/* Actions */}
+                    <td className="py-3 ">
+                      <div className="flex ml-5 gap-3 min-w-[60px]">
+                        {/* EDIT */}
+                        {isCreator ? (
+                          <button
+                            onClick={() => {
+                              setEditingUpdate(item);
+                              setEditDescription(item.description);
+                              const pId = typeof item.projectId === 'object' && item.projectId !== null
+                                ? (item.projectId._id || "")
+                                : (typeof item.projectId === 'string' ? item.projectId : "");
+                              setEditProjectId(pId);
+                              setEditFiles([]);
+                            }}
+                            className="text-primary hover:scale-110 transition"
+                          >
+                            <MdEdit size={16} />
+                          </button>
+                        ) : (
+                          <div className="w-[16px]" /> // 👈 placeholder
+                        )}
+
+                        {/* DELETE */}
+                        {canDelete && (
+                          <button
+                            onClick={() => handleDelete(item._id)}
+                            className="text-error hover:scale-110 transition"
+                          >
+                            <MdDelete size={16} />
+                          </button>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
