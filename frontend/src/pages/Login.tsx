@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import Lottie from "lottie-react";
 import { LockIcon, User2Icon, AlertCircleIcon, Loader2Icon } from "lucide-react";
@@ -21,10 +21,7 @@ const Login = ({ setToken }: LoginProps) => {
   // const animationUrl = "/login-animation.json";
 
 
-   // 2. State management for the animation file
-  const [animationData, setAnimationData] = useState<any>(null);
-  const [animationLoading, setAnimationLoading] = useState<boolean>(true);
-  const [animationError, setAnimationError] = useState<boolean>(false);
+
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -34,23 +31,7 @@ const Login = ({ setToken }: LoginProps) => {
   const [showPassword, setShowPassword] = useState(false);
 
 
-   // 3. Fetch the animation safely from the public folder
-  useEffect(() => {
-    fetch("/login-animation.json")
-      .then((res) => {
-        if (!res.ok) throw new Error("Failed to fetch animation file");
-        return res.json();
-      })
-      .then((data) => {
-        setAnimationData(data);
-        setAnimationLoading(false);
-      })
-      .catch((err) => {
-        console.error(err);
-        setAnimationError(true);
-        setAnimationLoading(false);
-      });
-  }, []);
+  
 
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -130,25 +111,12 @@ const Login = ({ setToken }: LoginProps) => {
     <div className="min-h-screen flex items-center justify-center bg-white p-6">
       <div className="w-full max-w-5xl bg-blue-200 rounded-2xl shadow-xl overflow-hidden flex flex-col md:flex-row">
        {/* LEFT SIDE: Handles loading, error, and rendering smoothly */}
-        <div className="w-full md:w-1/2 bg-blue-100 flex flex-col items-center justify-center p-10 min-h-[300px]">
-          {animationLoading && (
-            <div className="flex flex-col items-center space-y-2 text-blue-600">
-              <Loader2Icon className="w-8 h-8 animate-spin" />
-              <p className="text-sm font-medium">Loading animation...</p>
-            </div>
-          )}
-
-          {animationError && (
-            <div className="flex flex-col items-center space-y-2 text-red-500 text-center">
-              <AlertCircleIcon className="w-8 h-8" />
-              <p className="text-sm font-medium">Could not load visual assets.</p>
-              <p className="text-xs text-gray-500">You can still log in normally.</p>
-            </div>
-          )}
-
-          {!animationLoading && !animationError && animationData && (
-            <Lottie animationData={animationData} loop={true} />
-          )}
+      <div className="w-full md:w-1/2 bg-blue-100 flex items-center justify-center overflow-hidden">
+          <img
+            src="/loginImage.png"
+            alt="Circuit ERP"
+            className="w-full h-full max-h-[520px] object-fill"
+          />
         </div>
 
 

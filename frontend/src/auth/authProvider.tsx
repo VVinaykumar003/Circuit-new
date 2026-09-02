@@ -1,5 +1,4 @@
-import API from "@/api/axios";
-
+import { getCurrentUserApi ,logoutApi } from "@/services/api/auth.api";
 import {
   useCallback,
   useEffect,
@@ -170,7 +169,7 @@ export const AuthProvider = ({
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const res = await API.get("/auth/me");
+       const res = await getCurrentUserApi();
 
         const user =
           res.data.user as OrganizationMember;
@@ -326,7 +325,7 @@ export const AuthProvider = ({
    */
   const logout = useCallback(async () => {
     try {
-      await API.post("/auth/logout");
+      await logoutApi();
     } catch (err) {
       console.error(
         "Logout failed",

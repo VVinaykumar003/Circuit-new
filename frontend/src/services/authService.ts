@@ -8,4 +8,4 @@ export const login = (data) => API.post("/auth/login", data);
 export const logout = () => API.post("/auth/logout");
 
 // Corrected to match the backend route in routes/index.js
-export const getProfile = () => API.get("/auth/me");
+// export const getProfile = () => API.get("/auth/me");
