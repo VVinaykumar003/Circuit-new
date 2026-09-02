@@ -51,14 +51,47 @@ const uploadOnCloudinary = async (filePath) => {
     return null; // Return null or handle the error as needed
   }
 };
+const streamifier = require('streamifier');
+
+const uploadBufferToCloudinary = async (buffer, options = {}) => {
+  if (!buffer) {
+    throw new Error('Buffer is required for upload');
+  }
+
+  return new Promise((resolve, reject) => {
+    const folder = options.folder || 'circuit_uploads';
+    const resourceType = options.resourceType || options.resource_type || 'auto';
+
+    const stream = cloudinary.uploader.upload_stream(
+      {
+        folder,
+        resource_type: resourceType,
+        use_filename: true,
+        unique_filename: true,
+        ...options,
+      },
+      (error, result) => {
+        if (error) {
+          logger.error('Error uploading buffer to Cloudinary:', error);
+          reject(error);
+        } else {
+          logger.info(`Buffer uploaded to Cloudinary: ${result.secure_url}`);
+          resolve(result);
+        }
+      }
+    );
+
+    streamifier.createReadStream(buffer).pipe(stream);
+  });
+};
+
 // Set up local disk storage for multer (saves temporarily before Cloudinary upload)
 const storage = multer.diskStorage({});
 const upload = multer({ storage });
 
-
-
 module.exports = {
   uploadOnCloudinary,
+  uploadBufferToCloudinary,
   upload,
   cloudinary,
 };
