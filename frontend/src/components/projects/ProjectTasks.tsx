@@ -111,12 +111,7 @@ function TaskDrawer({
 
       await API.put(
         `/tasks/${auth.slug}/updateTask/${projectId}/${task.id}`,
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        },
+        formData
       );
 
       toast.success("Task Updated Successfully");

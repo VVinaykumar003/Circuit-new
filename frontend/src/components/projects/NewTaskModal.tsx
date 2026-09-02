@@ -176,12 +176,7 @@ export default function NewTaskModal({
 
       const { data } = await API.post(
         `/tasks/${auth.slug}/addTasks/${selectedProject}`,
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
+        formData
       );
 
       if (data.success) {

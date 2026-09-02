@@ -1,6 +1,6 @@
 
 const User = require("../models/User.model");
-const { cloudinary } = require("../config/cloudinary");
+const { cloudinary, uploadBufferToCloudinary } = require("../config/cloudinary");
 const streamifier = require("streamifier");
 const NotificationModel = require("../models/Notification.model");
 const { getIO } = require("../services/socket.service.js");
@@ -40,26 +40,18 @@ const sendNotification = async (req, res) => {
     const uploadedAttachments = [];
 
     for (const file of files) {
-      const result = await new Promise((resolve, reject) => {
-      const stream = cloudinary.uploader.upload_stream(
-  {
-    folder: "notifications",
-    resource_type: "auto",
-  },
-  (error, result) => {
-            if (error) reject(error);
-            else resolve(result);
-          }
-        );
-
-        streamifier.createReadStream(file.buffer).pipe(stream);
+      const result = await uploadBufferToCloudinary(file.buffer, {
+        folder: "notifications",
+        resource_type: "auto",
       });
 
-      uploadedAttachments.push({
-        fileUrl: result.secure_url,
-        fileName: file.originalname,
-        fileType: file.mimetype,
-      });
+      if (result?.secure_url) {
+        uploadedAttachments.push({
+          fileUrl: result.secure_url,
+          fileName: file.originalname,
+          fileType: file.mimetype,
+        });
+      }
     }
 
     const notification = await NotificationModel.create({
@@ -184,26 +176,18 @@ const updateNotification = async (req, res) => {
       uploadedAttachments = [];
 
       for (const file of files) {
-        const result = await new Promise((resolve, reject) => {
-       const stream = cloudinary.uploader.upload_stream(
-  {
-    folder: "notifications",
-    resource_type: "auto",
-  },
-  (error, result) => {
-              if (error) reject(error);
-              else resolve(result);
-            }
-          );
-
-          streamifier.createReadStream(file.buffer).pipe(stream);
+        const result = await uploadBufferToCloudinary(file.buffer, {
+          folder: "notifications",
+          resource_type: "auto",
         });
 
-        uploadedAttachments.push({
-          fileUrl: result.secure_url,
-          fileName: file.originalname,
-          fileType: file.mimetype,
-        });
+        if (result?.secure_url) {
+          uploadedAttachments.push({
+            fileUrl: result.secure_url,
+            fileName: file.originalname,
+            fileType: file.mimetype,
+          });
+        }
       }
     }
 

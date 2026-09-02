@@ -1,5 +1,5 @@
 const Product = require("../models/Product.model");
-const { cloudinary } = require("../config/cloudinary");
+const { cloudinary, uploadBufferToCloudinary } = require("../config/cloudinary");
 const streamifier = require("streamifier");
 
 /**
@@ -22,19 +22,12 @@ exports.createProduct = async (req, res) => {
     }
 
     for (const file of files) {
-      const isImage = file.fieldname === 'images';
+      const isImage = file.fieldname === 'images' || (file.mimetype && file.mimetype.startsWith('image/'));
       const folder = isImage ? "products/images" : "products/documents";
-      const resourceType = isImage ? "image" : "auto"; // "auto" lets cloudinary figure out raw/pdf formats
       
-      const result = await new Promise((resolve, reject) => {
-        const stream = cloudinary.uploader.upload_stream(
-          { folder, resource_type: resourceType },
-          (error, result) => {
-            if (error) reject(error);
-            else resolve(result);
-          }
-        );
-        streamifier.createReadStream(file.buffer).pipe(stream);
+      const result = await uploadBufferToCloudinary(file.buffer, {
+        folder,
+        resource_type: isImage ? "image" : "auto",
       });
 
       if (isImage) imageUrls.push(result.secure_url);
@@ -159,23 +152,16 @@ exports.updateProduct = async (req, res) => {
 
     if (files.length > 0) {
       for (const file of files) {
-        const isImage = file.fieldname === 'images';
+        const isImage = file.fieldname === 'images' || (file.mimetype && file.mimetype.startsWith('image/'));
         const folder = isImage ? "products/images" : "products/documents";
-        const resourceType = isImage ? "image" : "auto";
         
-        const result = await new Promise((resolve, reject) => {
-          const stream = cloudinary.uploader.upload_stream(
-            { folder, resource_type: resourceType },
-            (error, result) => {
-              if (error) reject(error);
-              else resolve(result);
-            }
-          );
-          streamifier.createReadStream(file.buffer).pipe(stream);
+        const result = await uploadBufferToCloudinary(file.buffer, {
+          folder,
+          resource_type: isImage ? "image" : "auto",
         });
 
         if (isImage) imageUrls.push(result.secure_url);
-      else documentUrls.push({ name: file.originalname, url: result.secure_url });
+        else documentUrls.push({ name: file.originalname, url: result.secure_url });
       }
     }
 

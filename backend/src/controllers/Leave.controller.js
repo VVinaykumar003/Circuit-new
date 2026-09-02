@@ -5,7 +5,7 @@ const Activity = require('../models/Activity');
 const { getIO } = require("../services/socket.service");
 const { sendEmailNotification } = require("../utils/notifier");
 
-const { cloudinary } = require("../config/cloudinary");
+const { cloudinary, uploadBufferToCloudinary } = require("../config/cloudinary");
 const streamifier = require("streamifier");
 // Safe Chalk Import
 let chalk;
@@ -104,23 +104,9 @@ exports.applyLeave = async (req, res) => {
     const files = req.files || [];
     for (const file of files) {
       try {
-        let resourceType = "auto";
-        if (file.mimetype && file.mimetype.startsWith("image/")) {
-          resourceType = "image";
-        }
-        const result = await new Promise((resolve, reject) => {
-          const stream = cloudinary.uploader.upload_stream(
-            {
-              folder: "leaves",
-              resource_type: resourceType,
-            },
-            (error, result) => {
-              if (error) reject(error);
-              else resolve(result);
-            }
-          );
-
-          streamifier.createReadStream(file.buffer).pipe(stream);
+        const result = await uploadBufferToCloudinary(file.buffer, {
+          folder: "leaves",
+          resource_type: "auto",
         });
 
         if (result && result.secure_url) {
@@ -527,22 +513,9 @@ exports.updateLeave = async (req, res) => {
     const newFiles = req.files || [];
     for (const file of newFiles) {
       try {
-        let resourceType = "auto";
-        if (file.mimetype && file.mimetype.startsWith("image/")) {
-          resourceType = "image";
-        }
-        const result = await new Promise((resolve, reject) => {
-          const stream = cloudinary.uploader.upload_stream(
-            {
-              folder: "leaves",
-              resource_type: resourceType,
-            },
-            (error, result) => {
-              if (error) reject(error);
-              else resolve(result);
-            }
-          );
-          streamifier.createReadStream(file.buffer).pipe(stream);
+        const result = await uploadBufferToCloudinary(file.buffer, {
+          folder: "leaves",
+          resource_type: "auto",
         });
         if (result && result.secure_url) {
           updatedAttachmentsList.push(result.secure_url);

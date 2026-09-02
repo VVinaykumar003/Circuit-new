@@ -1,4 +1,4 @@
-const { cloudinary } = require("../config/cloudinary");
+const { cloudinary, uploadBufferToCloudinary } = require("../config/cloudinary");
 const streamifier = require("streamifier");
 const Project = require("../models/Project.model");
 const Task = require("../models/Task.model");
@@ -53,19 +53,14 @@ console.log("User:", req.user);
     const uploadedAttachments = [];
 
     for (const file of files) {
-      const result = await new Promise((resolve, reject) => {
-        const stream = cloudinary.uploader.upload_stream(
-          { folder: "tasks" },
-          (error, result) => {
-            if (error) reject(error);
-            else resolve(result);
-          },
-        );
-
-        streamifier.createReadStream(file.buffer).pipe(stream);
+      const result = await uploadBufferToCloudinary(file.buffer, {
+        folder: "tasks",
+        resource_type: "auto",
       });
 
-      uploadedAttachments.push(result.secure_url);
+      if (result && result.secure_url) {
+        uploadedAttachments.push(result.secure_url);
+      }
     }
 
     // Role check
@@ -239,37 +234,16 @@ const updateTask = async (req, res) => {
     let uploadedAttachments = [];
 
     if (req.files && req.files.length > 0) {
-    uploadedAttachments = await Promise.all(
-  req.files.map((file) => {
-    return new Promise((resolve, reject) => {
-      let resourceType = "raw";
-
-if(file.mimetype.startsWith("image/")){
-  resourceType = "image";
-}
-console.log({
-  name: file.originalname,
-  type: file.mimetype
-});
-const stream = cloudinary.uploader.upload_stream(
-{
-  folder: "tasks",
-  resource_type: resourceType,
-   public_id: file.originalname,
-  use_filename: true,
-  unique_filename: true,
-},
-(error, result) => {
-  if (error) reject(error);
-  else resolve(result.secure_url);
-});
-
-      streamifier
-        .createReadStream(file.buffer)
-        .pipe(stream);
-    });
-  }),
-);
+      uploadedAttachments = await Promise.all(
+        req.files.map(async (file) => {
+          const result = await uploadBufferToCloudinary(file.buffer, {
+            folder: "tasks",
+            resource_type: "auto",
+          });
+          return result?.secure_url;
+        })
+      );
+      uploadedAttachments = uploadedAttachments.filter(Boolean);
     }
     console.log(req.files);
     const updateQuery = { ...updateFields };

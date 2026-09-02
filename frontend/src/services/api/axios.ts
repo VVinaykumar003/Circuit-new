@@ -40,6 +40,13 @@ export const API = axios.create({
 
 API.interceptors.request.use(
   (config) => {
+    // For multipart FormData, let the browser/Axios compute the Content-Type boundary automatically
+    if (config.data instanceof FormData) {
+      if (config.headers) {
+        delete config.headers["Content-Type"];
+      }
+    }
+
     const token = localStorage.getItem("token");
     if (token && token !== "undefined" && token !== "null" && token.trim() !== "") {
       config.headers["Authorization"] = `Bearer ${token.trim()}`;
@@ -52,7 +59,15 @@ API.interceptors.request.use(
 API.interceptors.response.use(
   (response) => response,
   (error) => {
-    const { response } = error;
+    const { response, config } = error;
+    if (import.meta.env.DEV) {
+      const isFormData = config?.data instanceof FormData;
+      console.warn(
+        `[API Error] ${config?.method?.toUpperCase()} ${config?.url} -> ${response?.status || "Network Error"}:`,
+        response?.data?.message || error.message,
+        isFormData ? "[FormData Payload]" : ""
+      );
+    }
     if (response && response.status === 401) {
       console.warn("Unauthorized request detected.");
     }

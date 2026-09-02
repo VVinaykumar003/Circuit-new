@@ -176,14 +176,35 @@ app.use((req, res, next) => {
 
 // Global Error Handler
 app.use((err, req, res, next) => {
-  const statusCode = err.statusCode || 500;
-  const message = err.message || "Internal Server Error";
+  let statusCode = err.statusCode || (err.status && typeof err.status === "number" ? err.status : 500);
+  let message = err.message || "Internal Server Error";
 
-  // Log error for debugging
-  console.error(`[Error] ${message}`, err.stack);
+  if (err.name === "MulterError") {
+    if (err.code === "LIMIT_FILE_SIZE") {
+      statusCode = 413;
+      message = "File size exceeds the allowed limit (50MB)";
+    } else if (err.code === "LIMIT_UNEXPECTED_FILE") {
+      statusCode = 400;
+      message = `Unexpected file field: ${err.field || "unknown"}`;
+    } else if (err.code === "LIMIT_FILE_COUNT") {
+      statusCode = 400;
+      message = "Too many files uploaded in a single request";
+    } else {
+      statusCode = 400;
+      message = `Upload format error: ${err.message}`;
+    }
+  }
+
+  // Safe developer diagnostic logging
+  if (process.env.NODE_ENV === "development") {
+    console.error(`[Error] ${req.method} ${req.originalUrl} -> ${statusCode}: ${message}`, err.stack);
+  } else {
+    console.error(`[Error] ${req.method} ${req.originalUrl} -> ${statusCode}: ${message}`);
+  }
 
   res.status(statusCode).json({
     status: "error",
+    success: false,
     message,
     ...(process.env.NODE_ENV === "development" && { stack: err.stack })
   });

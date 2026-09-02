@@ -1,9 +1,8 @@
 const Activity = require("../models/Activity");
-const { uploadOnCloudinary } = require("../config/cloudinary");
+const { uploadOnCloudinary, uploadBufferToCloudinary, cloudinary } = require("../config/cloudinary");
 const WorkUpdateModel = require("../models/WorkUpdate.model");
 const ProjectModel = require("../models/Project.model");
 const logger = require("../common/libs/logger");
-const { cloudinary } = require("../config/cloudinary");
 const streamifier = require("streamifier");
 // Add Work Update
 
@@ -40,39 +39,19 @@ if (Array.isArray(req.files)) {
     // Upload attachments to Cloudinary
     const uploadedAttachments = [];
 
-for (const file of files) {
-  const result = await new Promise((resolve, reject) => {
+    for (const file of files) {
+      const result = await uploadBufferToCloudinary(file.buffer, {
+        folder: "work-updates",
+        resource_type: "auto",
+      });
 
-    let resourceType = "raw";
-
-    if (file.mimetype.startsWith("image/")) {
-      resourceType = "image";
+      if (result?.secure_url) {
+        uploadedAttachments.push(result.secure_url);
+      }
     }
 
-    const stream = cloudinary.uploader.upload_stream(
-      {
-        folder: "work-updates",
-        resource_type: resourceType,
-         public_id: file.originalname,
-        use_filename: true,
-        unique_filename: true,
-      },
-      (error, result) => {
-        if (error) reject(error);
-        else resolve(result);
-      }
-    );
-
-    streamifier
-      .createReadStream(file.buffer)
-      .pipe(stream);
-
-  });
-
-  if (result?.secure_url) {
-    uploadedAttachments.push(result.secure_url);
-  }
-}
+    const validStatuses = ["updated", "notUpdated", "pending", "in-progress", "completed"];
+    const normalizedStatus = validStatuses.includes(status) ? status : "updated";
 
     // Create work update
     const workUpdate = new WorkUpdateModel({
@@ -80,7 +59,7 @@ for (const file of files) {
       projectId,
       description,
       attachments: uploadedAttachments,
-      status: status || "updated",
+      status: normalizedStatus,
       createdBy: userId,
     });
 
@@ -225,41 +204,16 @@ const editWorkUpdate = async (req, res) => {
     }
     const uploadedAttachments = [];
 
-   for (const file of files) {
-
-  const result = await new Promise((resolve, reject) => {
-
-    let resourceType = "raw";
-
-    if (file.mimetype.startsWith("image/")) {
-      resourceType = "image";
-    }
-
-    const stream = cloudinary.uploader.upload_stream(
-      {
+    for (const file of files) {
+      const result = await uploadBufferToCloudinary(file.buffer, {
         folder: "work-updates",
-        resource_type: resourceType,
-          public_id: file.originalname,
-        use_filename: true,
-        unique_filename: true,
-      },
-      (error, result) => {
-        if (error) reject(error);
-        else resolve(result);
+        resource_type: "auto",
+      });
+
+      if (result?.secure_url) {
+        uploadedAttachments.push(result.secure_url);
       }
-    );
-
-    streamifier
-      .createReadStream(file.buffer)
-      .pipe(stream);
-
-  });
-
-
-  if (result?.secure_url) {
-    uploadedAttachments.push(result.secure_url);
-  }
-}
+    }
 
     // Update fields
     if (description) workUpdate.description = description;

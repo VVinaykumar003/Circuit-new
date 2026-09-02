@@ -5,12 +5,7 @@ export const addWorkUpdate = async (
   slug: string,
   formData: FormData,
 ) => {
-  const res = await API.post(`/${slug}/workUpdate/${projectId}`, formData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
-
+  const res = await API.post(`/${slug}/workUpdate/${projectId}`, formData);
   return res.data;
 };
 
@@ -21,7 +16,6 @@ export const getWorkUpdates = async (
   try {
     const response = await API.get(`/${slug}/workUpdate`, {
       params,
-      withCredentials: true,
     });
 
     return response.data;
@@ -39,12 +33,6 @@ export const editWorkUpdate = async (
     const response = await API.put(
       `/${slug}/workUpdate/${updateId}`,
       formData,
-      {
-        withCredentials: true,
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      },
     );
 
     return response.data;

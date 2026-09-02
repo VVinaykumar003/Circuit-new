@@ -17,8 +17,8 @@ const workUpdateSchema = new mongoose.Schema({
   attachments:[String],
   status:{
     type: String,
-    enum: ['updated', 'notUpdated'],
-    default: 'notUpdated',
+    enum: ['updated', 'notUpdated', 'pending', 'in-progress', 'completed'],
+    default: 'updated',
   },
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
