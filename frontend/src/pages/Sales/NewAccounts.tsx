@@ -304,7 +304,18 @@ const payload = {
                     <option value="+91">🇮🇳 +91</option>
                     <option value="+44">🇬🇧 +44</option>
                   </select>
-                  <input type="tel" {...register("phoneNumber")} className="input input-sm border-none w-full focus:outline-none" placeholder="12345 67890" />
+                  <input
+                  maxLength={10}
+                    type="tel"
+                    {...register("phoneNumber",{
+                          onChange: (e) => {
+      e.target.value = e.target.value.replace(/\D/g, "").slice(0, 10);
+    },
+
+                    })}
+                    className="input input-sm border-none w-full focus:outline-none"
+                    placeholder="12345 67890"
+                  />
                 </div>
               </FormRow>
             </div>

@@ -214,7 +214,7 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
                   <MdPerson size={14} /> My Profile
                 </button>
               </li>
-              <li>
+              {/* <li>
                 <button
                   type="button"
                   onClick={() => navigate("/settings")}
@@ -222,7 +222,7 @@ export default function Navbar({ onMenuClick }: NavbarProps) {
                 >
                   <MdSettings size={14} /> Settings
                 </button>
-              </li>
+              </li> */}
               <div className="divider my-0.5"></div>
               <li>
                 <button

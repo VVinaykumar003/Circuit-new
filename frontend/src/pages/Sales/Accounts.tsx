@@ -401,8 +401,7 @@ export default function AccountsDashboard() {
   return (
     <div className="min-h-screen bg-base-200 p-4 md:p-6 font-sans flex flex-col h-full overflow-hidden relative">
       {/* ── Header ── */}
-    
-
+     
       <PageHeader
       title='Accounts Management'
        breadcrumbs={[

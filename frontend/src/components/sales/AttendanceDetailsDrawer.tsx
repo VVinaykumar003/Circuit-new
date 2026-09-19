@@ -10,7 +10,15 @@ export default function AttendanceDetailsDrawer({
   onClose: () => void;
 }) {
   const open = record !== null;
+const formatTime = (dateTime?: string | null) => {
+  if (!dateTime) return "—";
 
+  return new Date(dateTime).toLocaleTimeString("en-IN", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  });
+};
   return (
     <div className={`fixed inset-0 z-50 ${open ? "" : "pointer-events-none"}`} aria-hidden={!open}>
       {/* Backdrop */}
@@ -40,7 +48,18 @@ export default function AttendanceDetailsDrawer({
 
             <div className="flex-1 overflow-y-auto p-5 space-y-6">
               <div className="flex items-center gap-3">
-                <img src={record.profileImage} alt={record.employeeName} className="w-12 h-12 rounded-full object-cover" />
+                {/* <img src={record.profileImage} alt={record.employeeName} className="w-12 h-12 rounded-full object-cover" /> */}
+                {record.profileImage ? (
+  <img
+    src={record.profileImage}
+    alt={record.employeeName}
+    className="w-12 h-12 rounded-full object-cover"
+  />
+) : (
+  <div className="w-12 h-12 rounded-full bg-base-300 flex items-center justify-center font-semibold">
+    {record.employeeName?.charAt(0).toUpperCase()}
+  </div>
+)}
                 <div>
                   <p className="font-semibold">{record.employeeName}</p>
                   <p className="text-xs text-base-content/60">
@@ -62,11 +81,13 @@ export default function AttendanceDetailsDrawer({
                 <div className="grid grid-cols-2 gap-3">
                   <div className="rounded-xl bg-base-200 p-3">
                     <p className="text-[11px] text-base-content/50">Check In</p>
-                    <p className="font-semibold">{record.checkIn}</p>
+                    <p className="font-semibold">  {formatTime(record.checkIn)}</p>
                   </div>
                   <div className="rounded-xl bg-base-200 p-3">
                     <p className="text-[11px] text-base-content/50">Check Out</p>
-                    <p className="font-semibold">{record.checkOut}</p>
+                    <p className="font-semibold"><p className="font-semibold">
+   {formatTime(record.checkOut)}
+</p></p>
                   </div>
                 </div>
               </div>
@@ -74,17 +95,17 @@ export default function AttendanceDetailsDrawer({
               <div className="grid grid-cols-3 gap-3 text-center">
                 <div className="rounded-xl border border-base-300 p-3">
                   <Clock className="w-4 h-4 mx-auto mb-1 text-primary" />
-                  <p className="text-sm font-semibold">{record.totalHours}h</p>
+                  <p className="text-sm font-semibold">  {record.workingHours ?? 0}h</p>
                   <p className="text-[10px] text-base-content/50">Working</p>
                 </div>
                 <div className="rounded-xl border border-base-300 p-3">
                   <Coffee className="w-4 h-4 mx-auto mb-1 text-warning" />
-                  <p className="text-sm font-semibold">{record.breakHours}h</p>
+                  <p className="text-sm font-semibold">{record.totalBreak ?? 0}h</p>
                   <p className="text-[10px] text-base-content/50">Break</p>
                 </div>
                 <div className="rounded-xl border border-base-300 p-3">
                   <Timer className="w-4 h-4 mx-auto mb-1 text-success" />
-                  <p className="text-sm font-semibold">{record.overtimeHours}h</p>
+                  <p className="text-sm font-semibold">   {record.overtime ?? 0}h</p>
                   <p className="text-[10px] text-base-content/50">Overtime</p>
                 </div>
               </div>
@@ -112,9 +133,9 @@ export default function AttendanceDetailsDrawer({
               )}
             </div>
 
-            <div className="p-5 border-t border-base-300">
+            {/* <div className="p-5 border-t border-base-300">
               <button className="btn btn-primary btn-block btn-sm">Download Slip</button>
-            </div>
+            </div> */}
           </div>
         )}
       </div>

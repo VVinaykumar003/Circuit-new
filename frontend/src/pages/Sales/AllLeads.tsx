@@ -23,6 +23,7 @@ import {
   MdNotes,
   MdPerson,
   MdAdd,
+  MdDownload,
 } from "react-icons/md";
 import { deleteLead, getLeads, updateLead, convertLeadToCustomer, bulkDeleteLeads } from "@/services/leadServices";
 import { useAuth } from "@/auth/useAuth";
@@ -454,6 +455,8 @@ const [ownerFilter, setOwnerFilter] = useState("All");
 
   return (
     <div className="min-h-screen bg-base-200 p-4 md:p-6 font-sans flex flex-col h-full overflow-hidden relative">
+      {/* ── Header ── */}
+    
 
       <PageHeader
       title="All Leads"
@@ -776,13 +779,13 @@ const [ownerFilter, setOwnerFilter] = useState("All");
               </button>
             </div>
 
-            <div className="flex gap-2">
-              <button className="btn btn-primary btn-sm flex-1">
+            <div className="flex gap-2 justify-end">
+              {/* <button className="btn btn-primary btn-sm flex-1">
                 <MdPhone /> Call
               </button>
               <button className="btn btn-outline btn-sm flex-1 bg-base-100">
                 <MdEmail /> Email
-              </button>
+              </button> */}
               <div className="dropdown dropdown-end">
                 <button
                   tabIndex={0}
@@ -836,12 +839,12 @@ const [ownerFilter, setOwnerFilter] = useState("All");
               >
                 Timeline
               </a>
-              <a
+              {/* <a
                 className={`tab font-medium ${activeTab === "notes" ? "tab-active text-primary" : ""}`}
                 onClick={() => setActiveTab("notes")}
               >
                 Notes
-              </a>
+              </a> */}
             </div>
           </div>
 
@@ -1176,7 +1179,7 @@ const [ownerFilter, setOwnerFilter] = useState("All");
               </div>
             )}
 
-            {activeTab === "notes" && (
+            {/* {activeTab === "notes" && (
               <div className="animate-fade-in flex flex-col h-full">
                 <textarea
                   className="textarea textarea-bordered w-full flex-1 min-h-[200px]"
@@ -1186,7 +1189,7 @@ const [ownerFilter, setOwnerFilter] = useState("All");
                   <MdNotes /> Save Note
                 </button>
               </div>
-            )}
+            )} */}
               {isEditing && (
           <div className="flex justify-end gap-2 mt-4">
             <button

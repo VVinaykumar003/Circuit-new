@@ -7,7 +7,8 @@ import { MdClose, MdFolder, MdAssignment, MdLightbulbOutline, MdCheckCircle, MdO
 
 interface Project {
   _id: string;
-  projectName: string;
+  projectName: string;   
+  
 }
 
 interface WorkUpdateFormProps {

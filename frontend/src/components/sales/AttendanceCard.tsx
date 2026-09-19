@@ -13,7 +13,15 @@ export default function AttendanceCard({
 }) {
   const day = new Date(record.date).toLocaleDateString("en-US", { weekday: "short" });
   const dateLabel = new Date(record.date).toLocaleDateString("en-US", { day: "2-digit", month: "short" });
+const formatTime = (value?: string | null) => {
+  if (!value) return "--:--";
 
+  return new Date(value).toLocaleTimeString("en-IN", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  });
+};
   return (
     <button
       onClick={() => onView(record)}
@@ -21,13 +29,17 @@ export default function AttendanceCard({
     >
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-3">
-          {showEmployee && (
-            <img
-              src={record.profileImage}
-              alt={record.employeeName}
-              className="w-9 h-9 rounded-full object-cover"
-            />
-          )}
+          {showEmployee &&   (record.profileImage ? (
+              <img
+                src={record.profileImage}
+                alt={record.employeeName}
+                className="w-9 h-9 rounded-full object-cover"
+              />
+            ) : (
+              <div className="w-9 h-9 rounded-full bg-base-200 flex items-center justify-center text-sm font-semibold">
+                {record.employeeName?.charAt(0).toUpperCase()}
+              </div>
+            ))}
           <div>
             {showEmployee && <p className="text-sm font-semibold leading-tight">{record.employeeName}</p>}
             <p className="text-xs text-base-content/60">
@@ -41,11 +53,11 @@ export default function AttendanceCard({
       <div className="grid grid-cols-3 gap-2 mt-3 text-xs">
         <div className="flex flex-col">
           <span className="text-base-content/50">Check In</span>
-          <span className="font-medium">{record.checkIn}</span>
+          <span className="font-medium">{formatTime(record.checkIn)}</span>
         </div>
         <div className="flex flex-col">
           <span className="text-base-content/50">Check Out</span>
-          <span className="font-medium">{record.checkOut}</span>
+          <span className="font-medium">{formatTime(record.checkOut)}</span>
         </div>
         <div className="flex flex-col">
           <span className="text-base-content/50">Hours</span>

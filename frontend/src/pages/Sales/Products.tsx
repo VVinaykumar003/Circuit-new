@@ -74,29 +74,21 @@ export default function NewProduct() {
     <div className="min-h-screen bg-base-200 p-3 md:p-4 lg:p-6 font-sans">
       
       {/* ── Page Header ── */}
+     
       <PageHeader
-        title={isEditMode ? "Edit Software Product" : "Add New Software Product"}
-        breadcrumbs={[
-          { label: "Dashboard" },
-          { label: "Sales" },
-          { label: "Products" },
-          { label: isEditMode ? "Edit Product" : "Add Product", active: true },
-        ]}
-        cancel
-        actions={[
-          {
-            label: "Load Template",
-            icon: <MdContentCopy size={14} />,
-            variant: "outline",
-            onClick: () => loadTemplate("Software"),
-          },
-          {
-            label: "Save Draft",
-            icon: <MdSave size={14} />,
-            variant: "outline",
-          },
-        ]}
-      />
+  title={isEditMode ? "Edit Software Product" : "Add New Software Product"}
+  breadcrumbs={[
+    { label: "Dashboard" },
+    { label: "Sales" },
+    { label: "Products" },
+    {
+      label: isEditMode ? "Edit Product" : "Add Product",
+      active: true,
+    },
+  ]}
+  cancel
+/>
+   
 
       <form onSubmit={handleSubmit(hookOnSubmit)} className="grid grid-cols-1 lg:grid-cols-4 gap-4">
         

@@ -3,7 +3,7 @@ import { useAuth } from "@/auth/useAuth";
 import { getEnabledDepartments, getDepartmentById } from "@/config/departments";
 import { isManagementRole } from "@/config/roles";
 import { MdCheck, MdExpandMore, MdDashboard, MdTrendingUp, MdPeople, MdPayments, MdSupportAgent, MdInventory } from "react-icons/md";
-
+import { useNavigate } from "react-router-dom";
 const DEPT_ICONS: Record<string, React.ReactNode> = {
   MdDashboard: <MdDashboard size={15} />,
   MdTrendingUp: <MdTrendingUp size={15} />,
@@ -16,8 +16,14 @@ const DEPT_ICONS: Record<string, React.ReactNode> = {
 interface DepartmentSwitcherProps {
   collapsed?: boolean;
 }
+const DEPARTMENT_DASHBOARDS: Record<string, string> = {
+  erp: "/",
+  sales: "/sales",
+};
+
 
 export default function DepartmentSwitcher({ collapsed = false }: DepartmentSwitcherProps) {
+  const navigate = useNavigate();
   const { auth, activeDepartment, setActiveDepartment } = useAuth();
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -100,6 +106,7 @@ export default function DepartmentSwitcher({ collapsed = false }: DepartmentSwit
                 onClick={() => {
                   setActiveDepartment(dept.id);
                   setOpen(false);
+                     navigate(DEPARTMENT_DASHBOARDS[dept.id] || "/");
                 }}
                 className={`w-full flex items-center justify-between p-1.5 rounded-md text-[11px] font-medium transition-colors ${
                   isSelected

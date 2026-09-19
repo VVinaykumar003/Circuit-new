@@ -44,7 +44,7 @@ export default function Members() {
     await deleteMember(slug, id);
 
     setMembers((prev) =>
-      prev.filter((member) => member._id !== id && member.id !== id)
+      prev.filter((member) => member._id !== id && member._id !== id)
     );
 toast.success("Member deleted successfully");
   } catch (err) {

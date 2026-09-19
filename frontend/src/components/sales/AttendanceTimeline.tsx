@@ -22,6 +22,15 @@ export default function AttendanceTimeline({
   if (records.length === 0) {
     return <p className="text-center text-sm text-base-content/50 py-12">No records to show on the timeline.</p>;
   }
+  const formatTime = (value?: string | null) => {
+  if (!value) return "--:--";
+
+  return new Date(value).toLocaleTimeString("en-IN", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  });
+};
 
   return (
     <ol className="relative border-s-2 border-base-300 ms-3">
@@ -46,7 +55,8 @@ export default function AttendanceTimeline({
             </div>
             <div className="flex items-center gap-4 mt-2 text-xs text-base-content/60">
               <span className="flex items-center gap-1">
-                <Clock className="w-3 h-3" /> {r.checkIn} – {r.checkOut}
+                <Clock className="w-3 h-3" /> 
+                 {formatTime(r.checkIn)} – {formatTime(r.checkOut)}
               </span>
               <span>{r.totalHours}h worked</span>
             </div>

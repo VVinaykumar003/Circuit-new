@@ -35,14 +35,25 @@ export default function EmployeeAttendanceHistory() {
   });
  
 
-  const records: Attendance[] =
-    data?.data?.data?.map((item: any) => ({
-      ...item
-, // Spread the nested record details
-      id: item.employee._id, // Ensure a unique ID for React keys
-      date: item.date, // Use the parent date
-    })) ?? [];
+  // const records: Attendance[] =
+  //   data?.data?.data?.map((item: any) => ({
+  //     ...item.record, // Spread the nested record details
+  //     id: item.record._id, // Ensure a unique ID for React keys
+  //     date: item.date, // Use the parent date
+  //   })) ?? [];
+const records: Attendance[] =
+  data?.data?.data?.map((item: any) => ({
+    ...item.record,
 
+    id: item.record._id,
+    date: item.date,
+
+    totalHours: item.record.workingHours ?? 0,
+    breakHours: item.record.totalBreak ?? 0,
+    lateMinutes: item.record.lateBy ?? 0,
+    overtimeHours: item.record.overtime ?? 0,
+  })) ?? [];
+    console.log("EmployeeAttendanceHistory records:", data?.data);
 
 
   const totalPages = data ? Math.max(1, Math.ceil(data?.data?.total / pageSize)) : 1;
@@ -64,7 +75,7 @@ export default function EmployeeAttendanceHistory() {
               {new Date().toLocaleDateString("en-US", { month: "long", year: "numeric" })} summary
             </p>
           </div>
-          <div className="flex gap-2">
+          {/* <div className="flex gap-2">
             <button className="btn btn-sm btn-outline gap-2">
               <Download className="w-3.5 h-3.5" /> Export
             </button>
@@ -74,7 +85,7 @@ export default function EmployeeAttendanceHistory() {
             <button className="btn btn-sm btn-ghost gap-2" onClick={() => window.print()}>
               <Printer className="w-3.5 h-3.5" /> Print
             </button>
-          </div>
+          </div> */}
         </div>
 
         {/* Stats */}
@@ -91,7 +102,7 @@ export default function EmployeeAttendanceHistory() {
         />
 
         {/* Filters */}
-        <AttendanceFilters filters={filters} onChange={handleFiltersChange} />
+        {/* <AttendanceFilters filters={filters} onChange={handleFiltersChange} /> */}
 
         {/* View toggle */}
         <div className="flex items-center justify-between">

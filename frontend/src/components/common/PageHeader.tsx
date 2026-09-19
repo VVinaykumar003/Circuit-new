@@ -123,7 +123,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({
         )}
 
         {/* Import */}
-        {showImport && (
+        {/* {showImport && (
           <button
             type="button"
             className="btn btn-outline btn-sm gap-2 bg-base-100"
@@ -132,10 +132,10 @@ const PageHeader: React.FC<PageHeaderProps> = ({
             <MdDownload size={16} />
             Import CSV
           </button>
-        )}
+        )} */}
 
         {/* Export */}
-        {showExport && (
+        {/* {showExport && (
           <button
             type="button"
             className="btn btn-outline btn-sm gap-2 bg-base-100"
@@ -144,7 +144,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({
             <MdDownload size={16} />
             Export CSV
           </button>
-        )}
+        )} */}
 
         {/* Refresh */}
         {showRefresh && (

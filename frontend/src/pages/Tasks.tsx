@@ -42,16 +42,14 @@ export default function TaskDashboard() {
   const [loading, setLoading] = useState(true);
 
   const { auth } = useAuth();
-  const userRole = auth?.user?.role?.toLowerCase() || "";
-  const canCreateTask = ["admin", "owner", "manager"].includes(userRole);
-
+  console.log(auth)
   const [activeFilter, setActiveFilter] = useState<TaskFilter>("all");
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [drawerMode, setDrawerMode] = useState<"view" | "edit">("view");
   const [page, setPage] = useState(1);
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState<TaskView>("table");
-
+   const canCreateTask = auth?.user?.role !== "member"; // Only non-members can create tasks
   /* ---------------- FETCH TASKS ---------------- */
 
   const fetchTasks = async () => {
@@ -280,17 +278,16 @@ export default function TaskDashboard() {
 
   <div className="flex flex-wrap gap-2 w-full lg:w-auto">
     
-    {/* NEW TASK → ONLY VISIBLE TO ADMIN / OWNER / MANAGER */}
-    {canCreateTask && (
-      <Button
-        size="sm"
-        variant="primary"
-        onClick={() => setOpen(true)}
-        className="flex-1 sm:flex-none"
-      >
-        + New Task
-      </Button>
-    )}
+    {/* NEW TASK → ALWAYS VISIBLE (mobile + desktop) */}
+    {auth?.user?.role!="member"?<Button
+      size="sm"
+      variant="primary"
+      onClick={() => setOpen(true)}
+      className="flex-1 sm:flex-none"
+    >
+      + New Task
+    </Button>:null}
+    
 
     {/* THESE → ONLY DESKTOP */}
     <div className="hidden md:flex gap-2">

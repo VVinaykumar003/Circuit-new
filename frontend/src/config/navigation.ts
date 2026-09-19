@@ -146,18 +146,18 @@ export const DEPARTMENT_NAVIGATION: Record<string, NavSection[]> = {
         },
       ],
     },
-    {
-      title: "Preferences",
-      items: [
-        {
-          id: "settings",
-          label: "Settings",
-          path: "/settings",
-          icon: "MdSettings",
-          roles: ["admin", "owner"],
-        },
-      ],
-    },
+    // {
+    //   title: "Preferences",
+    //   items: [
+    //     {
+    //       id: "settings",
+    //       label: "Settings",
+    //       path: "/settings",
+    //       icon: "MdSettings",
+    //       roles: ["admin", "owner"],
+    //     },
+    //   ],
+    // },
   ],
 
   sales: [
@@ -367,27 +367,27 @@ export const DEPARTMENT_NAVIGATION: Record<string, NavSection[]> = {
             },
           ],
         },
-        {
-          id: "forecast",
-          label: "Forecasts",
-          path: "/sales/forecast",
-          icon: "MdTrendingUp",
-          children: [
-            {
-              id: "forecast-overview",
-              label: "Overview",
-              path: "/sales/forecast",
-              icon: "MdTrendingUp",
-            },
-            {
-              id: "add-forecast",
-              label: "New Forecast",
-              path: "/sales/forecast/new",
-              icon: "MdAdd",
-              roles: ["admin", "owner", "manager"],
-            },
-          ],
-        },
+        // {
+        //   id: "forecast",
+        //   label: "Forecasts",
+        //   path: "/sales/forecast",
+        //   icon: "MdTrendingUp",
+        //   children: [
+        //     {
+        //       id: "forecast-overview",
+        //       label: "Overview",
+        //       path: "/sales/forecast",
+        //       icon: "MdTrendingUp",
+        //     },
+        //     {
+        //       id: "add-forecast",
+        //       label: "New Forecast",
+        //       path: "/sales/forecast/new",
+        //       icon: "MdAdd",
+        //       roles: ["admin", "owner", "manager"],
+        //     },
+        //   ],
+        // },
       ],
     },
     {

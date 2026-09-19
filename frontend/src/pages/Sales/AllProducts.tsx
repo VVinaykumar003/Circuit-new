@@ -82,7 +82,10 @@ export default function AllProducts({ onAddProduct }: AllProductsProps) {
   const navigate = useNavigate();
 
   // State
-
+  const [productTypeFilter, setProductTypeFilter] = useState("All");
+const [categoryFilter, setCategoryFilter] = useState("All");
+const [brandFilter, setBrandFilter] = useState("All");
+const [warehouseFilter, setWarehouseFilter] = useState("All");
   const [view, setView] = useState<"table" | "card">("table");
   const [showFilters, setShowFilters] = useState(false);
   const [search, setSearch] = useState("");
@@ -122,15 +125,61 @@ export default function AllProducts({ onAddProduct }: AllProductsProps) {
 
   const { products, fetchProducts, loading, error, setProducts } =
     useProducts();
+  // const filteredProducts = useMemo(() => {
+  //   return products.filter(
+  //     (p) =>
+  //       (p.productName?.toLowerCase() || "").includes(search.toLowerCase()) ||
+  //       (p.productCode?.toLowerCase() || "").includes(search.toLowerCase()) ||
+  //       (p.sku?.toLowerCase() || "").includes(search.toLowerCase()) ||
+  //       (p.brand?.toLowerCase() || "").includes(search.toLowerCase()),
+  //   );
+  // }, [products, search]);
+  
+  
   const filteredProducts = useMemo(() => {
-    return products.filter(
-      (p) =>
-        (p.productName?.toLowerCase() || "").includes(search.toLowerCase()) ||
-        (p.productCode?.toLowerCase() || "").includes(search.toLowerCase()) ||
-        (p.sku?.toLowerCase() || "").includes(search.toLowerCase()) ||
-        (p.brand?.toLowerCase() || "").includes(search.toLowerCase()),
+  const searchTerm = search.toLowerCase().trim();
+
+  return products.filter((p) => {
+    const matchesSearch =
+      !searchTerm ||
+      (p.productName?.toLowerCase() || "").includes(searchTerm) ||
+      (p.productCode?.toLowerCase() || "").includes(searchTerm) ||
+      (p.sku?.toLowerCase() || "").includes(searchTerm) ||
+      (p.brand?.toLowerCase() || "").includes(searchTerm);
+
+    const matchesProductType =
+      productTypeFilter === "All" ||
+      p.productType === productTypeFilter;
+
+    const matchesCategory =
+      categoryFilter === "All" ||
+      p.softwareCategory === categoryFilter;
+
+    const matchesBrand =
+      brandFilter === "All" ||
+      p.brand === brandFilter;
+
+    const matchesWarehouse =
+      warehouseFilter === "All" ||
+      p.warehouse === warehouseFilter;
+
+    return (
+      matchesSearch &&
+      matchesProductType &&
+      matchesCategory &&
+      matchesBrand &&
+      matchesWarehouse
     );
-  }, [products, search]);
+  });
+}, [
+  products,
+  search,
+  productTypeFilter,
+  categoryFilter,
+  brandFilter,
+  warehouseFilter,
+]);
+  
   const {
     deleteModalOpen,
     setDeleteModalOpen,
@@ -287,7 +336,7 @@ export default function AllProducts({ onAddProduct }: AllProductsProps) {
         cell: (info) => (
           <div className="flex flex-col gap-1 items-start">
             <span className="badge badge-sm badge-ghost font-medium">
-              {info.getValue()}
+              {info.getValue() || "-"}
             </span>
             <span className="text-xs text-base-content/70">
               {info.row.original.softwareCategory}
@@ -378,7 +427,7 @@ export default function AllProducts({ onAddProduct }: AllProductsProps) {
                   <MdInventory /> Quick Stock Update
                 </a>
               </li>
-              <li>
+              {/* <li>
                 <a
                   onClick={() =>
                     navigate("/sales/products/new", {
@@ -388,7 +437,7 @@ export default function AllProducts({ onAddProduct }: AllProductsProps) {
                 >
                   <MdContentCopy /> Duplicate
                 </a>
-              </li>
+              </li> */}
               <li>
                 <a onClick={() => handleArchive(row.original)}>
                   <MdArchive /> Archive
@@ -538,23 +587,32 @@ export default function AllProducts({ onAddProduct }: AllProductsProps) {
             <label className="text-xs font-semibold text-base-content/70 mb-1 block">
               Product Group
             </label>
-            <select className="select select-sm select-bordered w-full">
+            <select   value={productTypeFilter}
+  onChange={(e) => setProductTypeFilter(e.target.value)} className="select select-sm select-bordered w-full">
               <option>All</option>
-              <option>Electronics</option>
-              <option>Software</option>
+              <option>ERP</option>
+              <option>CRM</option>
+              <option>SaaS</option>
+              <option>POS</option>
+              <option>HRMS</option>
+              <option>Other</option>
             </select>
           </div>
           <div>
             <label className="text-xs font-semibold text-base-content/70 mb-1 block">
               Category
             </label>
-            <select className="select select-sm select-bordered w-full">
+            <select  value={categoryFilter}
+  onChange={(e) => setCategoryFilter(e.target.value)} className="select select-sm select-bordered w-full">
               <option>All</option>
-              <option>Audio</option>
-              <option>Enterprise</option>
+              <option>Business Intelligence</option>
+              <option>Project Management</option>
+              <option>Marketing Automation</option>
+              <option>Cloud Storage</option>
+              <option>Cybersecurity</option>
             </select>
           </div>
-          <div>
+          {/* <div>
             <label className="text-xs font-semibold text-base-content/70 mb-1 block">
               Brand
             </label>
@@ -563,12 +621,12 @@ export default function AllProducts({ onAddProduct }: AllProductsProps) {
               <option>Sony</option>
               <option>Logitech</option>
             </select>
-          </div>
+          </div> */}
           {/* <div>
             <label className="text-xs font-semibold text-base-content/70 mb-1 block">Stock Status</label>
             <select className="select select-sm select-bordered w-full"><option>All</option><option>In Stock</option><option>Low Stock</option><option>Out Of Stock</option></select>
           </div> */}
-          <div>
+          {/* <div>
             <label className="text-xs font-semibold text-base-content/70 mb-1 block">
               Warehouse
             </label>
@@ -576,10 +634,20 @@ export default function AllProducts({ onAddProduct }: AllProductsProps) {
               <option>All</option>
               <option>Main Warehouse</option>
             </select>
-          </div>
+          </div> */}
           <div className="col-span-1 md:col-span-4 lg:col-span-5 flex justify-end gap-2 mt-2">
-            <button className="btn btn-sm btn-ghost">Reset Filters</button>
-            <button className="btn btn-sm btn-primary">Apply Filters</button>
+           <button
+  className="btn btn-sm btn-ghost"
+  onClick={() => {
+    setProductTypeFilter("All");
+    setCategoryFilter("All");
+    setBrandFilter("All");
+    setWarehouseFilter("All");
+  }}
+>
+  Reset Filters
+</button>
+            {/* <button className="btn btn-sm btn-primary">Apply Filters</button> */}
           </div>
         </div>
       )}
@@ -965,12 +1033,12 @@ export default function AllProducts({ onAddProduct }: AllProductsProps) {
               <div className="grid grid-cols-2 gap-y-4 gap-x-6 text-sm">
                 <div>
                   <p className="text-base-content/50 mb-1">Product Type</p>
-                  <p className="font-medium">{selectedProduct?.productType}</p>
+                  <p className="font-medium">{selectedProduct?.productType || "-"}</p>
                 </div>
                 <div>
                   <p className="text-base-content/50 mb-1">Software Category</p>
                   <p className="font-medium">
-                    {selectedProduct?.softwareCategory}
+                    {selectedProduct?.softwareCategory || "-"}
                   </p>
                 </div>
                 <div>

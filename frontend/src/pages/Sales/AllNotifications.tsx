@@ -5,6 +5,7 @@ import {  useNavigate } from 'react-router-dom';
 import { useAuth } from '@/auth/useAuth';
 import { getNotifications, markAllAsRead, markAsRead,deleteNotification, type Notification } from '@/services/notificationServices';
 import { toast } from 'react-toastify';
+import { PageHeader } from '@/components/common';
 
 export default function AllNotifications() {
   const { auth } = useAuth();
@@ -111,17 +112,23 @@ export default function AllNotifications() {
 
   return (
     <div className="min-h-screen bg-base-200 p-4 md:p-6 lg:p-8 font-sans flex flex-col relative">
-      
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 bg-base-100 p-5 rounded-xl border border-base-300 shadow-sm">
-        <div>
-          <h1 className="text-2xl font-bold text-base-content tracking-tight">Your Notifications</h1>
-          <p className="text-sm text-base-content/60 mt-1">Stay updated on your tasks, leads, and orders.</p>
-        </div>
-        <div className="flex gap-2">
-          <button onClick={() => markAllReadMutation.mutate()} className="btn btn-outline btn-sm gap-2"><MdCheckCircle /> Mark All as Read</button>
-          <button onClick={() => navigate('/sales/notifications/settings')} className="btn btn-ghost btn-sm btn-square"><MdOutlineSettings size={20} /></button>
-        </div>
-      </div>
+      <PageHeader
+  title="Your Notifications"
+  breadcrumbs={[
+    { label: "Dashboard" },
+    { label: "Sales" },
+    { label: "Notifications", active: true },
+  ]}
+  actions={[
+    {
+      label: "Mark All as Read",
+      icon: <MdCheckCircle />,
+      variant: "outline",
+      size: "sm",
+      onClick: () => markAllReadMutation.mutate(),
+    },
+  ]}
+/>
 
       <div className="flex flex-col lg:flex-row gap-6 flex-1">
         
@@ -210,7 +217,7 @@ export default function AllNotifications() {
             </div>
 
             <div className="bg-base-100 border border-base-200 p-4 rounded-xl shadow-sm text-sm grid grid-cols-2 gap-4">
-              <div><p className="text-xs text-base-content/50 uppercase font-bold mb-1">Sender</p><p className="font-semibold">{selectedNotif?.createdBy}</p></div>
+              <div><p className="text-xs text-base-content/50 uppercase font-bold mb-1">Sender</p><p className="font-semibold">{selectedNotif?.createdBy?.name}</p></div>
               <div><p className="text-xs text-base-content/50 uppercase font-bold mb-1">Status</p><p className="font-semibold text-success flex items-center gap-1"><MdCheckCircle /> Read</p></div>
             </div>
           </div>

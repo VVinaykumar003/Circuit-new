@@ -22,7 +22,7 @@ export default function ProjectMembers({ project, onUpdateProject }: Props) {
     role: "",
     responsibility: "",
   });
-
+ const canEdit=auth?.user?.role!="member"
   const roles = ["Member", "Manager"];
   const responsibilities = [
     "Frontend Development",
@@ -134,10 +134,11 @@ export default function ProjectMembers({ project, onUpdateProject }: Props) {
         <h3 className="text-[15px] font-semibold text-black">
           Team Members
         </h3>
-
-        <button className="btn btn-sm btn-primary text-primary-content" onClick={() => setShowModal(true)}>
+ 
+{canEdit?<button className="btn btn-sm btn-primary text-primary-content" onClick={() => setShowModal(true)}>
           + Add Member
-        </button>
+        </button>:null}
+        
       </div>
 
       <ul className="divide-y divide-base-300">
@@ -156,14 +157,14 @@ export default function ProjectMembers({ project, onUpdateProject }: Props) {
                   {participant.role} {participant.responsibility ? `- ${participant.responsibility}` : ""}
                 </p>
               </div>
-
-              <button 
+{canEdit? <button 
                 className="btn btn-xs btn-error btn-outline bg-red-600 text-white"
                 onClick={() => handleRemoveMember(userId)}
                 disabled={loading}
               >
                 Remove
-              </button>
+              </button>:null}
+             
             </li>
           );
         })}

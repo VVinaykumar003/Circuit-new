@@ -45,7 +45,8 @@ const EmployeeHeader: React.FC<Props> = ({ employee, todayStatus }) => {
         </div>
         <div className="divider sm:divider-horizontal"></div>
         <div className="grid lg:grid-cols-1 gap-x-6 gap-y-2 text-center sm:text-left" style={{ lineHeight: '1.3' }}>
-            <div className="font-medium text-base-content/60" style={{ fontSize: FONT_SIZES.body }}>Date :
+            <div className="font-medium text-base-content/60" style={{ fontSize: FONT_SIZES.body }}>Date : 
+            
             
             <span className="text-base-content/80" style={{ fontSize: FONT_SIZES.body }}>{new Date().toLocaleDateString('en-US', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' })}</span>
             </div>

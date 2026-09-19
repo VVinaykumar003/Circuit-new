@@ -168,6 +168,7 @@ export default function Sidebar({
                             <NavLink
                               key={child.id}
                               to={child.path}
+                              end
                               onClick={onCloseMobile}
                               className={({ isActive }) =>
                                 `flex items-center gap-2 px-2 py-1 rounded-md text-[11px] font-medium transition-all ${
@@ -193,6 +194,7 @@ export default function Sidebar({
                   <NavLink
                     key={item.id}
                     to={item.path}
+                    end
                     onClick={onCloseMobile}
                     title={collapsed ? item.label : undefined}
                     className={({ isActive }) =>

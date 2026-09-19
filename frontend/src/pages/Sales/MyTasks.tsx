@@ -1285,7 +1285,7 @@ const normalizedTasks = response.tasks.map((t: any) => ({
         {/* PAGE HEADER */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-extrabold text-base-content tracking-tight flex items-center gap-3">
+            <h1 className="text-xl font-bold text-base-content tracking-tight flex items-center gap-3">
             Good Morning {auth?.user?.name}
               <span className="animate-bounce origin-bottom-right inline-block">
                 👋
@@ -1296,11 +1296,11 @@ const normalizedTasks = response.tasks.map((t: any) => ({
               activities.
             </p>
           </div>
-          <div className="flex items-center gap-3">
+          {/* <div className="flex items-center gap-3">
             <button className="btn btn-primary rounded-xl shadow-sm hover:shadow-md transition-all px-6">
               + New Task
             </button>
-          </div>
+          </div> */}
         </div>
 
         {/* KPI CARDS */}

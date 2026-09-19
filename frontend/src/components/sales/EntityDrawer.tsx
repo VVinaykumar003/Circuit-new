@@ -160,7 +160,7 @@ return (
       </div>
 
       {/* ACTIONS */}
-      <div className="p-3 border-b flex gap-2">
+      {/* <div className="p-3 border-b flex gap-2">
         <button className="btn btn-sm btn-primary">
           Call
         </button>
@@ -168,7 +168,7 @@ return (
         <button className="btn btn-sm btn-outline">
           Email
         </button>
-      </div>
+      </div> */}
 
       {/* BODY */}
       <div className="p-4 overflow-auto flex-1">
@@ -231,7 +231,124 @@ function FieldEdit({ label, value, editable, onChange }: any) {
           hour: "2-digit",
           minute: "2-digit",
         })
-      : value;
+    : value;
+  const accountTypeOptions = [
+    "Individual",
+    "Business",
+    "Enterprise",
+    "Distributor",
+    "Retailer",
+    "Partner",
+  ];
+
+  const industryOptions = [
+    "Technology",
+    "Finance",
+    "Healthcare",
+    "Manufacturing",
+    "Education",
+    "Retail",
+    "Other",
+  ];
+
+  const countryOptions = [
+    "India",
+    "United States",
+    "United Kingdom",
+    "Canada",
+    "Australia",
+    "Germany",
+    "France",
+    "Singapore",
+    "UAE",
+    "Other",
+  ];
+
+  const paymentTermsOptions = [
+    "Immediate",
+    "Net 15",
+    "Net 30",
+    "Net 60",
+  ];
+  const leadSourceOptions = [
+  "Website",
+  "Referral",
+  
+
+  "Cold Call",
+  
+ 
+];
+
+const statusOptions = [
+ "Active",
+    "Inactive",
+    "Prospect",
+    "Customer",
+    "VIP",
+    "Blocked",
+];
+
+const genderOptions = [
+  "Male",
+  "Female",
+  "Other",
+];
+const countryCodeOptions = [
+  "+91",
+  "+1",
+  "+44",
+  "+61",
+  
+  "+49",
+  "+33",
+  "+65",
+  "+971",
+];
+  const isSelect =
+  fieldKey === "accountOwner.name" ||
+fieldKey === "assignedRep.name" ||
+    fieldKey === "accountType" ||
+    fieldKey === "industry" ||
+    fieldKey === "billingAddress.country" ||
+    fieldKey === "shippingAddress.country" ||
+      fieldKey === "leadSource" ||
+  fieldKey === "status" ||
+  fieldKey === "gender"||
+  fieldKey === "phone.countryCode"||
+    fieldKey === "paymentTerms";
+
+  const getOptions = () => {
+    switch (fieldKey) {
+      case "accountType":
+        return accountTypeOptions;
+
+      case "industry":
+        return industryOptions;
+
+      case "billingAddress.country":
+      case "shippingAddress.country":
+        return countryOptions;
+
+      case "paymentTerms":
+        return paymentTermsOptions;
+      
+      case "leadSource":
+      return leadSourceOptions;
+
+    case "status":
+      return statusOptions;
+
+    case "gender":
+      return genderOptions;
+    case "phone.countryCode":
+      return countryCodeOptions;
+      default:
+        return [];
+    }
+  };
+console.log("FIELD:", fieldKey, "VALUE:", value);
+
   return (
     <div className="bg-base-200 p-3 rounded-lg">
       <div className="text-xs text-gray-500">{label}</div>

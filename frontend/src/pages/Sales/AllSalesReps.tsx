@@ -750,9 +750,9 @@ const stats = useMemo(() => {
               </button>
             </div>
             
-            <div className="flex gap-2">
-              <button className="btn btn-primary btn-sm flex-1" onClick={() => navigate(`/sales/representatives/${selectedRep?.id}`)}><MdAssignmentInd /> Full Profile</button>
-              <button className="btn btn-outline btn-sm flex-1 bg-base-100"><MdEmail /> Email</button>
+            <div className="flex gap-2 justify-end">
+              {/* <button className="btn btn-primary btn-sm flex-1" onClick={() => navigate(`/sales/representatives/${selectedRep?.id}`)}><MdAssignmentInd /> Full Profile</button>
+              <button className="btn btn-outline btn-sm flex-1 bg-base-100"><MdEmail /> Email</button> */}
               <div className="dropdown dropdown-end">
                 <button tabIndex={0} className="btn btn-outline btn-sm btn-square bg-base-100"><MdMoreVert size={18}/></button>
                 <ul tabIndex={0} className="dropdown-content z-50 menu p-2 shadow-lg bg-base-100 rounded-box w-48 mt-1 border border-base-200">

@@ -188,30 +188,16 @@ export default function NewTask() {
   return (
     <div className="min-h-screen bg-base-200 p-4 md:p-6 lg:p-8 font-sans">
       
-      {/* ── Page Header ── */}
-      <PageHeader
-        title="Add Sales Task"
-        breadcrumbs={[
-          { label: "Dashboard" },
-          { label: "Sales" },
-          { label: "Tasks" },
-          { label: "Add Task", active: true },
-        ]}
-        cancel
-        actions={[
-          {
-            label: "Save Draft",
-            icon: <MdSave size={16} />,
-            variant: "outline",
-          },
-          {
-            label: "Load Template",
-            icon: <MdContentCopy size={16} />,
-            variant: "outline",
-            onClick: () => loadTemplate("Follow-up"),
-          },
-        ]}
-      />
+   <PageHeader
+  title="Add Sales Task"
+  breadcrumbs={[
+    { label: "Dashboard" },
+    { label: "Sales" },
+    { label: "Tasks" },
+    { label: "Add Task", active: true },
+  ]}
+  cancel
+/>
 
       {/* ── Main Layout ── */}
       <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 lg:grid-cols-4 gap-6">
